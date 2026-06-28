@@ -1,21 +1,12 @@
-const {
-    findMoney
-} = require('../../helpers/parser.helpers');
-
 module.exports = (text) => {
 
+    const resumoMatch = text.match(
+        /Resumo da Declaração.*?Receita Bruta Auferida.*?Valor Total do Débito Declarado.*?([\d\.]+,\d{2})([\d\.]+,\d{2})/i
+    );
+
     return {
-
-        receitaBruta: findMoney(
-            text,
-            /Receita Bruta Auferida.*?([\d\.,]+)/is
-        ),
-
-        valorDebitoDeclarado: findMoney(
-            text,
-            /Valor Total do Débito Declarado.*?([\d\.,]+)/is
-        )
-
+        receitaBruta: resumoMatch?.[1] || null,
+        valorDebitoDeclarado: resumoMatch?.[2] || null
     };
 
 };
