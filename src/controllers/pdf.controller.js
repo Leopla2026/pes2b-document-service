@@ -1,6 +1,4 @@
-const parserRegistry = require('../document/parsers/registry');
-const pdfExtractor = require('../document/extractors/pdf.extractor');
-const documentDetector = require('../document/detectors/document.detector');
+const documentEngine = require('../document/engine/document.engine');
 
 exports.extract = async (req, res) => {
 
@@ -13,25 +11,9 @@ exports.extract = async (req, res) => {
             });
         }
 
-        const result = await pdfExtractor.extract(req.file.buffer);
+        const result = await documentEngine.process(req.file.buffer);
 
-        const documentType = documentDetector.detect(result.text);
-
-        const parser = parserRegistry[documentType];
-
-        let parsedData = null;
-
-        if (parser) {
-            parsedData = parser.parse(result.text);
-        }
-
-        return res.json({
-            success: true,
-            documentType,
-            pages: result.pages,
-            data: parsedData,
-            text: result.text
-        });
+        return res.json(result);
 
     } catch (error) {
 
