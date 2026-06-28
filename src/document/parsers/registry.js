@@ -1,6 +1,8 @@
+const path = require('path');
+
 module.exports = {
-    DAS: require('./simples/das.parser'),
-    RECIBO_PGDAS: require('./simples/recibo.pgdas.parser'),
-    DECLARACAO_PGDAS: require('./simples/declaracao'),
-    EXTRATO_PGDAS: require('./simples/extrato.pgdas.parser')
+    DAS: require(path.join(__dirname, 'simples', 'das.parser.js')),
+    RECIBO_PGDAS: require(path.join(__dirname, 'simples', 'recibo.pgdas.parser.js')),
+    DECLARACAO_PGDAS: require(path.join(__dirname, 'simples', 'declaracao')),
+    EXTRATO_PGDAS: require(path.join(__dirname, 'simples', 'extrato.pgdas.parser.js'))
 };
