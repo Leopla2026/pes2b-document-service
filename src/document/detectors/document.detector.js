@@ -11,10 +11,11 @@ exports.detect = (text) => {
 
     // EXTRATO PGDAS
     if (
-        normalized.includes("EXTRATO DO SIMPLES NACIONAL")
-    ) {
-        return "EXTRATO_PGDAS";
-    }
+    text.includes("EXTRATO DO SIMPLES NACIONAL") ||
+    text.includes("Extrato do Simples Nacional")
+) {
+    return "EXTRATO_PGDAS";
+}
 
     // DECLARAÇÃO PGDAS
     if (
