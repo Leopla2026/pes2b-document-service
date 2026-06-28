@@ -28,17 +28,22 @@ exports.parse = (text) => {
         text.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/)?.[0]
         || null;
 
-    const competenciaExtenso = text.match(/\b(Janeiro|Fevereiro|Mar[cç]o|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)\/(\d{4})\b/i);
+    const competenciaPorExtenso = text.match(
+        /(Janeiro|Fevereiro|Mar[cç]o|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)\/(\d{4})/i
+    );
 
-    const competencia = competenciaExtenso
-        ? `${mesTextoParaNumero(competenciaExtenso[1])}/${competenciaExtenso[2]}`
+    const competencia = competenciaPorExtenso
+        ? `${mesTextoParaNumero(competenciaPorExtenso[1])}/${competenciaPorExtenso[2]}`
         : null;
 
-    const datas = text.match(/\b\d{2}\/\d{2}\/\d{4}\b/g);
-    const vencimento = datas?.[0] || null;
+    const vencimento =
+        text.match(/Pagar este documento até\s*(\d{2}\/\d{2}\/\d{4})/i)?.[1]
+        || text.match(/Pagar até:\s*(\d{2}\/\d{2}\/\d{4})/i)?.[1]
+        || null;
 
     const valor =
         text.match(/Valor Total do Documento\s*([\d\.,]+)/i)?.[1]
+        || text.match(/Valor:\s*([\d\.,]+)/i)?.[1]
         || null;
 
     return {
