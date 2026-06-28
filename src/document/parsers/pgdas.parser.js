@@ -8,9 +8,11 @@ exports.parse = (text) => {
         text.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/)?.[0]
         || null;
 
-    const competencia =
-        text.match(/Período de Apuração\s*(\d{2}\/\d{4})/i)?.[1]
-        || null;
+	const competencias = text.match(/\b\d{2}\/\d{4}\b/g);
+	const datas = text.match(/\b\d{2}\/\d{2}\/\d{4}\b/g);
+
+	const competencia = competencias?.[0] || null;
+	const vencimento = datas?.[0] || null;
 
     const vencimento =
         text.match(/Pagar este documento até\s*(\d{2}\/\d{2}\/\d{4})/i)?.[1]
