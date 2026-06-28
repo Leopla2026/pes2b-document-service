@@ -2,25 +2,36 @@ exports.detect = (text) => {
 
     const normalized = text.toUpperCase();
 
+    // GUIA DAS
     if (
-        normalized.includes('DOCUMENTO DE ARRECADAÇÃO DO SIMPLES NACIONAL') ||
-        normalized.includes('PGDAS')
+        normalized.includes("DOCUMENTO DE ARRECADAÇÃO DO SIMPLES NACIONAL") ||
+        normalized.includes("PAGUE COM O PIX")
     ) {
-        return 'PGDAS';
+        return "DAS";
     }
 
+    // RECIBO
     if (
-        normalized.includes('RECIBO DE ENTREGA')
+        normalized.includes("RECIBO DE ENTREGA DA APURAÇÃO NO PGDAS-D")
     ) {
-        return 'RECIBO';
+        return "RECIBO_PGDAS";
     }
 
+    // DECLARAÇÃO
     if (
-        normalized.includes('EXTRATO')
+        normalized.includes("PROGRAMA GERADOR DO DOCUMENTO DE ARRECADAÇÃO") &&
+        normalized.includes("DECLARAÇÃO ORIGINAL")
     ) {
-        return 'EXTRATO';
+        return "DECLARACAO_PGDAS";
     }
 
-    return 'UNKNOWN';
+    // EXTRATO
+    if (
+        normalized.includes("EXTRATO DO SIMPLES NACIONAL")
+    ) {
+        return "EXTRATO_PGDAS";
+    }
+
+    return "UNKNOWN";
 
 };
