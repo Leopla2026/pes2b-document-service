@@ -1,4 +1,5 @@
 const pdfExtractor = require('../document/extractors/pdf.extractor');
+const documentDetector = require('../document/detectors/document.detector');
 
 exports.extract = async (req, res) => {
 
@@ -11,10 +12,19 @@ exports.extract = async (req, res) => {
             });
         }
 
-        const result = await pdfExtractor.extract(req.file.buffer);
+const result = await pdfExtractor.extract(req.file.buffer);
 
-        return res.json(result);
+const documentType = documentDetector.detect(result.text);
 
+return res.json({
+    success: true,
+
+    documentType,
+
+    pages: result.pages,
+
+    text: result.text
+});
     } catch (error) {
 
         return res.status(500).json({
