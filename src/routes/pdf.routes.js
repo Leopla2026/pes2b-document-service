@@ -11,4 +11,10 @@ router.post(
     pdfController.extract
 );
 
+router.post(
+    '/extract-batch',
+    upload.array('files', 10),
+    pdfController.extractBatch
+);
+
 module.exports = router;
