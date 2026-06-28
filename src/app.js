@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 
 const healthRoutes = require('./routes/health.routes');
+const pdfRoutes = require('./routes/pdf.routes');
 
 const app = express();
 
@@ -11,5 +12,6 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/pdf', pdfRoutes);
 
 module.exports = app;
