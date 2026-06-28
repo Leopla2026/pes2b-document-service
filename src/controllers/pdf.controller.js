@@ -1,4 +1,4 @@
-const pgdasParser = require('../document/parsers/pgdas.parser');
+const parserRegistry = require('../document/parsers/registry');
 const pdfExtractor = require('../document/extractors/pdf.extractor');
 const documentDetector = require('../document/detectors/document.detector');
 
@@ -13,29 +13,25 @@ exports.extract = async (req, res) => {
             });
         }
 
-const result = await pdfExtractor.extract(req.file.buffer);
+        const result = await pdfExtractor.extract(req.file.buffer);
 
-const documentType = documentDetector.detect(result.text);
+        const documentType = documentDetector.detect(result.text);
 
-let data = null;
+        const parser = parserRegistry[documentType];
 
-if (documentType === 'PGDAS') {
-    data = pgdasParser.parse(result.text);
-}
+        let parsedData = null;
 
-return res.json({
+        if (parser) {
+            parsedData = parser.parse(result.text);
+        }
 
-    success: true,
-
-    documentType,
-
-    pages: result.pages,
-
-    data,
-
-    text: result.text
-
-});
+        return res.json({
+            success: true,
+            documentType,
+            pages: result.pages,
+            data: parsedData,
+            text: result.text
+        });
 
     } catch (error) {
 
