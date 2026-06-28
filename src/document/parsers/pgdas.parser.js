@@ -1,3 +1,23 @@
+function mesTextoParaNumero(mes) {
+    const mapa = {
+        janeiro: '01',
+        fevereiro: '02',
+        marco: '03',
+        março: '03',
+        abril: '04',
+        maio: '05',
+        junho: '06',
+        julho: '07',
+        agosto: '08',
+        setembro: '09',
+        outubro: '10',
+        novembro: '11',
+        dezembro: '12'
+    };
+
+    return mapa[mes.toLowerCase()] || null;
+}
+
 exports.parse = (text) => {
 
     const empresa =
@@ -8,10 +28,13 @@ exports.parse = (text) => {
         text.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/)?.[0]
         || null;
 
-    const competencias = text.match(/\b\d{2}\/\d{4}\b/g);
-    const datas = text.match(/\b\d{2}\/\d{2}\/\d{4}\b/g);
+    const competenciaExtenso = text.match(/\b(Janeiro|Fevereiro|Mar[cç]o|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)\/(\d{4})\b/i);
 
-    const competencia = competencias?.[0] || null;
+    const competencia = competenciaExtenso
+        ? `${mesTextoParaNumero(competenciaExtenso[1])}/${competenciaExtenso[2]}`
+        : null;
+
+    const datas = text.match(/\b\d{2}\/\d{2}\/\d{4}\b/g);
     const vencimento = datas?.[0] || null;
 
     const valor =
