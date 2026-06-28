@@ -3,7 +3,7 @@ const {
     findHour,
     findCPF,
     findIP
-} = require('../../../helpers/parser.helpers');
+} = require('../../helpers/parser.helpers');
 
 module.exports = function (text) {
 
