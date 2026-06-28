@@ -2,9 +2,18 @@ const pdfExtractor = require('../document/extractors/pdf.extractor');
 
 exports.extract = async (req, res) => {
 
-    return res.status(200).json({
+    if (!req.file) {
+        return res.status(400).json({
+            success: false,
+            message: 'Nenhum arquivo enviado.'
+        });
+    }
+
+    return res.json({
         success: true,
-        message: 'Extractor carregado.'
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
     });
 
 };
