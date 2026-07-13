@@ -27,6 +27,7 @@ exports.detect = (text) => {
         return 'RELATORIO_SIMPLES';
     }
 
+
 // DECLARAÇÃO PGDAS + RECIBO NO MESMO PDF
 if (
     normalized.includes(
@@ -41,6 +42,19 @@ if (
     return 'COMBINADO_DECLARACAO_RECIBO_PGDAS';
 }
 
+/*
+ * DECLARAÇÃO DE FATURAMENTO
+ */
+
+if (
+    normalized.includes('DECLARAMOS PARA OS DEVIDOS FINS') &&
+    normalized.includes('TEVE COMO FATURAMENTO NO PERÍODO') &&
+    normalized.includes('CADASTRO NACIONAL DA PESSOA JURÍDICA') &&
+    normalized.includes('CRC') &&
+    normalized.includes('TOTAL')
+) {
+    return 'DECLARACAO_FATURAMENTO';
+}
 
     /*
      * RECIBO PGDAS

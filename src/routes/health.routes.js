@@ -5,7 +5,7 @@ router.get('/', (req, res) => {
     res.status(200).json({
         status: 'ok',
         service: 'pes2b-document-service',
-        version: '1.2.0',
+        version: '1.3.0',
         timestamp: new Date().toISOString()
     });
 });

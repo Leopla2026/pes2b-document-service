@@ -43,4 +43,12 @@ module.exports = {
                 'relatorio'
             )
         )
+DECLARACAO_FATURAMENTO:
+    require(
+        path.join(
+            __dirname,
+            'simples',
+            'declaracao-faturamento'
+        )
+    ),
 };
