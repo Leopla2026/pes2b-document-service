@@ -4,7 +4,6 @@ const extratoParser =
     require('./simples/extrato');
 
 module.exports = {
-
     DAS:
         require(
             path.join(
@@ -42,13 +41,14 @@ module.exports = {
                 'simples',
                 'relatorio'
             )
+        ),
+
+    DECLARACAO_FATURAMENTO:
+        require(
+            path.join(
+                __dirname,
+                'simples',
+                'declaracao-faturamento'
+            )
         )
-DECLARACAO_FATURAMENTO:
-    require(
-        path.join(
-            __dirname,
-            'simples',
-            'declaracao-faturamento'
-        )
-    ),
 };
