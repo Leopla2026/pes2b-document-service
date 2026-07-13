@@ -1,10 +1,5 @@
 const { PDFDocument } = require('pdf-lib');
 
-const extractor = require('../extractors/pdf.extractor');
-
-const MARCADOR_RECIBO =
-    'RECIBO DE ENTREGA DA APURAÇÃO NO PGDAS-D';
-
 async function carregarPdf(buffer) {
     if (!Buffer.isBuffer(buffer)) {
         throw new Error(
@@ -14,7 +9,7 @@ async function carregarPdf(buffer) {
 
     if (buffer.length < 5) {
         throw new Error(
-            'O PDF recebido pelo divisor está vazio ou incompleto.'
+            'O PDF recebido está vazio ou incompleto.'
         );
     }
 
@@ -24,7 +19,7 @@ async function carregarPdf(buffer) {
 
     if (assinatura !== '%PDF-') {
         throw new Error(
-            `O arquivo recebido não possui assinatura PDF válida. Início encontrado: ${assinatura}`
+            `Arquivo sem assinatura PDF válida. Início encontrado: ${assinatura}`
         );
     }
 
@@ -38,10 +33,7 @@ async function carregarPdf(buffer) {
     );
 }
 
-async function criarPdfComPaginas(
-    pdfOriginal,
-    indices
-) {
+async function criarPdfComPaginas(pdfOriginal, indices) {
     if (!Array.isArray(indices) || indices.length === 0) {
         throw new Error(
             'Nenhuma página foi informada para criação do PDF.'
@@ -50,48 +42,27 @@ async function criarPdfComPaginas(
 
     const novoPdf = await PDFDocument.create();
 
-    const paginas = await novoPdf.copyPages(
+    const paginasCopiadas = await novoPdf.copyPages(
         pdfOriginal,
         indices
     );
 
-    for (const pagina of paginas) {
+    for (const pagina of paginasCopiadas) {
         novoPdf.addPage(pagina);
     }
 
     const bytes = await novoPdf.save({
         useObjectStreams: false,
-        addDefaultPage: false,
-        updateFieldAppearances: false
+        addDefaultPage: false
     });
 
     return Buffer.from(bytes);
 }
 
-async function extrairTextoPagina(
-    pdfOriginal,
-    indicePagina
-) {
-    const bufferPagina =
-        await criarPdfComPaginas(
-            pdfOriginal,
-            [indicePagina]
-        );
+exports.split = async function splitPgdasCombinado(buffer) {
+    const pdfOriginal = await carregarPdf(buffer);
 
-    const resultado =
-        await extractor.extract(bufferPagina);
-
-    return resultado.text || '';
-}
-
-exports.split = async function splitPgdasCombinado(
-    buffer
-) {
-    const pdfOriginal =
-        await carregarPdf(buffer);
-
-    const totalPaginas =
-        pdfOriginal.getPageCount();
+    const totalPaginas = pdfOriginal.getPageCount();
 
     if (totalPaginas < 2) {
         throw new Error(
@@ -99,94 +70,52 @@ exports.split = async function splitPgdasCombinado(
         );
     }
 
-    let indiceInicioRecibo = -1;
+    /*
+     * Padrão do Integra Contador:
+     *
+     * - Todas as páginas anteriores formam a declaração;
+     * - A última página contém o recibo de entrega.
+     *
+     * Exemplo:
+     * páginas 1, 2 e 3 = declaração
+     * página 4 = recibo
+     */
 
-    for (
-        let indice = 0;
-        indice < totalPaginas;
-        indice++
-    ) {
-        const textoPagina =
-            await extrairTextoPagina(
-                pdfOriginal,
-                indice
-            );
+    const indiceUltimaPagina = totalPaginas - 1;
 
-        const textoNormalizado =
-            String(textoPagina)
-                .toUpperCase()
-                .replace(/\s+/g, ' ')
-                .trim();
+    const paginasDeclaracao = Array.from(
+        { length: indiceUltimaPagina },
+        (_, indice) => indice
+    );
 
-        if (
-            textoNormalizado.includes(
-                MARCADOR_RECIBO
-            )
-        ) {
-            indiceInicioRecibo = indice;
-            break;
-        }
-    }
+    const paginasRecibo = [
+        indiceUltimaPagina
+    ];
 
-    if (indiceInicioRecibo < 1) {
-        throw new Error(
-            'Não foi possível localizar uma página de recibo posterior às páginas da declaração.'
-        );
-    }
+    const declaracaoBuffer = await criarPdfComPaginas(
+        pdfOriginal,
+        paginasDeclaracao
+    );
 
-    const paginasDeclaracao =
-        Array.from(
-            {
-                length: indiceInicioRecibo
-            },
-            (_, indice) => indice
-        );
-
-    const paginasRecibo =
-        Array.from(
-            {
-                length:
-                    totalPaginas -
-                    indiceInicioRecibo
-            },
-            (_, indice) =>
-                indiceInicioRecibo + indice
-        );
-
-    const declaracaoBuffer =
-        await criarPdfComPaginas(
-            pdfOriginal,
-            paginasDeclaracao
-        );
-
-    const reciboBuffer =
-        await criarPdfComPaginas(
-            pdfOriginal,
-            paginasRecibo
-        );
+    const reciboBuffer = await criarPdfComPaginas(
+        pdfOriginal,
+        paginasRecibo
+    );
 
     return [
         {
             role: 'DECLARACAO',
-            expectedDocumentType:
-                'DECLARACAO_PGDAS',
-            suggestedSuffix:
-                'DECLARACAO',
-            pages:
-                paginasDeclaracao.length,
-            buffer:
-                declaracaoBuffer
+            expectedDocumentType: 'DECLARACAO_PGDAS',
+            suggestedSuffix: 'DECLARACAO',
+            pages: paginasDeclaracao.length,
+            buffer: declaracaoBuffer
         },
         {
             role: 'RECIBO',
-            expectedDocumentType:
-                'RECIBO_PGDAS',
-            suggestedSuffix:
-                'RECIBO',
-            pages:
-                paginasRecibo.length,
-            buffer:
-                reciboBuffer
+            expectedDocumentType: 'RECIBO_PGDAS',
+            suggestedSuffix: 'RECIBO',
+            pages: paginasRecibo.length,
+            buffer: reciboBuffer
         }
     ];
 };
