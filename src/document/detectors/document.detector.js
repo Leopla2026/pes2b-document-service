@@ -27,6 +27,21 @@ exports.detect = (text) => {
         return 'RELATORIO_SIMPLES';
     }
 
+// DECLARAÇÃO PGDAS + RECIBO NO MESMO PDF
+if (
+    normalized.includes(
+        'PROGRAMA GERADOR DO DOCUMENTO DE ARRECADAÇÃO'
+    ) &&
+    normalized.includes('DECLARATÓRIO') &&
+    normalized.includes('Nº DA DECLARAÇÃO') &&
+    normalized.includes(
+        'RECIBO DE ENTREGA DA APURAÇÃO NO PGDAS-D'
+    )
+) {
+    return 'COMBINADO_DECLARACAO_RECIBO_PGDAS';
+}
+
+
     /*
      * RECIBO PGDAS
      */
