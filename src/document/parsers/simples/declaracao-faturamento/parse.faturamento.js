@@ -12,6 +12,7 @@ function normalizarValorBR(valor) {
             .replace(/\s/g, '')
             .replace(/\./g, '')
             .replace(',', '.')
+            .replace(/[^\d.-]/g, '')
     );
 
     return Number.isFinite(numero)
@@ -23,7 +24,8 @@ function normalizarNomeMes(mes) {
     return String(mes || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
-        .toUpperCase();
+        .toUpperCase()
+        .trim();
 }
 
 function numeroMes(mes) {
@@ -45,74 +47,143 @@ function numeroMes(mes) {
     return mapa[normalizarNomeMes(mes)] || null;
 }
 
+function arredondar(valor) {
+    return Number(Number(valor || 0).toFixed(2));
+}
+
 module.exports = function parseFaturamento(text) {
+    /*
+     * O texto pode chegar assim:
+     *
+     * Julho/2025 R$ 6.715,00
+     * Julho/2025 6.715,00 R$
+     * Julho/20256.715,00R$
+     *
+     * Por isso aceitamos R$ antes, depois ou ausente.
+     */
     const conteudo = String(text || '')
+        .replace(/\u00A0/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
 
     const meses = [];
 
     const regexMes =
-        /(Janeiro|Fevereiro|Março|Marco|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)\s*\/\s*(\d{4})\s*R\$\s*([\d.]+,\d{2})/gi;
+        /(Janeiro|Fevereiro|Março|Marco|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)\s*\/\s*(\d{4})\s*(?:R\$\s*)?([\d.]+,\d{2})\s*(?:R\$)?/gi;
 
     let match;
 
-    while ((match = regexMes.exec(conteudo)) !== null) {
-        const mesNumero = numeroMes(match[1]);
+    while (
+        (match = regexMes.exec(conteudo)) !== null
+    ) {
+        const mesNome = match[1];
+        const mes = numeroMes(mesNome);
         const ano = match[2];
         const valorTexto = match[3];
+        const valorNumero =
+            normalizarValorBR(valorTexto);
 
         meses.push({
-            mesNome: match[1],
-            mes: mesNumero,
+            mesNome,
+            mes,
             ano,
+
             competencia:
-                mesNumero
-                    ? `${mesNumero}/${ano}`
+                mes
+                    ? `${mes}/${ano}`
                     : null,
-            valor: valorTexto,
-            valorNumero:
-                normalizarValorBR(valorTexto)
+
+            valor:
+                valorTexto,
+
+            valorNumero
         });
     }
 
-    const total =
-        conteudo.match(
-            /TOTAL\s+(?:R\$\s*)?([\d.]+,\d{2})/i
-        )?.[1] ||
-        null;
+    /*
+     * Evita duplicidade caso o extrator repita algum trecho.
+     * Mantemos somente uma ocorrência por competência.
+     */
+    const mesesPorCompetencia = new Map();
 
-    const totalCalculado =
-        meses.reduce(
-            (soma, item) =>
-                soma + (item.valorNumero || 0),
-            0
+    for (const item of meses) {
+        const chave =
+            item.competencia ||
+            `${item.mesNome}-${item.ano}`;
+
+        if (!mesesPorCompetencia.has(chave)) {
+            mesesPorCompetencia.set(
+                chave,
+                item
+            );
+        }
+    }
+
+    const mesesUnicos =
+        Array.from(
+            mesesPorCompetencia.values()
         );
+
+    const totalMatch =
+        conteudo.match(
+            /TOTAL\s*(?:R\$\s*)?([\d.]+,\d{2})\s*(?:R\$)?/i
+        );
+
+    const total =
+        totalMatch?.[1] ||
+        null;
 
     const totalNumero =
         normalizarValorBR(total);
 
+    const totalCalculado =
+        arredondar(
+            mesesUnicos.reduce(
+                (soma, item) =>
+                    soma +
+                    (item.valorNumero || 0),
+                0
+            )
+        );
+
     const diferenca =
         totalNumero !== null
-            ? Number(
+            ? arredondar(
                 Math.abs(
-                    totalCalculado - totalNumero
-                ).toFixed(2)
+                    totalCalculado -
+                    totalNumero
+                )
             )
             : null;
+
+    const totalConfere =
+        diferenca !== null &&
+        diferenca <= 0.01;
+
+    const primeiraCompetencia =
+        mesesUnicos[0]?.competencia ||
+        null;
+
+    const ultimaCompetencia =
+        mesesUnicos[
+            mesesUnicos.length - 1
+        ]?.competencia ||
+        null;
 
     return {
         total,
         totalNumero,
-        totalCalculado:
-            Number(totalCalculado.toFixed(2)),
+        totalCalculado,
         diferenca,
-        totalConfere:
-            diferenca !== null
-                ? diferenca <= 0.01
-                : false,
+        totalConfere,
+
         quantidadeMeses:
-            meses.length,
-        meses
+            mesesUnicos.length,
+
+        primeiraCompetencia,
+        ultimaCompetencia,
+
+        meses:
+            mesesUnicos
     };
 };
