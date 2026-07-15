@@ -84,7 +84,7 @@ async function processarDocumentoCombinado(
         success: true,
 
         engine: {
-            version: '1.2.0',
+            version: '1.4.0',
             parser: 'pgdas-combined-splitter',
             confidence: 1
         },

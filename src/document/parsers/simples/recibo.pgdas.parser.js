@@ -1,30 +1,42 @@
 const extractCnpj = require('../../helpers/extractCnpj');
+const {
+    extrairMetadadosDeclaracao
+} = require('./helpers/declaracao.metadata');
+
+function valorNumero(valor) {
+    if (!valor) return null;
+
+    const numero = Number(
+        String(valor)
+            .replace(/\./g, '')
+            .replace(',', '.')
+    );
+
+    return Number.isFinite(numero) ? numero : null;
+}
 
 exports.parse = (text) => {
     const cnpj = extractCnpj(text);
+    const metadados = extrairMetadadosDeclaracao(text);
 
     const empresa =
-        text.match(/CNPJ da Matriz\s*(.*?)\s*\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/i)?.[1]?.replace(/\s+/g, ' ').trim()
-        || null;
+        text.match(/CNPJ da Matriz\s*(.*?)\s*\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/i)?.[1]
+            ?.replace(/\s+/g, ' ')
+            .trim() ||
+        null;
 
     const resumoMatch = text.match(
-        /(\d{2}\/\d{4})(\d{14,})R\$\s*([\d\.,]+)R\$\s*([\d\.,]+)R\$\s*([\d\.,]+)R\$\s*([\d\.,]+)/i
+        /(\d{2}\/\d{4})\s*(\d{14,})\s*R\$\s*([\d.,]+)\s*R\$\s*([\d.,]+)\s*R\$\s*([\d.,]+)\s*R\$\s*([\d.,]+)/i
     );
 
     const competencia = resumoMatch?.[1] || null;
-    const numeroDeclaracao = resumoMatch?.[2] || null;
+    const numeroDeclaracao =
+        resumoMatch?.[2] ||
+        metadados.numeroDeclaracao;
     const receitaBruta = resumoMatch?.[3] || null;
     const totalDebitoDeclarado = resumoMatch?.[4] || null;
     const totalDebitoSuspenso = resumoMatch?.[5] || null;
     const totalDebitoExigivel = resumoMatch?.[6] || null;
-
-    const transmissaoMatch = text.match(/(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2}:\d{2})/);
-
-    const numeroRecibo =
-        text.match(/Número do Recibo\s*([\d\.\-]+)/i)?.[1] || null;
-
-    const autenticacao =
-        text.match(/Autenticação\s*([\d\.]+)/i)?.[1] || null;
 
     return {
         identificacao: {
@@ -35,20 +47,37 @@ exports.parse = (text) => {
         documento: {
             tipo: 'RECIBO_PGDAS',
             numeroDeclaracao,
-            numeroRecibo,
-            autenticacao,
-            tipoDeclaracao: 'Original'
+            numeroRecibo: metadados.numeroRecibo,
+            autenticacao: metadados.autenticacao,
+            tipoDeclaracao: metadados.tipoDeclaracao,
+            ehRetificadora: metadados.ehRetificadora,
+            tipoDeclaracaoIdentificado:
+                metadados.tipoDeclaracaoIdentificado
         },
         datas: {
-            dataTransmissao: transmissaoMatch?.[1] || null,
-            horaTransmissao: transmissaoMatch?.[2] || null
+            dataTransmissao: metadados.dataTransmissao,
+            horaTransmissao: metadados.horaTransmissao,
+            dataTransmissaoISO:
+                metadados.dataTransmissaoISO
         },
         valores: {
             receitaBruta,
+            receitaBrutaNumero: valorNumero(receitaBruta),
             totalDebitoDeclarado,
+            totalDebitoDeclaradoNumero:
+                valorNumero(totalDebitoDeclarado),
             totalDebitoSuspenso,
-            totalDebitoExigivel
+            totalDebitoSuspensoNumero:
+                valorNumero(totalDebitoSuspenso),
+            totalDebitoExigivel,
+            totalDebitoExigivelNumero:
+                valorNumero(totalDebitoExigivel)
         },
-        extras: {}
+        extras: {
+            retificacao: {
+                tipoDeclaracao: metadados.tipoDeclaracao,
+                ehRetificadora: metadados.ehRetificadora
+            }
+        }
     };
 };
