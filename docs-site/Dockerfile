@@ -6,8 +6,10 @@ COPY index.html /usr/share/nginx/html/index.html
 COPY styles.css /usr/share/nginx/html/styles.css
 COPY app.js /usr/share/nginx/html/app.js
 COPY swagger.html /usr/share/nginx/html/swagger.html
+COPY openapi.json /usr/share/nginx/html/openapi.json
 
 COPY downloads /usr/share/nginx/html/downloads
+COPY openapi.json /usr/share/nginx/html/downloads/openapi.json
 
 EXPOSE 80
 
