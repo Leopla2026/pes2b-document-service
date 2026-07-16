@@ -1,6 +1,6 @@
 {
   "name": "pes2b-document-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "P&S2B Document Service",
   "main": "src/server.js",
   "scripts": {

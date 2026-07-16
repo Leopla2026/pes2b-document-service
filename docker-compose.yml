@@ -1,0 +1,15 @@
+services:
+  api:
+    build: .
+    environment:
+      PORT: 3000
+      APP_ENV: production
+      API_KEY_REQUIRED: "true"
+      API_KEY: ${API_KEY}
+    ports:
+      - "3000:3000"
+
+  docs:
+    build: ./docs-site
+    ports:
+      - "8080:80"

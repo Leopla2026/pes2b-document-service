@@ -1,0 +1,120 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "P&S2B Document Service API",
+    "version": "2.0.0",
+    "description": "API para identificação, extração e estruturação de documentos fiscais e contábeis em PDF."
+  },
+  "servers": [
+    {
+      "url": "https://regiflowautomacao-irpf-pdf-reader.ftlz6v.easypanel.host",
+      "description": "Produção"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string" },
+          "requestId": { "type": "string" },
+          "data": { "nullable": true },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" },
+                "field": { "type": "string", "nullable": true }
+              }
+            }
+          },
+          "warnings": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "summary": "Verifica a disponibilidade do serviço",
+        "responses": {
+          "200": { "description": "Serviço disponível" }
+        }
+      }
+    },
+    "/api/v1/info": {
+      "get": {
+        "summary": "Retorna versão e informações da API",
+        "responses": {
+          "200": { "description": "Informações do serviço" }
+        }
+      }
+    },
+    "/api/v1/pdf/extract": {
+      "post": {
+        "summary": "Processa um documento PDF",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Documento processado" },
+          "400": { "description": "Arquivo ausente ou inválido" },
+          "401": { "description": "API Key ausente ou inválida" },
+          "500": { "description": "Erro interno" }
+        }
+      }
+    },
+    "/api/v1/pdf/extract-batch": {
+      "post": {
+        "summary": "Processa até 10 documentos PDF",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["files"],
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": { "type": "string", "format": "binary" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Lote processado" },
+          "400": { "description": "Arquivos ausentes ou inválidos" },
+          "401": { "description": "API Key ausente ou inválida" },
+          "500": { "description": "Erro interno" }
+        }
+      }
+    }
+  }
+}

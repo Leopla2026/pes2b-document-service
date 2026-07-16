@@ -1,9 +1,11 @@
 require('dotenv').config();
 
+const validateConfig = require('./config/validate.config');
+const config = require('./config/app.config');
 const app = require('./app');
 
-const PORT = process.env.PORT || 3000;
+validateConfig();
 
-app.listen(PORT, () => {
-  console.log(`pes2b-document-service running on port ${PORT}`);
+app.listen(config.port, () => {
+    console.log(`${config.serviceName} ${config.version} running on port ${config.port}`);
 });

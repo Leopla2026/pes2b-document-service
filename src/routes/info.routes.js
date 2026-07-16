@@ -6,15 +6,17 @@ const router = express.Router();
 router.get('/', (req, res) => {
     res.status(200).json({
         success: true,
-        message: 'Serviço disponível.',
+        message: 'Informações do serviço.',
         requestId: req.requestId,
         data: {
             service: config.serviceName,
-            status: 'UP',
+            version: config.version,
             environment: config.environment,
-            timestamp: new Date().toISOString()
+            authentication: {
+                type: 'apiKey',
+                header: 'X-API-Key'
+            }
         },
-        version: config.version,
         errors: [],
         warnings: []
     });

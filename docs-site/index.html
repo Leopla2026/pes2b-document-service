@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>P&S2B Document API</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="mark">P&S2B</span><div><strong>Document API</strong><small>Portal de desenvolvedores</small></div></div>
+    <nav><a href="#inicio">Início</a><a href="#autenticacao">Autenticação</a><a href="#endpoints">Endpoints</a><a href="/downloads/openapi.json">OpenAPI</a></nav>
+  </header>
+  <main>
+    <section id="inicio" class="hero">
+      <span class="badge">API v2.0.0</span>
+      <h1>Documentos fiscais transformados em dados estruturados.</h1>
+      <p>Identifique, extraia e integre documentos PDF do Simples Nacional e outros fluxos documentais da P&S2B.</p>
+      <div class="status"><span>Serviço</span><strong data-api-status>consultando...</strong><span>Versão</span><strong data-api-version>2.0.0</strong><span>Resposta</span><strong data-api-response-time>-</strong></div>
+    </section>
+
+    <section id="autenticacao" class="card">
+      <h2>Autenticação</h2>
+      <p>Envie a chave no cabeçalho <code>X-API-Key</code>. Os endpoints de health, info e OpenAPI são públicos.</p>
+      <pre><code>X-API-Key: SUA_CHAVE</code></pre>
+      <div class="note">A chave deve ser armazenada em credenciais do n8n ou em variáveis de ambiente. Nunca inclua a chave no código-fonte.</div>
+    </section>
+
+    <section id="endpoints" class="card">
+      <h2>Endpoints</h2>
+      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/health</code><p>Disponibilidade do serviço.</p></div>
+      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/info</code><p>Versão e configuração pública.</p></div>
+      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract</code><p>Processa um PDF enviado no campo multipart <code>file</code>.</p></div>
+      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract-batch</code><p>Processa até 10 PDFs enviados no campo multipart <code>files</code>.</p></div>
+    </section>
+
+    <section class="card">
+      <h2>Exemplo com cURL</h2>
+      <pre><code>curl -X POST \
+  'https://regiflowautomacao-irpf-pdf-reader.ftlz6v.easypanel.host/api/v1/pdf/extract' \
+  -H 'X-API-Key: SUA_CHAVE' \
+  -F 'file=@documento.pdf;type=application/pdf'</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>Relatórios do Simples</h2>
+      <p>O retorno inclui resumo, carga tributária, apurações individuais e consolidação por anexo.</p>
+      <pre><code>{
+  "resumo": {
+    "receitaBrutaMesNumero": "10238.00",
+    "valorSimplesRecolherNumero": "332.78",
+    "cargaTributariaTotalNumero": 3.2504
+  },
+  "apuracoes": [ ... ],
+  "consolidacaoPorAnexo": [ ... ]
+}</code></pre>
+    </section>
+  </main>
+  <footer>P&S2B • Automação e integração documental</footer>
+  <script src="/app.js"></script>
+</body>
+</html>

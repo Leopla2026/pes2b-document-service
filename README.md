@@ -1,52 +1,35 @@
 # P&S2B Document Service
 
-Microserviço responsável pela extração, interpretação e manipulação de documentos utilizados nas automações da P&S2B.
+API para extração e estruturação de documentos usados nas automações da P&S2B.
 
-## Recursos atuais
+## Recursos
 
-- extração de texto de PDFs;
-- identificação de documentos do Simples Nacional;
-- separação de PDF combinado de declaração e recibo do PGDAS-D;
-- leitura de DAS, declaração, recibo, extrato, relatório e declaração de faturamento;
-- identificação de declaração original ou retificadora;
-- extração do número da declaração, número do recibo, autenticação e transmissão;
-- valores numéricos estruturados no recibo do PGDAS-D.
+- identificação e leitura de PDFs do Simples Nacional;
+- declaração, recibo, DAS, extrato, relatório e declaração de faturamento;
+- declaração original e retificadora;
+- separação de declaração e recibo combinados;
+- múltiplas apurações e consolidação por anexo;
+- autenticação por API Key;
+- Request ID, OpenAPI e portal de desenvolvedores.
 
-## Retificações do PGDAS-D
+## Configuração
 
-Os parsers de declaração e recibo retornam os seguintes metadados:
+Copie `.env.example` para `.env` e defina uma chave com pelo menos 32 caracteres:
 
-```json
-{
-  "tipoDeclaracao": "RETIFICADORA",
-  "ehRetificadora": true,
-  "tipoDeclaracaoIdentificado": true,
-  "numeroDeclaracao": "29223375202606004",
-  "numeroRecibo": "01.07.26190.0432924-9"
-}
+```bash
+openssl rand -hex 32
 ```
 
-A transmissão também é devolvida em formato brasileiro e ISO:
-
-```json
-{
-  "dataTransmissao": "09/07/2026",
-  "horaTransmissao": "20:30:40",
-  "dataTransmissaoISO": "2026-07-09T20:30:40-03:00"
-}
+```env
+PORT=3000
+APP_ENV=production
+API_KEY_REQUIRED=true
+API_KEY=CHAVE_GERADA
 ```
 
-Quando o documento não contém marcador explícito, o parser utiliza:
+Nunca grave a chave real no Git.
 
-```json
-{
-  "tipoDeclaracao": "NAO_IDENTIFICADO",
-  "ehRetificadora": false,
-  "tipoDeclaracaoIdentificado": false
-}
-```
-
-## Execução local
+## Execução
 
 ```bash
 npm install
@@ -58,3 +41,13 @@ npm start
 ```bash
 npm test
 ```
+
+## Endpoints
+
+- `GET /api/v1/health` — público;
+- `GET /api/v1/info` — público;
+- `GET /openapi.json` — público;
+- `POST /api/v1/pdf/extract` — exige `X-API-Key`;
+- `POST /api/v1/pdf/extract-batch` — exige `X-API-Key`.
+
+A documentação detalhada está em [`docs/api.md`](docs/api.md).

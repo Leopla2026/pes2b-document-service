@@ -3,16 +3,34 @@ const {
     findDate
 } = require('../../helpers/parser.helpers');
 
+function extractCompetenciaRelatorio(text) {
+    const direct = text.match(
+        /Per[ií]odo\s*:\s*(\d{2}\/\d{4})/i
+    )?.[1];
+
+    if (direct) {
+        return direct;
+    }
+
+    const nearPeriod = text.match(
+        /Per[ií]odo\s*:[\s\S]{0,120}?\b(0[1-9]|1[0-2])\/(\d{4})\b/i
+    );
+
+    if (nearPeriod) {
+        return `${nearPeriod[1]}/${nearPeriod[2]}`;
+    }
+
+    const headerEnd = text.search(/SIMPLES\s+NACIONAL/i);
+    const header = headerEnd >= 0
+        ? text.slice(0, headerEnd + 30)
+        : text.slice(0, 600);
+
+    return header.match(
+        /\b(0[1-9]|1[0-2])\/(\d{4})\b/
+    )?.[0] || null;
+}
+
 module.exports = function parseIdentificacao(text) {
-
-    /*
-     * Exemplo de início do texto extraído:
-     *
-     * Empresa: Emissão: Página:0001 09/07/2026
-     * 29.223.375 RENATO LUIZ DE SOUZA COSTA
-     * CNPJ:29.223.375/0001-00
-     */
-
     const empresa =
         text.match(
             /Página:\s*\d+\s+\d{2}\/\d{2}\/\d{4}\s+(.+?)\s+CNPJ:/i
@@ -24,18 +42,6 @@ module.exports = function parseIdentificacao(text) {
 
         || null;
 
-    /*
-     * No relatório do Domínio, o CPF responsável pode aparecer
-     * entre o rótulo "Período" e a competência.
-     */
-
-    const competencia =
-        text.match(
-            /Período:\s*(?:\d{3}\.\d{3}\.\d{3}-\d{2}\s*)?(\d{2}\/\d{4})/i
-        )?.[1]
-
-        || null;
-
     const dataEmissao =
         text.match(
             /Página:\s*\d+\s+(\d{2}\/\d{2}\/\d{4})/i
@@ -44,14 +50,6 @@ module.exports = function parseIdentificacao(text) {
         || findDate(text)
 
         || null;
-
-    /*
-     * O relatório normalmente começa o nome empresarial
-     * com o código interno da empresa no Domínio.
-     *
-     * Exemplo:
-     * 29.223.375 RENATO LUIZ DE SOUZA COSTA
-     */
 
     const codigoEmpresa =
         empresa?.match(/^([\d.]+)\s+/)?.[1]
@@ -65,8 +63,10 @@ module.exports = function parseIdentificacao(text) {
     return {
         empresa,
         cnpj: findCnpj(text),
-        competencia,
+        competencia: extractCompetenciaRelatorio(text),
         codigoEmpresa,
         dataEmissao
     };
 };
+
+module.exports.extractCompetenciaRelatorio = extractCompetenciaRelatorio;
