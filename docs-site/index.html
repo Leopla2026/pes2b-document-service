@@ -22,7 +22,7 @@
     <a href="#extract">Extração</a>
     <a href="#simples">Simples Nacional</a>
     <a href="#downloads">Downloads</a>
-    <a class="button button-secondary topbar-button" href="https://document.pes2b.com/docs" target="_blank" rel="noopener noreferrer">Abrir Swagger</a>
+    <a class="button button-secondary topbar-button" href="/swagger/" target="_blank" rel="noopener noreferrer">Abrir Swagger</a>
   </nav>
 </header>
 
@@ -41,6 +41,7 @@
     <a href="#response">Resposta</a>
     <a href="#simples">Simples Nacional</a>
     <a href="#documents">Documentos reconhecidos</a>
+    <a href="#examples-by-type">Exemplos por documento</a>
     <a href="#n8n">Integração n8n</a>
     <a href="#traceability">Rastreabilidade</a>
     <a href="#errors">Códigos de erro</a>
@@ -180,13 +181,266 @@
 
     <section id="documents">
       <span class="eyebrow">IDENTIFICAÇÃO</span><h2>Documentos reconhecidos</h2>
+      <p>A API identifica automaticamente o tipo do PDF e seleciona o parser correspondente. Os campos variam conforme o documento e a qualidade do conteúdo extraído.</p>
       <div class="table-wrapper"><table><thead><tr><th>Tipo</th><th>Identificador</th><th>Dados principais</th></tr></thead><tbody>
-        <tr><td>Declaração PGDAS-D</td><td><code>DECLARACAO_PGDAS</code></td><td>Competência, receita, débito, número da declaração e situação.</td></tr>
-        <tr><td>Recibo PGDAS-D</td><td><code>RECIBO_PGDAS</code></td><td>Número do recibo, transmissão, CNPJ e competência.</td></tr>
-        <tr><td>Relatório do Simples</td><td><code>RELATORIO_SIMPLES</code></td><td>Resumo, apurações e consolidação por anexo.</td></tr>
-        <tr><td>DARF</td><td><code>DARF</code></td><td>Valor, vencimento, código da receita e identificação.</td></tr>
-        <tr><td>Documento não reconhecido</td><td><code>NAO_IDENTIFICADO</code></td><td>Metadados básicos e indicação para conferência.</td></tr>
+        <tr><td>Declaração PGDAS-D</td><td><code>DECLARACAO_PGDAS</code></td><td>Competência, receitas, débito, número da declaração, recibo e tipo original/retificadora.</td></tr>
+        <tr><td>Recibo PGDAS-D</td><td><code>RECIBO_PGDAS</code></td><td>Número do recibo, transmissão, CNPJ, competência, receita e débitos.</td></tr>
+        <tr><td>Guia DAS</td><td><code>DAS</code></td><td>Empresa, CNPJ, competência, número do documento, valor e vencimento.</td></tr>
+        <tr><td>Extrato PGDAS-D</td><td><code>EXTRATO_PGDAS</code></td><td>Identificação do documento; parser detalhado ainda em evolução.</td></tr>
+        <tr><td>Relatório do Simples</td><td><code>RELATORIO_SIMPLES</code></td><td>Resumo, RBT12, apurações, consolidação por anexo e carga tributária.</td></tr>
+        <tr><td>Declaração de faturamento</td><td><code>DECLARACAO_FATURAMENTO</code></td><td>Período, faturamento mensal, total, emissão, responsável e validações.</td></tr>
+        <tr><td>Declaração + recibo no mesmo PDF</td><td><code>COMBINADO_DECLARACAO_RECIBO_PGDAS</code></td><td>Separação automática em dois documentos estruturados.</td></tr>
+        <tr><td>Documento não reconhecido</td><td><code>NAO_IDENTIFICADO</code></td><td>Metadados técnicos e indicação para conferência manual.</td></tr>
       </tbody></table></div>
+    </section>
+
+    <section id="examples-by-type">
+      <span class="eyebrow">REFERÊNCIA PRÁTICA</span><h2>Exemplos de JSON por documento</h2>
+      <p>Todos os exemplos abaixo utilizam dados fictícios e anonimizados. O envelope técnico real inclui também <code>success</code>, <code>engine</code>, <code>pages</code>, <code>warnings</code>, <code>errors</code>, <code>text</code> e <code>requestId</code>.</p>
+
+      <div class="example-stack">
+        <details class="json-example" open>
+          <summary><span>Declaração PGDAS-D</span><code>DECLARACAO_PGDAS</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-declaracao">Copiar</button><pre id="json-declaracao"><code>{
+  "success": true,
+  "documentType": "DECLARACAO_PGDAS",
+  "pages": 4,
+  "data": {
+    "identificacao": {
+      "empresa": "EMPRESA EXEMPLO LTDA.",
+      "cnpj": "12.345.678/0001-90",
+      "competencia": "06/2026",
+      "numeroDeclaracao": "12345678202606001"
+    },
+    "documento": {
+      "tipo": "DECLARACAO_PGDAS",
+      "tipoDeclaracao": "ORIGINAL",
+      "ehRetificadora": false,
+      "numeroRecibo": "01.23.45678.9012345-6"
+    },
+    "resumo": {
+      "receitaBrutaMesNumero": 45000.00,
+      "totalDebitoDeclaradoNumero": 2187.50
+    }
+  },
+  "warnings": [],
+  "errors": [],
+  "requestId": "00000000-0000-4000-8000-000000000001"
+}</code></pre></div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Recibo PGDAS-D</span><code>RECIBO_PGDAS</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-recibo">Copiar</button><pre id="json-recibo"><code>{
+  "success": true,
+  "documentType": "RECIBO_PGDAS",
+  "data": {
+    "identificacao": {
+      "empresa": "EMPRESA EXEMPLO LTDA.",
+      "cnpj": "12.345.678/0001-90",
+      "competencia": "06/2026"
+    },
+    "documento": {
+      "tipo": "RECIBO_PGDAS",
+      "numeroDeclaracao": "12345678202606001",
+      "numeroRecibo": "01.23.45678.9012345-6",
+      "tipoDeclaracao": "ORIGINAL",
+      "ehRetificadora": false
+    },
+    "datas": {
+      "dataTransmissao": "15/07/2026",
+      "horaTransmissao": "14:32:10",
+      "dataTransmissaoISO": "2026-07-15T17:32:10.000Z"
+    },
+    "valores": {
+      "receitaBrutaNumero": 45000.00,
+      "totalDebitoDeclaradoNumero": 2187.50,
+      "totalDebitoExigivelNumero": 2187.50
+    }
+  },
+  "requestId": "00000000-0000-4000-8000-000000000002"
+}</code></pre></div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Guia DAS</span><code>DAS</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-das">Copiar</button><pre id="json-das"><code>{
+  "success": true,
+  "documentType": "DAS",
+  "data": {
+    "identificacao": {
+      "empresa": "EMPRESA EXEMPLO LTDA.",
+      "cnpj": "12.345.678/0001-90",
+      "competencia": "06/2026"
+    },
+    "documento": {
+      "tipo": "DAS",
+      "numeroDocumento": "07.16.26123.4567890-1"
+    },
+    "datas": {
+      "vencimento": "20/07/2026"
+    },
+    "valores": {
+      "valorDocumento": "2.187,50"
+    },
+    "extras": {}
+  },
+  "requestId": "00000000-0000-4000-8000-000000000003"
+}</code></pre></div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Extrato PGDAS-D</span><code>EXTRATO_PGDAS</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-extrato">Copiar</button><pre id="json-extrato"><code>{
+  "success": true,
+  "documentType": "EXTRATO_PGDAS",
+  "data": {
+    "identificacao": {},
+    "documento": {
+      "tipo": "EXTRATO_PGDAS"
+    },
+    "datas": {},
+    "valores": {},
+    "extras": {
+      "mensagem": "Parser ainda não implementado."
+    }
+  },
+  "warnings": [],
+  "requestId": "00000000-0000-4000-8000-000000000004"
+}</code></pre></div>
+          <div class="callout callout-warning"><strong>Transparência:</strong> o extrato já é reconhecido, mas a extração detalhada ainda não está implementada na versão atual.</div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Relatório do Simples Nacional</span><code>RELATORIO_SIMPLES</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-relatorio">Copiar</button><pre id="json-relatorio"><code>{
+  "success": true,
+  "documentType": "RELATORIO_SIMPLES",
+  "data": {
+    "identificacao": {
+      "empresa": "EMPRESA EXEMPLO LTDA.",
+      "cnpj": "12.345.678/0001-90",
+      "competencia": "06/2026"
+    },
+    "documento": {
+      "tipo": "RELATORIO_SIMPLES"
+    },
+    "resumo": {
+      "receitaBrutaMesNumero": 45000.00,
+      "rbt12Numero": 480000.00,
+      "faixaEnquadramento": "360.000,01 a 720.000,00",
+      "valorSimplesRecolherNumero": 2187.50,
+      "cargaTributariaTotalNumero": 4.8611
+    },
+    "apuracoes": [
+      {
+        "ordem": 1,
+        "anexo": "III",
+        "descricaoAnexo": "Prestação de Serviços",
+        "receitaTributadaNumero": 45000.00,
+        "aliquotaEfetivaNumero": 4.8611,
+        "valorSimplesNumero": 2187.50
+      }
+    ],
+    "consolidacaoPorAnexo": [
+      {
+        "anexo": "III",
+        "receitaTributadaNumero": 45000.00,
+        "valorSimplesNumero": 2187.50,
+        "quantidadeApuracoes": 1,
+        "aliquotaMediaNumero": 4.8611
+      }
+    ]
+  },
+  "requestId": "00000000-0000-4000-8000-000000000005"
+}</code></pre></div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Declaração de faturamento</span><code>DECLARACAO_FATURAMENTO</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-faturamento">Copiar</button><pre id="json-faturamento"><code>{
+  "success": true,
+  "documentType": "DECLARACAO_FATURAMENTO",
+  "data": {
+    "identificacao": {
+      "empresa": "EMPRESA EXEMPLO LTDA.",
+      "cnpj": "12.345.678/0001-90",
+      "competencia": "06/2026"
+    },
+    "documento": {
+      "tipo": "DECLARACAO_FATURAMENTO",
+      "finalidade": "COMPROVACAO_FATURAMENTO_12_MESES"
+    },
+    "periodo": {
+      "inicio": "07/2025",
+      "fim": "06/2026"
+    },
+    "faturamento": {
+      "meses": [
+        { "competencia": "07/2025", "valorNumero": 38000.00 },
+        { "competencia": "08/2025", "valorNumero": 40500.00 }
+      ],
+      "quantidadeMeses": 12,
+      "totalNumero": 480000.00,
+      "totalConfere": true
+    },
+    "emissao": {
+      "data": "16/07/2026",
+      "municipio": "Porto Alegre/RS"
+    },
+    "responsavel": {
+      "nome": "RESPONSÁVEL EXEMPLO",
+      "cpf": "***.***.***-**"
+    },
+    "assinatura": {
+      "necessaria": true,
+      "assinada": false,
+      "tipoEsperado": "PADES"
+    },
+    "warnings": []
+  },
+  "requestId": "00000000-0000-4000-8000-000000000006"
+}</code></pre></div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Declaração e recibo combinados</span><code>COMBINADO_DECLARACAO_RECIBO_PGDAS</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-combinado">Copiar</button><pre id="json-combinado"><code>{
+  "success": true,
+  "documentType": "COMBINADO_DECLARACAO_RECIBO_PGDAS",
+  "compound": true,
+  "documents": [
+    {
+      "role": "DECLARACAO",
+      "suggestedSuffix": "DECLARACAO",
+      "documentType": "DECLARACAO_PGDAS",
+      "pages": 4,
+      "data": { "documento": { "tipo": "DECLARACAO_PGDAS" } },
+      "file": {
+        "mimeType": "application/pdf",
+        "extension": "pdf",
+        "size": 182400,
+        "base64": "JVBERi0xLjQKLi4u"
+      }
+    },
+    {
+      "role": "RECIBO",
+      "suggestedSuffix": "RECIBO",
+      "documentType": "RECIBO_PGDAS",
+      "pages": 1,
+      "data": { "documento": { "tipo": "RECIBO_PGDAS" } },
+      "file": {
+        "mimeType": "application/pdf",
+        "extension": "pdf",
+        "size": 48320,
+        "base64": "JVBERi0xLjQKLi4u"
+      }
+    }
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000007"
+}</code></pre></div>
+        </details>
+      </div>
     </section>
 
     <section id="n8n">
@@ -223,7 +477,7 @@
         <a class="download-card" href="/downloads/PES2B_Document_API.md" download><strong>Documentação Markdown</strong><span>Referência técnica versionável.</span></a>
         <a class="download-card" href="/downloads/PES2B_Document_API.postman_collection.json" download><strong>Collection Postman</strong><span>Chamadas prontas para teste.</span></a>
         <a class="download-card" href="/downloads/openapi.json" download><strong>Especificação OpenAPI</strong><span>Contrato atualizado diretamente da API.</span></a>
-        <a class="download-card" href="https://document.pes2b.com/docs" target="_blank" rel="noopener noreferrer"><strong>Swagger UI</strong><span>Explore e teste os endpoints.</span></a>
+        <a class="download-card" href="/swagger/" target="_blank" rel="noopener noreferrer"><strong>Swagger UI</strong><span>Explore e teste os endpoints.</span></a>
       </div>
     </section>
 

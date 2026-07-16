@@ -62,3 +62,20 @@ async function loadApiStatus() {
 
 loadApiStatus();
 setInterval(loadApiStatus, 60000);
+
+
+document.querySelectorAll('[data-copy-target]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const target = document.getElementById(button.dataset.copyTarget);
+    if (!target) return;
+    const original = button.textContent;
+    try {
+      await navigator.clipboard.writeText(target.innerText);
+      button.textContent = 'Copiado';
+      setTimeout(() => { button.textContent = original; }, 1600);
+    } catch {
+      button.textContent = 'Falha ao copiar';
+      setTimeout(() => { button.textContent = original; }, 1600);
+    }
+  });
+});

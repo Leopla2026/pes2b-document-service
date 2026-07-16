@@ -870,3 +870,101 @@ td {
   .topbar-nav a:not(.topbar-button) { display: none; }
   .hero h1 { font-size: 38px; }
 }
+
+
+/* Downloads premium */
+.download-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.download-card {
+    display: flex;
+    min-height: 126px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+    text-decoration: none;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.download-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+}
+
+.download-card strong {
+    color: var(--primary);
+    font-size: 17px;
+}
+
+.download-card span {
+    margin-top: 6px;
+    color: var(--text-soft);
+    font-size: 14px;
+}
+
+.example-stack {
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.json-example {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+}
+
+.json-example summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--primary);
+    list-style: none;
+}
+
+.json-example summary::-webkit-details-marker { display: none; }
+.json-example summary::after {
+    content: "+";
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+}
+.json-example[open] summary::after { content: "−"; }
+.json-example summary code {
+    margin-left: auto;
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 600;
+}
+.json-example .code-card {
+    margin: 0 16px 16px;
+}
+.json-example .callout {
+    margin: 0 16px 16px;
+}
+
+@media (max-width: 760px) {
+    .download-grid { grid-template-columns: 1fr; }
+    .json-example summary { align-items: flex-start; flex-wrap: wrap; }
+    .json-example summary code { width: 100%; margin-left: 0; }
+}
