@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Documentação oficial da PES2B Document API">
   <title>PES2B Document API — Developer Portal</title>
-  <link rel="stylesheet" href="/styles.css?v=3.0.0">
+  <link rel="stylesheet" href="/styles.css?v=3.1.0">
 </head>
 <body>
 <header class="topbar">
@@ -21,6 +21,7 @@
     <a href="#getting-started">Primeiros passos</a>
     <a href="#extract">Extração</a>
     <a href="#simples">Simples Nacional</a>
+    <a href="#new-document">Novo parser</a>
     <a href="#downloads">Downloads</a>
     <a class="button button-secondary topbar-button" href="/swagger/" target="_blank" rel="noopener noreferrer">Abrir Swagger</a>
   </nav>
@@ -42,6 +43,7 @@
     <a href="#simples">Simples Nacional</a>
     <a href="#documents">Documentos reconhecidos</a>
     <a href="#examples-by-type">Exemplos por documento</a>
+    <a href="#new-document">Incluir novo documento</a>
     <a href="#n8n">Integração n8n</a>
     <a href="#traceability">Rastreabilidade</a>
     <a href="#errors">Códigos de erro</a>
@@ -443,6 +445,117 @@
       </div>
     </section>
 
+
+    <section id="new-document">
+      <span class="eyebrow">EVOLUÇÃO DO PARSER</span><h2>Como incluir um novo tipo de documento</h2>
+      <p>Adicionar um documento não significa apenas criar uma expressão regular. O processo completo inclui amostras reais, regra de identificação, contrato de saída, parser, testes, documentação e validação no fluxo consumidor.</p>
+
+      <div class="callout callout-info"><strong>Exemplo:</strong> para incluir um <strong>Recibo de entrega do SPED</strong>, primeiro precisamos receber PDFs reais e anonimizados. O texto e o leiaute podem variar conforme o módulo — ECD, ECF, EFD ICMS/IPI, EFD-Contribuições ou outro — e também conforme a versão do programa.</div>
+
+      <h3>Visão geral do processo</h3>
+      <div class="step-list">
+        <div><span>1</span><p><strong>Reunir amostras.</strong> Separar preferencialmente de 3 a 5 PDFs do mesmo documento, incluindo variações de período, empresa e versão.</p></div>
+        <div><span>2</span><p><strong>Definir o contrato de saída.</strong> Listar exatamente quais campos devem retornar e seus formatos.</p></div>
+        <div><span>3</span><p><strong>Analisar o texto extraído.</strong> Verificar como o <code>pdf-parse</code> entrega títulos, rótulos e valores.</p></div>
+        <div><span>4</span><p><strong>Criar a detecção.</strong> Incluir uma regra específica no detector, antes de regras mais genéricas.</p></div>
+        <div><span>5</span><p><strong>Implementar o parser.</strong> Extrair e normalizar os campos sem misturar identificação com regra de negócio do n8n.</p></div>
+        <div><span>6</span><p><strong>Registrar o parser.</strong> Associar o novo <code>documentType</code> ao módulo criado.</p></div>
+        <div><span>7</span><p><strong>Criar testes automatizados.</strong> Validar identificação, campos obrigatórios, variações e documentos parecidos.</p></div>
+        <div><span>8</span><p><strong>Atualizar contrato e documentação.</strong> OpenAPI, Swagger, exemplos JSON, Markdown e changelog.</p></div>
+        <div><span>9</span><p><strong>Publicar e homologar.</strong> Executar testes, fazer deploy e validar uma chamada real antes de alterar o fluxo do n8n.</p></div>
+      </div>
+
+      <h3>Arquivos normalmente alterados</h3>
+      <div class="table-wrapper"><table><thead><tr><th>Arquivo</th><th>Finalidade</th></tr></thead><tbody>
+        <tr><td><code>src/document/detectors/document.detector.js</code></td><td>Reconhece o tipo documental pelas marcas textuais do PDF.</td></tr>
+        <tr><td><code>src/document/parsers/&lt;grupo&gt;/&lt;documento&gt;.parser.js</code></td><td>Extrai os campos e monta o objeto <code>data</code>.</td></tr>
+        <tr><td><code>src/document/parsers/registry.js</code></td><td>Liga o identificador retornado pelo detector ao parser correspondente.</td></tr>
+        <tr><td><code>src/document/helpers/</code></td><td>Funções reutilizáveis para CNPJ, competência, datas, valores e normalização.</td></tr>
+        <tr><td><code>test/&lt;documento&gt;.test.js</code></td><td>Garante que futuras mudanças não quebrem o documento já suportado.</td></tr>
+        <tr><td><code>docs/openapi.json</code> e <code>docs-site/openapi.json</code></td><td>Documentam schemas, exemplos e respostas no Swagger.</td></tr>
+        <tr><td><code>docs-site/index.html</code> e Markdown</td><td>Explicam o novo documento para quem integra com a API.</td></tr>
+      </tbody></table></div>
+
+      <h3>Exemplo: Recibo de entrega do SPED</h3>
+      <p>O identificador deve ser específico para o módulo. Um nome possível seria <code>RECIBO_SPED_ECD</code>. Não é recomendável usar apenas <code>RECIBO_SPED</code> se os campos e marcas textuais forem diferentes entre ECD, ECF e EFD.</p>
+
+      <div class="code-card"><pre><code>// document.detector.js — exemplo ilustrativo
+if (
+  normalized.includes('RECIBO DE ENTREGA DE ESCRITURAÇÃO CONTÁBIL DIGITAL') &amp;&amp;
+  normalized.includes('IDENTIFICAÇÃO DO ARQUIVO') &amp;&amp;
+  normalized.includes('HASH DA ESCRITURAÇÃO')
+) {
+  return 'RECIBO_SPED_ECD';
+}</code></pre></div>
+
+      <div class="code-card"><pre><code>// registry.js
+RECIBO_SPED_ECD: require(
+  path.join(__dirname, 'sped', 'recibo.ecd.parser.js')
+)</code></pre></div>
+
+      <div class="code-card"><pre><code>// recibo.ecd.parser.js — estrutura sugerida
+exports.parse = (text) =&gt; ({
+  identificacao: {
+    empresa: extrairEmpresa(text),
+    cnpj: extrairCnpj(text),
+    periodo: extrairPeriodo(text)
+  },
+  documento: {
+    tipo: 'RECIBO_SPED_ECD',
+    numeroRecibo: extrairNumeroRecibo(text),
+    hashEscrituracao: extrairHash(text)
+  },
+  transmissao: {
+    dataHora: extrairDataHora(text),
+    situacao: extrairSituacao(text)
+  },
+  extras: {}
+});</code></pre></div>
+
+      <h3>Contrato JSON sugerido</h3>
+      <div class="code-card"><pre><code>{
+  "success": true,
+  "documentType": "RECIBO_SPED_ECD",
+  "pages": 1,
+  "data": {
+    "identificacao": {
+      "empresa": "EMPRESA EXEMPLO LTDA.",
+      "cnpj": "12.345.678/0001-90",
+      "periodo": {
+        "inicio": "01/01/2025",
+        "fim": "31/12/2025"
+      }
+    },
+    "documento": {
+      "tipo": "RECIBO_SPED_ECD",
+      "numeroRecibo": "ECD-EXEMPLO-000001",
+      "hashEscrituracao": "HASH_ANONIMIZADO"
+    },
+    "transmissao": {
+      "dataHora": "30/06/2026 18:42:10",
+      "situacao": "RECEBIDA"
+    },
+    "extras": {}
+  },
+  "warnings": [],
+  "errors": [],
+  "requestId": "00000000-0000-4000-8000-000000000100"
+}</code></pre></div>
+
+      <h3>Critérios mínimos de aceite</h3>
+      <ul class="check-list">
+        <li>O novo PDF é identificado corretamente em todas as amostras de homologação.</li>
+        <li>Documentos semelhantes não são classificados como o novo tipo por engano.</li>
+        <li>Campos obrigatórios possuem testes automatizados.</li>
+        <li>Campos ausentes retornam <code>null</code>, sem inventar valores.</li>
+        <li>Datas, valores, CNPJ e competência seguem o padrão já adotado pela API.</li>
+        <li>O Swagger e o Markdown exibem um exemplo anonimizado.</li>
+        <li>O workflow consumidor trata o novo <code>documentType</code> antes da entrada em produção.</li>
+      </ul>
+
+      <div class="callout callout-warning"><strong>Importante:</strong> a inclusão no parser e a inclusão no fluxo do n8n são etapas diferentes. A API pode reconhecer e devolver o JSON corretamente, mas o workflow ainda precisa decidir onde salvar o arquivo, quais campos atualizar e quais ações executar.</div>
+    </section>
+
     <section id="n8n">
       <span class="eyebrow">AUTOMAÇÃO</span><h2>Integração com n8n</h2>
       <div class="step-list">
@@ -509,6 +622,6 @@
     </section>
   </main>
 </div>
-<script src="/app.js?v=3.0.0"></script>
+<script src="/app.js?v=3.1.0"></script>
 </body>
 </html>
