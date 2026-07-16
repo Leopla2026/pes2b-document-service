@@ -865,4 +865,8 @@ td {
         top: 9px;
         right: 9px;
     }
+}.status-updated { margin-top: 14px; color: var(--muted); font-size: 13px; }
+@media (max-width: 900px) {
+  .topbar-nav a:not(.topbar-button) { display: none; }
+  .hero h1 { font-size: 38px; }
 }

@@ -1,125 +1,243 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Portal de desenvolvedores da P&S2B Document API">
-  <title>P&S2B Document API | Developer Portal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Documentação oficial da PES2B Document API">
+  <title>PES2B Document API — Developer Portal</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="mark">P&S2B</span><div><strong>Document API</strong><small>Portal de desenvolvedores</small></div></div>
-    <nav><a href="#inicio">Início</a><a href="#autenticacao">Autenticação</a><a href="#endpoints">Endpoints</a><a href="#simples">Simples Nacional</a><a href="#erros">Erros</a><a href="/downloads/openapi.json">OpenAPI</a></nav>
-  </header>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">P&S2B</div>
+    <div class="brand-text">
+      <strong>PES2B Document API</strong>
+      <span>Developer Portal</span>
+    </div>
+  </div>
+  <nav class="topbar-nav">
+    <a href="#overview">Visão geral</a>
+    <a href="#getting-started">Primeiros passos</a>
+    <a href="#extract">Extração</a>
+    <a href="#simples">Simples Nacional</a>
+    <a href="#downloads">Downloads</a>
+    <a class="button button-secondary topbar-button" href="https://document.pes2b.com/docs" target="_blank" rel="noopener noreferrer">Abrir Swagger</a>
+  </nav>
+</header>
 
-  <main>
-    <section id="inicio" class="hero">
-      <span class="badge">API v<span data-api-version>2.0.0</span></span>
-      <h1>Documentos fiscais transformados em dados estruturados.</h1>
-      <p>API para identificação, extração e integração de PDFs fiscais e contábeis, preparada para n8n, Microsoft 365 e demais sistemas do grupo P&S2B.</p>
-      <div class="status">
-        <span>Serviço</span><strong data-api-status>consultando...</strong>
-        <span>Versão</span><strong data-api-version>2.0.0</strong>
-        <span>Resposta</span><strong data-api-response-time>-</strong>
+<div class="layout">
+  <aside class="sidebar">
+    <p class="sidebar-title">DOCUMENTAÇÃO</p>
+    <a href="#overview">Visão geral</a>
+    <a href="#status">Status da API</a>
+    <a href="#getting-started">Primeiros passos</a>
+    <a href="#base-url">URL base</a>
+    <a href="#authentication">Autenticação</a>
+    <a href="#health">Health checks</a>
+    <a href="#extract">Processar PDF</a>
+    <a href="#batch">Processamento em lote</a>
+    <a href="#request">Requisição</a>
+    <a href="#response">Resposta</a>
+    <a href="#simples">Simples Nacional</a>
+    <a href="#documents">Documentos reconhecidos</a>
+    <a href="#n8n">Integração n8n</a>
+    <a href="#traceability">Rastreabilidade</a>
+    <a href="#errors">Códigos de erro</a>
+    <a href="#downloads">Downloads</a>
+    <a href="#versioning">Versionamento</a>
+    <a href="#security">Segurança</a>
+    <hr>
+    <a href="/downloads/PES2B_Document_API.md" download>Baixar documentação Markdown</a>
+    <a href="/downloads/PES2B_Document_API.postman_collection.json" download>Baixar Collection Postman</a>
+  </aside>
+
+  <main class="content">
+    <section id="overview" class="hero">
+      <span class="badge">API REST • v2 ESTÁVEL</span>
+      <h1>Documentos fiscais transformados em dados estruturados</h1>
+      <p>API para identificação e extração de informações de PDFs fiscais e contábeis, preparada para automações com n8n, Microsoft 365 e sistemas internos do grupo P&S2B.</p>
+      <div class="hero-actions">
+        <a class="button" href="#getting-started">Começar integração</a>
+        <a class="button button-secondary" href="/downloads/PES2B_Document_API.md" download>Baixar documentação</a>
       </div>
     </section>
 
-    <section id="autenticacao" class="card">
-      <h2>Autenticação</h2>
-      <p>Os endpoints de processamento exigem uma chave enviada no cabeçalho <code>X-API-Key</code>.</p>
-      <pre><code>X-API-Key: SUA_CHAVE_SEGURA</code></pre>
-      <div class="note">Armazene a chave em credenciais do n8n ou em variáveis de ambiente. Nunca exponha a chave em páginas públicas ou código-fonte.</div>
+    <section id="status">
+      <div class="section-heading">
+        <div><span class="eyebrow">DISPONIBILIDADE</span><h2>Status da API</h2></div>
+        <a class="text-link" href="https://document.pes2b.com/api/v1/health" target="_blank" rel="noopener noreferrer">Abrir health check</a>
+      </div>
+      <div class="status-grid">
+        <article class="status-card"><span>Status</span><strong data-api-status>Consultando...</strong></article>
+        <article class="status-card"><span>Versão</span><strong data-api-version>2.0.0</strong></article>
+        <article class="status-card"><span>Tempo de resposta</span><strong data-api-response-time>Consultando...</strong></article>
+        <article class="status-card"><span>API</span><strong>v2 — Estável</strong></article>
+      </div>
+      <p class="status-updated">Última verificação: <strong data-api-checked-at>aguardando...</strong></p>
     </section>
 
-    <section id="endpoints" class="card">
-      <h2>Endpoints</h2>
-      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/health</code><p>Verifica a disponibilidade da API.</p></div>
-      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/info</code><p>Retorna informações públicas e versão.</p></div>
-      <div class="endpoint"><span class="method get">GET</span><code>/openapi.json</code><p>Especificação OpenAPI.</p></div>
-      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract</code><p>Processa um PDF no campo multipart <code>file</code>.</p></div>
-      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract-batch</code><p>Processa até 10 PDFs no campo multipart <code>files</code>.</p></div>
+    <section id="getting-started">
+      <span class="eyebrow">INTEGRAÇÃO</span><h2>Primeiros passos</h2>
+      <p>O consumo básico da API pode ser concluído em cinco etapas.</p>
+      <div class="step-list">
+        <div><span>1</span><p>Solicite uma API Key à P&S2B.</p></div>
+        <div><span>2</span><p>Prepare o arquivo PDF que será processado.</p></div>
+        <div><span>3</span><p>Envie um <strong>POST</strong> multipart para <code>/api/v1/pdf/extract</code>.</p></div>
+        <div><span>4</span><p>Informe a chave no cabeçalho <code>X-API-Key</code>.</p></div>
+        <div><span>5</span><p>Utilize os dados estruturados retornados na automação.</p></div>
+      </div>
     </section>
 
-    <section class="card">
-      <h2>Exemplo com cURL</h2>
-      <pre><code>curl -X POST \
+    <section id="base-url">
+      <span class="eyebrow">ENDEREÇO</span><h2>URL base</h2>
+      <div class="code-card"><button class="copy-button" data-copy="https://document.pes2b.com">Copiar</button><pre><code>https://document.pes2b.com</code></pre></div>
+    </section>
+
+    <section id="authentication">
+      <span class="eyebrow">SEGURANÇA</span><h2>Autenticação</h2>
+      <p>Os endpoints de processamento exigem uma API Key válida no cabeçalho <code>X-API-Key</code>.</p>
+      <div class="code-card"><button class="copy-button" data-copy="X-API-Key: SUA_CHAVE">Copiar</button><pre><code>X-API-Key: SUA_CHAVE</code></pre></div>
+      <div class="callout callout-warning"><strong>Importante:</strong> armazene a chave em credenciais do n8n ou em variáveis de ambiente. Nunca publique a chave em código-fonte, GitHub, prints ou workflows exportados.</div>
+    </section>
+
+    <section id="health">
+      <span class="eyebrow">MONITORAMENTO</span><h2>Health checks</h2>
+      <div class="endpoint"><span class="method method-get">GET</span><code>/api/v1/health</code><span class="endpoint-badge">Público</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><code>/api/v1/info</code><span class="endpoint-badge">Público</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><code>/openapi.json</code><span class="endpoint-badge">Público</span></div>
+    </section>
+
+    <section id="extract">
+      <span class="eyebrow">ENDPOINT PRINCIPAL</span><h2>Processar PDF</h2>
+      <div class="endpoint"><span class="method method-post">POST</span><code>/api/v1/pdf/extract</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
+      <p>Recebe um arquivo PDF no campo multipart <code>file</code>, identifica o tipo documental e devolve os dados encontrados em JSON.</p>
+      <div class="callout callout-info">Envie o arquivo como <code>multipart/form-data</code>. O nome do campo deve ser exatamente <code>file</code>.</div>
+    </section>
+
+    <section id="batch">
+      <span class="eyebrow">PROCESSAMENTO EM LOTE</span><h2>Processar vários PDFs</h2>
+      <div class="endpoint"><span class="method method-post">POST</span><code>/api/v1/pdf/extract-batch</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
+      <p>Processa até 10 arquivos por requisição. Envie os PDFs no campo multipart <code>files</code>.</p>
+    </section>
+
+    <section id="request">
+      <span class="eyebrow">ENTRADA</span><h2>Exemplo de requisição</h2>
+      <div class="code-card"><button class="copy-button" data-copy="curl -X POST 'https://document.pes2b.com/api/v1/pdf/extract' -H 'X-API-Key: SUA_CHAVE' -F 'file=@documento.pdf;type=application/pdf'">Copiar</button><pre><code>curl -X POST \
   'https://document.pes2b.com/api/v1/pdf/extract' \
   -H 'X-API-Key: SUA_CHAVE' \
-  -F 'file=@documento.pdf;type=application/pdf'</code></pre>
-      <button data-copy="curl -X POST 'https://document.pes2b.com/api/v1/pdf/extract' -H 'X-API-Key: SUA_CHAVE' -F 'file=@documento.pdf;type=application/pdf'">Copiar comando</button>
+  -F 'file=@documento.pdf;type=application/pdf'</code></pre></div>
+      <div class="table-wrapper"><table><thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead><tbody><tr><td><code>file</code></td><td>PDF</td><td>Sim</td><td>Documento a ser identificado e processado.</td></tr></tbody></table></div>
     </section>
 
-    <section class="card">
-      <h2>Exemplo no n8n</h2>
-      <p>Use um node <strong>HTTP Request</strong> com método <code>POST</code>, autenticação por header, body do tipo <code>Form-Data</code> e o arquivo binário no campo <code>file</code>.</p>
-      <pre><code>URL: https://document.pes2b.com/api/v1/pdf/extract
-Header: X-API-Key = SUA_CHAVE
-Body Content Type: Form-Data
-Campo: file
-Tipo: n8n Binary File</code></pre>
-    </section>
-
-    <section id="simples" class="card">
-      <h2>Relatório do Simples Nacional</h2>
-      <p>O retorno inclui identificação, resumo geral, apurações individuais, consolidação por anexo e carga tributária total.</p>
-      <pre><code>{
-  "processamento": {
-    "success": true,
-    "documentType": "RELATORIO_SIMPLES",
-    "warnings": [],
-    "errors": []
-  },
+    <section id="response">
+      <span class="eyebrow">SAÍDA</span><h2>Resposta de sucesso</h2>
+      <div class="code-card"><pre><code>{
+  "success": true,
+  "requestId": "req_20260716_a1b2c3d4",
+  "tipoDocumento": "RELATORIO_SIMPLES",
+  "competencia": "05/2020",
   "dados": {
-    "identificacao": {
-      "cnpj": "01.006.445/0001-41",
-      "competencia": "05/2020"
-    },
     "resumo": {
-      "receitaBrutaMesNumero": "10238.00",
-      "rbt12Numero": "122916.51",
-      "valorSimplesRecolherNumero": "332.78",
+      "receitaBrutaMesNumero": 10238.00,
+      "valorSimplesRecolherNumero": 332.78,
       "cargaTributariaTotalNumero": 3.2504
     },
-    "apuracoes": [ ... ],
-    "consolidacaoPorAnexo": [ ... ]
+    "apuracoes": [],
+    "consolidacaoPorAnexo": []
   }
-}</code></pre>
+}</code></pre></div>
+      <p>Os campos disponíveis variam conforme o tipo do documento reconhecido.</p>
     </section>
 
-    <section class="card">
-      <h2>Tipos de documentos</h2>
-      <p>A API retorna o tipo detectado em <code>processamento.documentType</code>. Entre os tipos atualmente suportados estão:</p>
-      <pre><code>DAS
-DECLARACAO_PGDAS
-RECIBO_PGDAS
-EXTRATO_PGDAS
-RELATORIO_SIMPLES
-DECLARACAO_FATURAMENTO
-COMBINADO_DECLARACAO_RECIBO_PGDAS</code></pre>
+    <section id="simples">
+      <span class="eyebrow">MÓDULO FISCAL</span><h2>Relatório do Simples Nacional</h2>
+      <p>Para relatórios de apuração do Domínio Sistemas, a API pode retornar o resumo mensal, as apurações individuais e a consolidação por anexo.</p>
+      <div class="feature-grid">
+        <article class="feature-card"><strong>Resumo mensal</strong><p>Receita da competência, RBT12, faixa, valor do Simples e carga tributária efetiva.</p></article>
+        <article class="feature-card"><strong>Apurações</strong><p>Atividade, anexo, seção, tratamento tributário, receita, alíquota efetiva e tributo.</p></article>
+        <article class="feature-card"><strong>Consolidação</strong><p>Agrupamento das receitas e tributos por anexo, com alíquota média efetiva.</p></article>
+      </div>
+      <div class="code-card"><pre><code>{
+  "resumo": {
+    "receitaBrutaMesNumero": 10238.00,
+    "rbt12Numero": 122916.51,
+    "faixaEnquadramento": "0,00 a 180.000,00",
+    "valorSimplesRecolherNumero": 332.78,
+    "cargaTributariaTotalNumero": 3.2504
+  },
+  "consolidacaoPorAnexo": [
+    {
+      "anexo": "I",
+      "descricaoAnexo": "Comércio",
+      "receitaTributadaNumero": 8378.00,
+      "valorSimplesNumero": 221.18,
+      "aliquotaMediaNumero": 2.64
+    }
+  ]
+}</code></pre></div>
     </section>
 
-    <section class="card">
-      <h2>Rastreabilidade</h2>
-      <p>Todas as respostas incluem o cabeçalho <code>X-Request-Id</code>. Guarde esse identificador nos logs do n8n para facilitar suporte e auditoria.</p>
+    <section id="documents">
+      <span class="eyebrow">IDENTIFICAÇÃO</span><h2>Documentos reconhecidos</h2>
+      <div class="table-wrapper"><table><thead><tr><th>Tipo</th><th>Identificador</th><th>Dados principais</th></tr></thead><tbody>
+        <tr><td>Declaração PGDAS-D</td><td><code>DECLARACAO_PGDAS</code></td><td>Competência, receita, débito, número da declaração e situação.</td></tr>
+        <tr><td>Recibo PGDAS-D</td><td><code>RECIBO_PGDAS</code></td><td>Número do recibo, transmissão, CNPJ e competência.</td></tr>
+        <tr><td>Relatório do Simples</td><td><code>RELATORIO_SIMPLES</code></td><td>Resumo, apurações e consolidação por anexo.</td></tr>
+        <tr><td>DARF</td><td><code>DARF</code></td><td>Valor, vencimento, código da receita e identificação.</td></tr>
+        <tr><td>Documento não reconhecido</td><td><code>NAO_IDENTIFICADO</code></td><td>Metadados básicos e indicação para conferência.</td></tr>
+      </tbody></table></div>
     </section>
 
-    <section id="erros" class="card">
-      <h2>Erros comuns</h2>
-      <div class="endpoint"><span class="method post">401</span><code>API_KEY_MISSING</code><p>O cabeçalho <code>X-API-Key</code> não foi enviado.</p></div>
-      <div class="endpoint"><span class="method post">403</span><code>API_KEY_INVALID</code><p>A chave enviada não é válida.</p></div>
-      <div class="endpoint"><span class="method post">400</span><code>INVALID_FILE</code><p>Arquivo ausente, inválido ou fora do formato aceito.</p></div>
-      <div class="endpoint"><span class="method post">413</span><code>FILE_TOO_LARGE</code><p>Arquivo acima do limite configurado.</p></div>
-      <div class="endpoint"><span class="method post">500</span><code>INTERNAL_ERROR</code><p>Erro inesperado. Informe o <code>X-Request-Id</code> ao suporte.</p></div>
+    <section id="n8n">
+      <span class="eyebrow">AUTOMAÇÃO</span><h2>Integração com n8n</h2>
+      <div class="step-list">
+        <div><span>1</span><p>Use o node <strong>HTTP Request</strong>.</p></div>
+        <div><span>2</span><p>Método <strong>POST</strong> e URL <code>https://document.pes2b.com/api/v1/pdf/extract</code>.</p></div>
+        <div><span>3</span><p>Adicione o cabeçalho <code>X-API-Key</code> usando uma credencial segura.</p></div>
+        <div><span>4</span><p>Ative <strong>Send Body</strong>, selecione <strong>Form-Data</strong> e envie o binary no campo <code>file</code>.</p></div>
+        <div><span>5</span><p>Utilize <code>tipoDocumento</code>, <code>competencia</code> e <code>dados</code> nos próximos nodes.</p></div>
+      </div>
     </section>
 
-    <section class="card">
-      <h2>Downloads</h2>
-      <p><a href="/downloads/openapi.json">OpenAPI JSON</a></p>
+    <section id="traceability">
+      <span class="eyebrow">AUDITORIA</span><h2>Rastreabilidade</h2>
+      <p>Registre o <code>requestId</code> retornado pela API. Ele permite localizar a execução nos logs e facilita o diagnóstico de falhas.</p>
+      <div class="callout callout-info">Nos workflows do n8n, grave o identificador na lista de logs junto ao nome do arquivo, empresa, competência e tipo documental.</div>
+    </section>
+
+    <section id="errors">
+      <span class="eyebrow">DIAGNÓSTICO</span><h2>Códigos de erro</h2>
+      <div class="table-wrapper"><table><thead><tr><th>HTTP</th><th>Situação</th><th>Ação recomendada</th></tr></thead><tbody>
+        <tr><td><code>400</code></td><td>Arquivo ausente, inválido ou parâmetros incorretos.</td><td>Confira o multipart e o campo <code>file</code>.</td></tr>
+        <tr><td><code>401</code></td><td>API Key ausente ou inválida.</td><td>Revise o cabeçalho <code>X-API-Key</code>.</td></tr>
+        <tr><td><code>413</code></td><td>Arquivo excede o limite permitido.</td><td>Reduza o PDF ou divida o lote.</td></tr>
+        <tr><td><code>422</code></td><td>Conteúdo não processável.</td><td>Confirme se o arquivo é PDF válido e legível.</td></tr>
+        <tr><td><code>500</code></td><td>Falha interna no processamento.</td><td>Registre o <code>requestId</code> e consulte os logs.</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="downloads">
+      <span class="eyebrow">RECURSOS</span><h2>Downloads</h2>
+      <div class="download-grid">
+        <a class="download-card" href="/downloads/PES2B_Document_API.md" download><strong>Documentação Markdown</strong><span>Referência técnica versionável.</span></a>
+        <a class="download-card" href="/downloads/PES2B_Document_API.postman_collection.json" download><strong>Collection Postman</strong><span>Chamadas prontas para teste.</span></a>
+        <a class="download-card" href="/downloads/openapi.json" download><strong>Especificação OpenAPI</strong><span>Contrato atualizado diretamente da API.</span></a>
+        <a class="download-card" href="https://document.pes2b.com/docs" target="_blank" rel="noopener noreferrer"><strong>Swagger UI</strong><span>Explore e teste os endpoints.</span></a>
+      </div>
+    </section>
+
+    <section id="versioning">
+      <span class="eyebrow">EVOLUÇÃO</span><h2>Versionamento</h2>
+      <p>A versão principal é indicada na URL dos endpoints, como <code>/api/v1</code>. Alterações incompatíveis serão publicadas em uma nova versão de rota.</p>
+    </section>
+
+    <section id="security">
+      <span class="eyebrow">BOAS PRÁTICAS</span><h2>Segurança</h2>
+      <ul class="check-list"><li>Não exponha a API Key no navegador ou em repositórios.</li><li>Use HTTPS em todas as chamadas.</li><li>Evite armazenar PDFs sensíveis fora dos ambientes autorizados.</li><li>Registre somente os dados necessários para auditoria.</li><li>Faça rotação da API Key quando houver suspeita de exposição.</li></ul>
     </section>
   </main>
-
-  <footer>P&S2B • Automação e integração documental</footer>
-  <script src="/app.js"></script>
+</div>
+<script src="/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,45 @@
+{
+  "info": {
+    "name": "PES2B Document API",
+    "description": "Collection oficial da PES2B Document API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://document.pes2b.com" },
+    { "key": "apiKey", "value": "SUA_CHAVE" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/health" }
+    },
+    {
+      "name": "Info",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/info" }
+    },
+    {
+      "name": "Processar PDF",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "X-API-Key", "value": "{{apiKey}}" }],
+        "body": {
+          "mode": "formdata",
+          "formdata": [{ "key": "file", "type": "file", "src": [] }]
+        },
+        "url": "{{baseUrl}}/api/v1/pdf/extract"
+      }
+    },
+    {
+      "name": "Processar lote",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "X-API-Key", "value": "{{apiKey}}" }],
+        "body": {
+          "mode": "formdata",
+          "formdata": [{ "key": "files", "type": "file", "src": [] }]
+        },
+        "url": "{{baseUrl}}/api/v1/pdf/extract-batch"
+      }
+    }
+  ]
+}
