@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PES2B Document API — Swagger UI</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <style>
     body { margin: 0; background: #f5f7fa; }
     .swagger-ui .topbar { background: #20364d; }
@@ -18,11 +19,15 @@
   <script>
     window.onload = () => {
       SwaggerUIBundle({
-        url: '/openapi-proxy',
+        url: '/openapi.json',
         dom_id: '#swagger-ui',
         deepLinking: true,
         persistAuthorization: true,
         displayRequestDuration: true,
+        defaultModelsExpandDepth: 2,
+        defaultModelExpandDepth: 2,
+        docExpansion: 'list',
+        filter: true,
         presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
         layout: 'StandaloneLayout'
       });

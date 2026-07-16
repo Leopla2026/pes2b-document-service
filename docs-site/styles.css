@@ -968,3 +968,59 @@ td {
     .json-example summary { align-items: flex-start; flex-wrap: wrap; }
     .json-example summary code { width: 100%; margin-left: 0; }
 }
+
+/* Resource downloads v3 - intentionally unique class names to avoid stale/legacy collisions */
+.resource-download-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    margin-top: 24px !important;
+}
+.resource-download-card {
+    display: grid !important;
+    grid-template-columns: 54px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 16px !important;
+    min-height: 118px !important;
+    padding: 20px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    background: var(--surface) !important;
+    box-shadow: var(--shadow-soft) !important;
+    color: var(--text) !important;
+    text-decoration: none !important;
+}
+.resource-download-card:hover {
+    border-color: var(--accent) !important;
+    box-shadow: var(--shadow) !important;
+    transform: translateY(-2px);
+}
+.resource-download-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .04em;
+}
+.resource-download-copy { display: block; min-width: 0; }
+.resource-download-copy strong { display: block; color: var(--primary); font-size: 16px; line-height: 1.3; }
+.resource-download-copy small { display: block; margin-top: 5px; color: var(--text-soft); font-size: 13px; line-height: 1.45; }
+.resource-download-action {
+    padding: 7px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 800;
+}
+@media (max-width: 760px) {
+    .resource-download-grid { grid-template-columns: 1fr !important; }
+    .resource-download-card { grid-template-columns: 48px minmax(0, 1fr) !important; }
+    .resource-download-icon { width: 48px; height: 48px; }
+    .resource-download-action { grid-column: 2; justify-self: start; }
+}
