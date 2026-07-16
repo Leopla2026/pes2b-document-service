@@ -3,59 +3,122 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>P&S2B Document API</title>
+  <meta name="description" content="Portal de desenvolvedores da P&S2B Document API">
+  <title>P&S2B Document API | Developer Portal</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><span class="mark">P&S2B</span><div><strong>Document API</strong><small>Portal de desenvolvedores</small></div></div>
-    <nav><a href="#inicio">Início</a><a href="#autenticacao">Autenticação</a><a href="#endpoints">Endpoints</a><a href="/downloads/openapi.json">OpenAPI</a></nav>
+    <nav><a href="#inicio">Início</a><a href="#autenticacao">Autenticação</a><a href="#endpoints">Endpoints</a><a href="#simples">Simples Nacional</a><a href="#erros">Erros</a><a href="/downloads/openapi.json">OpenAPI</a></nav>
   </header>
+
   <main>
     <section id="inicio" class="hero">
-      <span class="badge">API v2.0.0</span>
+      <span class="badge">API v<span data-api-version>2.0.0</span></span>
       <h1>Documentos fiscais transformados em dados estruturados.</h1>
-      <p>Identifique, extraia e integre documentos PDF do Simples Nacional e outros fluxos documentais da P&S2B.</p>
-      <div class="status"><span>Serviço</span><strong data-api-status>consultando...</strong><span>Versão</span><strong data-api-version>2.0.0</strong><span>Resposta</span><strong data-api-response-time>-</strong></div>
+      <p>API para identificação, extração e integração de PDFs fiscais e contábeis, preparada para n8n, Microsoft 365 e demais sistemas do grupo P&S2B.</p>
+      <div class="status">
+        <span>Serviço</span><strong data-api-status>consultando...</strong>
+        <span>Versão</span><strong data-api-version>2.0.0</strong>
+        <span>Resposta</span><strong data-api-response-time>-</strong>
+      </div>
     </section>
 
     <section id="autenticacao" class="card">
       <h2>Autenticação</h2>
-      <p>Envie a chave no cabeçalho <code>X-API-Key</code>. Os endpoints de health, info e OpenAPI são públicos.</p>
-      <pre><code>X-API-Key: SUA_CHAVE</code></pre>
-      <div class="note">A chave deve ser armazenada em credenciais do n8n ou em variáveis de ambiente. Nunca inclua a chave no código-fonte.</div>
+      <p>Os endpoints de processamento exigem uma chave enviada no cabeçalho <code>X-API-Key</code>.</p>
+      <pre><code>X-API-Key: SUA_CHAVE_SEGURA</code></pre>
+      <div class="note">Armazene a chave em credenciais do n8n ou em variáveis de ambiente. Nunca exponha a chave em páginas públicas ou código-fonte.</div>
     </section>
 
     <section id="endpoints" class="card">
       <h2>Endpoints</h2>
-      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/health</code><p>Disponibilidade do serviço.</p></div>
-      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/info</code><p>Versão e configuração pública.</p></div>
-      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract</code><p>Processa um PDF enviado no campo multipart <code>file</code>.</p></div>
-      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract-batch</code><p>Processa até 10 PDFs enviados no campo multipart <code>files</code>.</p></div>
+      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/health</code><p>Verifica a disponibilidade da API.</p></div>
+      <div class="endpoint"><span class="method get">GET</span><code>/api/v1/info</code><p>Retorna informações públicas e versão.</p></div>
+      <div class="endpoint"><span class="method get">GET</span><code>/openapi.json</code><p>Especificação OpenAPI.</p></div>
+      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract</code><p>Processa um PDF no campo multipart <code>file</code>.</p></div>
+      <div class="endpoint"><span class="method post">POST</span><code>/api/v1/pdf/extract-batch</code><p>Processa até 10 PDFs no campo multipart <code>files</code>.</p></div>
     </section>
 
     <section class="card">
       <h2>Exemplo com cURL</h2>
       <pre><code>curl -X POST \
-  'https://regiflowautomacao-irpf-pdf-reader.ftlz6v.easypanel.host/api/v1/pdf/extract' \
+  'https://document.pes2b.com/api/v1/pdf/extract' \
   -H 'X-API-Key: SUA_CHAVE' \
   -F 'file=@documento.pdf;type=application/pdf'</code></pre>
+      <button data-copy="curl -X POST 'https://document.pes2b.com/api/v1/pdf/extract' -H 'X-API-Key: SUA_CHAVE' -F 'file=@documento.pdf;type=application/pdf'">Copiar comando</button>
     </section>
 
     <section class="card">
-      <h2>Relatórios do Simples</h2>
-      <p>O retorno inclui resumo, carga tributária, apurações individuais e consolidação por anexo.</p>
+      <h2>Exemplo no n8n</h2>
+      <p>Use um node <strong>HTTP Request</strong> com método <code>POST</code>, autenticação por header, body do tipo <code>Form-Data</code> e o arquivo binário no campo <code>file</code>.</p>
+      <pre><code>URL: https://document.pes2b.com/api/v1/pdf/extract
+Header: X-API-Key = SUA_CHAVE
+Body Content Type: Form-Data
+Campo: file
+Tipo: n8n Binary File</code></pre>
+    </section>
+
+    <section id="simples" class="card">
+      <h2>Relatório do Simples Nacional</h2>
+      <p>O retorno inclui identificação, resumo geral, apurações individuais, consolidação por anexo e carga tributária total.</p>
       <pre><code>{
-  "resumo": {
-    "receitaBrutaMesNumero": "10238.00",
-    "valorSimplesRecolherNumero": "332.78",
-    "cargaTributariaTotalNumero": 3.2504
+  "processamento": {
+    "success": true,
+    "documentType": "RELATORIO_SIMPLES",
+    "warnings": [],
+    "errors": []
   },
-  "apuracoes": [ ... ],
-  "consolidacaoPorAnexo": [ ... ]
+  "dados": {
+    "identificacao": {
+      "cnpj": "01.006.445/0001-41",
+      "competencia": "05/2020"
+    },
+    "resumo": {
+      "receitaBrutaMesNumero": "10238.00",
+      "rbt12Numero": "122916.51",
+      "valorSimplesRecolherNumero": "332.78",
+      "cargaTributariaTotalNumero": 3.2504
+    },
+    "apuracoes": [ ... ],
+    "consolidacaoPorAnexo": [ ... ]
+  }
 }</code></pre>
     </section>
+
+    <section class="card">
+      <h2>Tipos de documentos</h2>
+      <p>A API retorna o tipo detectado em <code>processamento.documentType</code>. Entre os tipos atualmente suportados estão:</p>
+      <pre><code>DAS
+DECLARACAO_PGDAS
+RECIBO_PGDAS
+EXTRATO_PGDAS
+RELATORIO_SIMPLES
+DECLARACAO_FATURAMENTO
+COMBINADO_DECLARACAO_RECIBO_PGDAS</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>Rastreabilidade</h2>
+      <p>Todas as respostas incluem o cabeçalho <code>X-Request-Id</code>. Guarde esse identificador nos logs do n8n para facilitar suporte e auditoria.</p>
+    </section>
+
+    <section id="erros" class="card">
+      <h2>Erros comuns</h2>
+      <div class="endpoint"><span class="method post">401</span><code>API_KEY_MISSING</code><p>O cabeçalho <code>X-API-Key</code> não foi enviado.</p></div>
+      <div class="endpoint"><span class="method post">403</span><code>API_KEY_INVALID</code><p>A chave enviada não é válida.</p></div>
+      <div class="endpoint"><span class="method post">400</span><code>INVALID_FILE</code><p>Arquivo ausente, inválido ou fora do formato aceito.</p></div>
+      <div class="endpoint"><span class="method post">413</span><code>FILE_TOO_LARGE</code><p>Arquivo acima do limite configurado.</p></div>
+      <div class="endpoint"><span class="method post">500</span><code>INTERNAL_ERROR</code><p>Erro inesperado. Informe o <code>X-Request-Id</code> ao suporte.</p></div>
+    </section>
+
+    <section class="card">
+      <h2>Downloads</h2>
+      <p><a href="/downloads/openapi.json">OpenAPI JSON</a></p>
+    </section>
   </main>
+
   <footer>P&S2B • Automação e integração documental</footer>
   <script src="/app.js"></script>
 </body>
