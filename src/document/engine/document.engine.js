@@ -11,7 +11,8 @@ const { buildResponse } = require('./engine.response');
 async function processarDocumentoSimples(buffer) {
     const extraction = await extractor.extract(buffer);
 
-    const documentType = detector.detect(extraction.text);
+    const detection = detector.detectDetailed(extraction.text);
+    const documentType = detection.documentType;
 
     const parser = registry[documentType];
 
@@ -31,7 +32,8 @@ async function processarDocumentoSimples(buffer) {
         parser: parserName,
         pages: extraction.pages,
         data,
-        text: extraction.text
+        text: extraction.text,
+        detection
     });
 }
 
@@ -84,7 +86,7 @@ async function processarDocumentoCombinado(
         success: true,
 
         engine: {
-            version: '1.4.0',
+            version: '1.5.0',
             parser: 'pgdas-combined-splitter',
             confidence: 1
         },
@@ -108,7 +110,8 @@ async function processarDocumentoCombinado(
 exports.process = async (buffer) => {
     const extraction = await extractor.extract(buffer);
 
-    const documentType = detector.detect(extraction.text);
+    const detection = detector.detectDetailed(extraction.text);
+    const documentType = detection.documentType;
 
     if (
         documentType ===
@@ -138,6 +141,7 @@ exports.process = async (buffer) => {
         parser: parserName,
         pages: extraction.pages,
         data,
-        text: extraction.text
+        text: extraction.text,
+        detection
     });
 };
