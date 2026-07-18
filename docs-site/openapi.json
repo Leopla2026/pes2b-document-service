@@ -19,6 +19,10 @@
     {
       "name": "Documentos",
       "description": "Extração individual e em lote"
+    },
+    {
+      "name": "Diagnóstico",
+      "description": "Métricas operacionais e diagnóstico protegido do serviço"
     }
   ],
   "paths": {
@@ -272,7 +276,8 @@
           "Diagnóstico"
         ],
         "summary": "Retorna métricas operacionais em memória",
-        "description": "Exige X-API-Key. As métricas reiniciam quando o processo é reiniciado.",
+        "description": "Endpoint protegido por X-API-Key. Exibe volume processado, sucesso, falhas, confiança, parsers ativos e tempo médio. As métricas reiniciam quando o processo ou contêiner é reiniciado.",
+        "operationId": "getDiagnostics",
         "security": [
           {
             "ApiKeyAuth": []
@@ -284,13 +289,55 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/DiagnosticsResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Diagnóstico operacional do serviço.",
+                  "requestId": "a1cb5279-4b56-442d-876c-bf4b1ae23aca",
+                  "data": {
+                    "service": "pes2b-document-service",
+                    "environment": "production",
+                    "engineVersion": "1.10.0",
+                    "startedAt": "2026-07-18T12:26:10.849Z",
+                    "uptimeSeconds": 104,
+                    "processedDocuments": 0,
+                    "successfulDocuments": 0,
+                    "failedDocuments": 0,
+                    "successRate": 1,
+                    "blockedByConfidence": 0,
+                    "unknownDocuments": 0,
+                    "rejectedUploads": 0,
+                    "averageProcessingMs": 0,
+                    "parsers": {
+                      "total": 6,
+                      "active": 6,
+                      "inactive": 0
+                    },
+                    "byDocumentType": {},
+                    "byConfidenceLevel": {
+                      "HIGH": 0,
+                      "MEDIUM": 0,
+                      "LOW": 0
+                    }
+                  },
+                  "errors": [],
+                  "warnings": [
+                    "As métricas são mantidas em memória e reiniciadas quando o serviço é reiniciado."
+                  ]
                 }
               }
             }
           },
           "401": {
-            "description": "API Key ausente ou inválida"
+            "description": "API Key ausente ou inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -613,6 +660,9 @@
           "requestId": {
             "type": "string",
             "format": "uuid"
+          },
+          "engine": {
+            "$ref": "#/components/schemas/EngineMetadata"
           }
         }
       },
@@ -670,6 +720,278 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "EngineMetadata": {
+        "type": "object",
+        "description": "Metadados técnicos da detecção e execução do parser.",
+        "properties": {
+          "version": {
+            "type": "string",
+            "example": "1.10.0"
+          },
+          "family": {
+            "type": "string",
+            "nullable": true,
+            "example": "SIMPLES_NACIONAL"
+          },
+          "detector": {
+            "type": "string",
+            "nullable": true,
+            "example": "simples.detector"
+          },
+          "parser": {
+            "type": "string",
+            "nullable": true,
+            "example": "declaracao"
+          },
+          "parserVersion": {
+            "type": "string",
+            "nullable": true,
+            "example": "1.0.0"
+          },
+          "parserStatus": {
+            "type": "string",
+            "nullable": true,
+            "example": "active"
+          },
+          "schemaVersion": {
+            "type": "string",
+            "nullable": true,
+            "example": "1.0"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1,
+            "example": 1
+          },
+          "confidenceLevel": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "example": "HIGH"
+          },
+          "minimumConfidence": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1,
+            "example": 0.8
+          },
+          "parserExecuted": {
+            "type": "boolean",
+            "example": true
+          },
+          "parserBlocked": {
+            "type": "boolean",
+            "example": false
+          },
+          "matchedRules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missingRules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludedRules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DiagnosticsData": {
+        "type": "object",
+        "required": [
+          "service",
+          "environment",
+          "engineVersion",
+          "startedAt",
+          "uptimeSeconds",
+          "processedDocuments",
+          "successfulDocuments",
+          "failedDocuments",
+          "successRate",
+          "parsers",
+          "byDocumentType",
+          "byConfidenceLevel"
+        ],
+        "properties": {
+          "service": {
+            "type": "string",
+            "example": "pes2b-document-service"
+          },
+          "environment": {
+            "type": "string",
+            "example": "production"
+          },
+          "engineVersion": {
+            "type": "string",
+            "example": "1.10.0"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-07-18T12:26:10.849Z"
+          },
+          "uptimeSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 104
+          },
+          "processedDocuments": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 3
+          },
+          "successfulDocuments": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 3
+          },
+          "failedDocuments": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 0
+          },
+          "successRate": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1,
+            "example": 1
+          },
+          "blockedByConfidence": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 0
+          },
+          "unknownDocuments": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 0
+          },
+          "rejectedUploads": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 0
+          },
+          "averageProcessingMs": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "example": 186.4
+          },
+          "parsers": {
+            "type": "object",
+            "required": [
+              "total",
+              "active",
+              "inactive"
+            ],
+            "properties": {
+              "total": {
+                "type": "integer",
+                "example": 6
+              },
+              "active": {
+                "type": "integer",
+                "example": 6
+              },
+              "inactive": {
+                "type": "integer",
+                "example": 0
+              }
+            }
+          },
+          "byDocumentType": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "example": {
+              "DAS": 1,
+              "DECLARACAO_PGDAS": 1,
+              "RECIBO_PGDAS": 1
+            }
+          },
+          "byConfidenceLevel": {
+            "type": "object",
+            "required": [
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "properties": {
+              "HIGH": {
+                "type": "integer",
+                "example": 3
+              },
+              "MEDIUM": {
+                "type": "integer",
+                "example": 0
+              },
+              "LOW": {
+                "type": "integer",
+                "example": 0
+              }
+            }
+          }
+        }
+      },
+      "DiagnosticsResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "requestId",
+          "data",
+          "errors",
+          "warnings"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Diagnóstico operacional do serviço."
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DiagnosticsData"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "As métricas são mantidas em memória e reiniciadas quando o serviço é reiniciado."
+            ]
           }
         }
       }

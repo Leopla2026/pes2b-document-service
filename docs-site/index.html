@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Documentação oficial da PES2B Document API">
   <title>PES2B Document API — Developer Portal</title>
-  <link rel="stylesheet" href="/styles.css?v=3.1.0">
+  <link rel="stylesheet" href="/styles.css?v=3.2.0">
 </head>
 <body>
 <header class="topbar">
@@ -36,6 +36,7 @@
     <a href="#base-url">URL base</a>
     <a href="#authentication">Autenticação</a>
     <a href="#health">Health checks</a>
+    <a href="#diagnostics">Diagnóstico operacional</a>
     <a href="#extract">Processar PDF</a>
     <a href="#batch">Processamento em lote</a>
     <a href="#request">Requisição</a>
@@ -45,6 +46,7 @@
     <a href="#examples-by-type">Exemplos por documento</a>
     <a href="#new-document">Incluir novo documento</a>
     <a href="#n8n">Integração n8n</a>
+    <a href="#architecture">Arquitetura e qualidade</a>
     <a href="#traceability">Rastreabilidade</a>
     <a href="#errors">Códigos de erro</a>
     <a href="#downloads">Downloads</a>
@@ -57,7 +59,7 @@
 
   <main class="content">
     <section id="overview" class="hero">
-      <span class="badge">API REST • v2 ESTÁVEL</span>
+      <span class="badge">API 2.0.0 • ENGINE 1.10.0 • ESTÁVEL</span>
       <h1>Documentos fiscais transformados em dados estruturados</h1>
       <p>API para identificação e extração de informações de PDFs fiscais e contábeis, preparada para automações com n8n, Microsoft 365 e sistemas internos do grupo P&S2B.</p>
       <div class="hero-actions">
@@ -75,7 +77,7 @@
         <article class="status-card"><span>Status</span><strong data-api-status>Consultando...</strong></article>
         <article class="status-card"><span>Versão</span><strong data-api-version>2.0.0</strong></article>
         <article class="status-card"><span>Tempo de resposta</span><strong data-api-response-time>Consultando...</strong></article>
-        <article class="status-card"><span>API</span><strong>v2 — Estável</strong></article>
+        <article class="status-card"><span>Engine documental</span><strong>1.10.0</strong></article>
       </div>
       <p class="status-updated">Última verificação: <strong data-api-checked-at>aguardando...</strong></p>
     </section>
@@ -111,6 +113,54 @@
       <div class="endpoint"><span class="method method-get">GET</span><code>/openapi.json</code><span class="endpoint-badge">Público</span></div>
     </section>
 
+    <section id="diagnostics">
+      <span class="eyebrow">OBSERVABILIDADE</span><h2>Diagnóstico operacional</h2>
+      <div class="endpoint"><span class="method method-get">GET</span><code>/api/v1/diagnostics</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
+      <p>Retorna métricas acumuladas desde o último início do serviço, incluindo volume, sucesso, falhas, confiança, parsers ativos e tempo médio de processamento.</p>
+      <div class="code-card"><button class="copy-button" data-copy="curl -X GET 'https://document.pes2b.com/api/v1/diagnostics' -H 'X-API-Key: SUA_CHAVE'">Copiar</button><pre><code>curl -X GET \
+  'https://document.pes2b.com/api/v1/diagnostics' \
+  -H 'X-API-Key: SUA_CHAVE'</code></pre></div>
+      <div class="table-wrapper"><table><thead><tr><th>Campo</th><th>Significado</th></tr></thead><tbody>
+        <tr><td><code>processedDocuments</code></td><td>Total de documentos contabilizados.</td></tr>
+        <tr><td><code>successfulDocuments</code></td><td>Documentos processados com sucesso.</td></tr>
+        <tr><td><code>failedDocuments</code></td><td>Documentos com falha.</td></tr>
+        <tr><td><code>successRate</code></td><td>Taxa de sucesso entre 0 e 1.</td></tr>
+        <tr><td><code>blockedByConfidence</code></td><td>Parsers bloqueados por confiança inferior ao mínimo.</td></tr>
+        <tr><td><code>unknownDocuments</code></td><td>Documentos não identificados.</td></tr>
+        <tr><td><code>rejectedUploads</code></td><td>Uploads rejeitados antes do processamento.</td></tr>
+        <tr><td><code>averageProcessingMs</code></td><td>Tempo médio de processamento em milissegundos.</td></tr>
+        <tr><td><code>byDocumentType</code></td><td>Quantidade processada por tipo documental.</td></tr>
+        <tr><td><code>byConfidenceLevel</code></td><td>Quantidade nos níveis HIGH, MEDIUM e LOW.</td></tr>
+      </tbody></table></div>
+      <div class="code-card"><pre><code>{
+  "success": true,
+  "message": "Diagnóstico operacional do serviço.",
+  "requestId": "a1cb5279-4b56-442d-876c-bf4b1ae23aca",
+  "data": {
+    "service": "pes2b-document-service",
+    "environment": "production",
+    "engineVersion": "1.10.0",
+    "uptimeSeconds": 104,
+    "processedDocuments": 0,
+    "successfulDocuments": 0,
+    "failedDocuments": 0,
+    "successRate": 1,
+    "blockedByConfidence": 0,
+    "unknownDocuments": 0,
+    "rejectedUploads": 0,
+    "averageProcessingMs": 0,
+    "parsers": { "total": 6, "active": 6, "inactive": 0 },
+    "byDocumentType": {},
+    "byConfidenceLevel": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 }
+  },
+  "errors": [],
+  "warnings": [
+    "As métricas são mantidas em memória e reiniciadas quando o serviço é reiniciado."
+  ]
+}</code></pre></div>
+      <div class="callout callout-warning"><strong>Limitação atual:</strong> as métricas são mantidas em memória. Reinícios e novos deploys zeram os contadores.</div>
+    </section>
+
     <section id="extract">
       <span class="eyebrow">ENDPOINT PRINCIPAL</span><h2>Processar PDF</h2>
       <div class="endpoint"><span class="method method-post">POST</span><code>/api/v1/pdf/extract</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
@@ -137,20 +187,34 @@
       <span class="eyebrow">SAÍDA</span><h2>Resposta de sucesso</h2>
       <div class="code-card"><pre><code>{
   "success": true,
-  "requestId": "req_20260716_a1b2c3d4",
-  "tipoDocumento": "RELATORIO_SIMPLES",
-  "competencia": "05/2020",
-  "dados": {
-    "resumo": {
-      "receitaBrutaMesNumero": 10238.00,
-      "valorSimplesRecolherNumero": 332.78,
-      "cargaTributariaTotalNumero": 3.2504
-    },
-    "apuracoes": [],
-    "consolidacaoPorAnexo": []
-  }
+  "documentType": "DECLARACAO_PGDAS",
+  "engine": {
+    "version": "1.10.0",
+    "family": "SIMPLES_NACIONAL",
+    "detector": "simples.detector",
+    "parser": "declaracao",
+    "parserVersion": "1.0.0",
+    "schemaVersion": "1.0",
+    "confidence": 1,
+    "confidenceLevel": "HIGH",
+    "minimumConfidence": 0.8,
+    "parserExecuted": true,
+    "parserBlocked": false
+  },
+  "pages": 2,
+  "data": {
+    "identificacao": {
+      "empresa": "EMPRESA EXEMPLO LTDA.",
+      "cnpj": "12.345.678/0001-90",
+      "competencia": "06/2026"
+    }
+  },
+  "warnings": [],
+  "errors": [],
+  "requestId": "00000000-0000-4000-8000-000000000001"
 }</code></pre></div>
-      <p>Os campos disponíveis variam conforme o tipo do documento reconhecido.</p>
+      <p>O objeto <code>engine</code> permite auditar detector, parser, versão, confiança e eventual bloqueio de segurança. Os campos de <code>data</code> variam conforme o documento.</p>
+      <div class="callout callout-info"><strong>Níveis de confiança:</strong> <code>HIGH</code> a partir de 0,90; <code>MEDIUM</code> a partir de 0,75; <code>LOW</code> abaixo de 0,75. O parser somente executa quando a confiança atinge o limite definido no registry.</div>
     </section>
 
     <section id="simples">
@@ -467,8 +531,8 @@
 
       <h3>Arquivos normalmente alterados</h3>
       <div class="table-wrapper"><table><thead><tr><th>Arquivo</th><th>Finalidade</th></tr></thead><tbody>
-        <tr><td><code>src/document/detectors/document.detector.js</code></td><td>Reconhece o tipo documental pelas marcas textuais do PDF.</td></tr>
-        <tr><td><code>src/document/parsers/&lt;grupo&gt;/&lt;documento&gt;.parser.js</code></td><td>Extrai os campos e monta o objeto <code>data</code>.</td></tr>
+        <tr><td><code>src/document/detectors/familias/&lt;familia&gt;.detector.js</code></td><td>Reconhece o tipo documental pelas marcas textuais do PDF.</td></tr>
+        <tr><td><code>src/document/parsers/&lt;grupo&gt;/&lt;documento&gt;/parser.js</code></td><td>Extrai os campos e monta o objeto <code>data</code>.</td></tr>
         <tr><td><code>src/document/parsers/registry.js</code></td><td>Liga o identificador retornado pelo detector ao parser correspondente.</td></tr>
         <tr><td><code>src/document/helpers/</code></td><td>Funções reutilizáveis para CNPJ, competência, datas, valores e normalização.</td></tr>
         <tr><td><code>test/&lt;documento&gt;.test.js</code></td><td>Garante que futuras mudanças não quebrem o documento já suportado.</td></tr>
@@ -490,10 +554,10 @@ if (
 
       <div class="code-card"><pre><code>// registry.js
 RECIBO_SPED_ECD: require(
-  path.join(__dirname, 'sped', 'recibo.ecd.parser.js')
+  path.join(__dirname, 'sped', 'recibo-ecd')
 )</code></pre></div>
 
-      <div class="code-card"><pre><code>// recibo.ecd.parser.js — estrutura sugerida
+      <div class="code-card"><pre><code>// src/document/parsers/sped/recibo-ecd/parser.js
 exports.parse = (text) =&gt; ({
   identificacao: {
     empresa: extrairEmpresa(text),
@@ -563,8 +627,22 @@ exports.parse = (text) =&gt; ({
         <div><span>2</span><p>Método <strong>POST</strong> e URL <code>https://document.pes2b.com/api/v1/pdf/extract</code>.</p></div>
         <div><span>3</span><p>Adicione o cabeçalho <code>X-API-Key</code> usando uma credencial segura.</p></div>
         <div><span>4</span><p>Ative <strong>Send Body</strong>, selecione <strong>Form-Data</strong> e envie o binary no campo <code>file</code>.</p></div>
-        <div><span>5</span><p>Utilize <code>tipoDocumento</code>, <code>competencia</code> e <code>dados</code> nos próximos nodes.</p></div>
+        <div><span>5</span><p>Utilize <code>documentType</code>, <code>data.identificacao.competencia</code> e <code>data</code> nos próximos nodes.</p></div>
       </div>
+    </section>
+
+    <section id="architecture">
+      <span class="eyebrow">ENGINE 1.10.0</span><h2>Arquitetura, testes e observabilidade</h2>
+      <p>A engine foi organizada para crescer por famílias documentais sem concentrar toda a lógica em um único detector ou parser.</p>
+      <div class="feature-grid">
+        <article class="feature-card"><strong>Detecção por família</strong><p>Regras ponderadas identificam o documento, registram regras encontradas e calculam confiança real.</p></article>
+        <article class="feature-card"><strong>Registry central</strong><p>Cada parser declara família, versão, status, schema e confiança mínima.</p></article>
+        <article class="feature-card"><strong>Parser modular</strong><p>Cada documento possui <code>index.js</code>, <code>parser.js</code>, <code>schema.js</code> e <code>rules.js</code>.</p></article>
+        <article class="feature-card"><strong>Qualidade automatizada</strong><p>Fixtures anonimizadas e testes unitários, de contrato e end-to-end protegem os formatos homologados.</p></article>
+        <article class="feature-card"><strong>Logs estruturados</strong><p>Eventos JSON registram requestId, documento, confiança, parser, duração e motivo de falha.</p></article>
+        <article class="feature-card"><strong>Métricas operacionais</strong><p>O endpoint de diagnóstico consolida volume, taxa de sucesso, tempo médio e níveis de confiança.</p></article>
+      </div>
+      <div class="callout callout-info"><strong>Compatibilidade:</strong> o campo público <code>documentType</code> foi preservado. As informações novas foram acrescentadas ao objeto <code>engine</code>, mantendo os workflows existentes do n8n.</div>
     </section>
 
     <section id="traceability">
@@ -613,7 +691,7 @@ exports.parse = (text) =&gt; ({
 
     <section id="versioning">
       <span class="eyebrow">EVOLUÇÃO</span><h2>Versionamento</h2>
-      <p>A versão principal é indicada na URL dos endpoints, como <code>/api/v1</code>. Alterações incompatíveis serão publicadas em uma nova versão de rota.</p>
+      <p>A API pública está na versão <code>2.0.0</code> e utiliza rotas <code>/api/v1</code>. A engine documental está na versão <code>1.10.0</code>. Alterações incompatíveis no contrato público serão publicadas em uma nova versão de rota; melhorias internas compatíveis evoluem a versão da engine.</p>
     </section>
 
     <section id="security">
@@ -622,6 +700,6 @@ exports.parse = (text) =&gt; ({
     </section>
   </main>
 </div>
-<script src="/app.js?v=3.1.0"></script>
+<script src="/app.js?v=3.2.0"></script>
 </body>
 </html>

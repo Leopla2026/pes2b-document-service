@@ -5,26 +5,64 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "https://document.pes2b.com" },
-    { "key": "apiKey", "value": "SUA_CHAVE" }
+    {
+      "key": "baseUrl",
+      "value": "https://document.pes2b.com"
+    },
+    {
+      "key": "apiKey",
+      "value": "SUA_CHAVE"
+    }
   ],
   "item": [
     {
       "name": "Health",
-      "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/health" }
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/health"
+      }
     },
     {
       "name": "Info",
-      "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/info" }
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/info"
+      }
+    },
+    {
+      "name": "Diagnóstico operacional",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/diagnostics",
+        "description": "Métricas em memória. Os contadores reiniciam após reinício ou novo deploy do serviço."
+      }
     },
     {
       "name": "Processar PDF",
       "request": {
         "method": "POST",
-        "header": [{ "key": "X-API-Key", "value": "{{apiKey}}" }],
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}"
+          }
+        ],
         "body": {
           "mode": "formdata",
-          "formdata": [{ "key": "file", "type": "file", "src": [] }]
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            }
+          ]
         },
         "url": "{{baseUrl}}/api/v1/pdf/extract"
       }
@@ -33,10 +71,21 @@
       "name": "Processar lote",
       "request": {
         "method": "POST",
-        "header": [{ "key": "X-API-Key", "value": "{{apiKey}}" }],
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}"
+          }
+        ],
         "body": {
           "mode": "formdata",
-          "formdata": [{ "key": "files", "type": "file", "src": [] }]
+          "formdata": [
+            {
+              "key": "files",
+              "type": "file",
+              "src": []
+            }
+          ]
         },
         "url": "{{baseUrl}}/api/v1/pdf/extract-batch"
       }

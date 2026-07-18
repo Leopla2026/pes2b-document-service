@@ -4,6 +4,15 @@
 
 `https://document.pes2b.com`
 
+
+## Versões atuais
+
+- **API pública:** `2.0.0`
+- **Engine documental:** `1.10.0`
+- **Rota principal:** `/api/v1`
+
+A versão da API representa o contrato público. A versão da engine identifica a evolução interna de detecção, parsers, confiança e métricas.
+
 ## Autenticação
 
 Envie a API Key no cabeçalho `X-API-Key`.
@@ -38,6 +47,102 @@ A API devolve um `requestId` no JSON e no cabeçalho `X-Request-Id`. Registre es
 `https://developer.document.pes2b.com/swagger/`
 
 ---
+
+
+## Diagnóstico operacional
+
+```http
+GET /api/v1/diagnostics
+X-API-Key: SUA_CHAVE
+```
+
+O endpoint protegido retorna métricas operacionais acumuladas desde o último início do serviço:
+
+- `processedDocuments`: total de documentos contabilizados;
+- `successfulDocuments`: documentos processados com sucesso;
+- `failedDocuments`: documentos com falha;
+- `successRate`: proporção de sucesso entre `0` e `1`;
+- `blockedByConfidence`: parsers bloqueados por confiança insuficiente;
+- `unknownDocuments`: documentos não reconhecidos;
+- `rejectedUploads`: uploads rejeitados antes do processamento;
+- `averageProcessingMs`: tempo médio de processamento;
+- `parsers`: quantidade total, ativa e inativa;
+- `byDocumentType`: volume por tipo documental;
+- `byConfidenceLevel`: volume nos níveis `HIGH`, `MEDIUM` e `LOW`.
+
+Exemplo:
+
+```json
+{
+  "success": true,
+  "message": "Diagnóstico operacional do serviço.",
+  "requestId": "a1cb5279-4b56-442d-876c-bf4b1ae23aca",
+  "data": {
+    "service": "pes2b-document-service",
+    "environment": "production",
+    "engineVersion": "1.10.0",
+    "uptimeSeconds": 104,
+    "processedDocuments": 0,
+    "successfulDocuments": 0,
+    "failedDocuments": 0,
+    "successRate": 1,
+    "blockedByConfidence": 0,
+    "unknownDocuments": 0,
+    "rejectedUploads": 0,
+    "averageProcessingMs": 0,
+    "parsers": { "total": 6, "active": 6, "inactive": 0 },
+    "byDocumentType": {},
+    "byConfidenceLevel": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 }
+  },
+  "errors": [],
+  "warnings": [
+    "As métricas são mantidas em memória e reiniciadas quando o serviço é reiniciado."
+  ]
+}
+```
+
+> Nesta versão, as métricas não são persistidas. Um reinício ou novo deploy zera os contadores. A persistência histórica será tratada em evolução posterior.
+
+## Metadados da engine e confiança
+
+A resposta de processamento pode incluir o objeto `engine`, com dados técnicos de auditoria:
+
+```json
+{
+  "engine": {
+    "version": "1.10.0",
+    "family": "SIMPLES_NACIONAL",
+    "detector": "simples.detector",
+    "parser": "declaracao",
+    "parserVersion": "1.0.0",
+    "parserStatus": "active",
+    "schemaVersion": "1.0",
+    "confidence": 1,
+    "confidenceLevel": "HIGH",
+    "minimumConfidence": 0.8,
+    "parserExecuted": true,
+    "parserBlocked": false,
+    "matchedRules": [],
+    "missingRules": [],
+    "excludedRules": []
+  }
+}
+```
+
+Os níveis são: `HIGH` para confiança igual ou superior a `0.90`, `MEDIUM` a partir de `0.75` e `LOW` abaixo de `0.75`. Cada parser pode definir seu próprio `minimumConfidence`. Abaixo desse limite, o tipo pode ser identificado, mas o parser é bloqueado para evitar extração incorreta.
+
+## Arquitetura e qualidade
+
+A engine `1.10.0` utiliza:
+
+- detectores organizados por família documental;
+- registry central de parsers com versão, status e schema;
+- módulos de parser com `index.js`, `parser.js`, `schema.js` e `rules.js`;
+- fixtures anonimizadas;
+- testes unitários, de contrato e end-to-end;
+- logs estruturados em JSON;
+- rastreamento por `requestId`;
+- métricas operacionais em memória.
 
 # Como incluir um novo documento no parser
 
@@ -119,7 +224,7 @@ Regras específicas devem ficar antes de regras genéricas. Evite identificar um
 
 Caminho sugerido:
 
-`src/document/parsers/sped/recibo.ecd.parser.js`
+`src/document/parsers/sped/recibo-ecd/parser.js`
 
 Estrutura sugerida:
 
@@ -153,7 +258,7 @@ Arquivo:
 
 ```javascript
 RECIBO_SPED_ECD: require(
-  path.join(__dirname, 'sped', 'recibo.ecd.parser.js')
+  path.join(__dirname, 'sped', 'recibo-ecd')
 )
 ```
 
