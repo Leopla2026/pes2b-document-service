@@ -33,3 +33,11 @@
 ### Testes
 
 - adicionados testes de metadados, listagem, validação, compatibilidade e tipos desconhecidos.
+
+## Arquitetura 1.7.0 - confiança ponderada
+
+- detecção documental baseada em sinais ponderados;
+- níveis de confiança HIGH, MEDIUM e LOW;
+- auditoria de regras encontradas e ausentes;
+- bloqueio seguro do parser abaixo de `minimumConfidence`;
+- compatibilidade preservada com `documentType` e endpoints existentes.

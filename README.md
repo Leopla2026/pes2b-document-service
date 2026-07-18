@@ -51,3 +51,11 @@ npm test
 - `POST /api/v1/pdf/extract-batch` — exige `X-API-Key`.
 
 A documentação detalhada está em [`docs/api.md`](docs/api.md).
+
+## Arquitetura 1.7.0 - confiança ponderada
+
+- detecção documental baseada em sinais ponderados;
+- níveis de confiança HIGH, MEDIUM e LOW;
+- auditoria de regras encontradas e ausentes;
+- bloqueio seguro do parser abaixo de `minimumConfidence`;
+- compatibilidade preservada com `documentType` e endpoints existentes.

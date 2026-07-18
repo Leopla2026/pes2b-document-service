@@ -1,3 +1,5 @@
+const ENGINE_VERSION = '1.7.0';
+
 exports.buildResponse = ({
   documentType,
   parser,
@@ -5,15 +7,22 @@ exports.buildResponse = ({
   data,
   text,
   detection,
-  parserDefinition
+  parserDefinition,
+  parserBlocked = false
 }) => {
   const warnings = [];
 
-  if (!data?.identificacao?.cnpj) {
+  if (parserBlocked) {
+    warnings.push(
+      `Parser não executado: confiança ${detection?.confidence ?? 0} abaixo do mínimo ${parserDefinition?.minimumConfidence ?? 0}.`
+    );
+  }
+
+  if (!parserBlocked && !data?.identificacao?.cnpj) {
     warnings.push('CNPJ não encontrado.');
   }
 
-  if (!data?.identificacao?.competencia) {
+  if (!parserBlocked && !data?.identificacao?.competencia) {
     warnings.push('Competência não encontrada.');
   }
 
@@ -21,23 +30,29 @@ exports.buildResponse = ({
     Number(detection?.confidence)
   )
     ? Number(detection.confidence)
-    : warnings.length === 0
-      ? 1
-      : 0.9;
+    : 0;
 
   return {
     success: true,
 
     engine: {
-      version: '1.6.0',
+      version: ENGINE_VERSION,
       parser,
       parserVersion: parserDefinition?.version || null,
       parserStatus: parserDefinition?.status || null,
       schemaVersion: parserDefinition?.schemaVersion || null,
+      parserExecuted: Boolean(parserDefinition) && !parserBlocked,
+      parserBlocked,
+      minimumConfidence:
+        parserDefinition?.minimumConfidence ?? null,
       confidence,
+      confidenceLevel:
+        detection?.confidenceLevel || 'LOW',
       family: detection?.family || 'UNKNOWN',
       detector: detection?.detector || 'none',
-      matchedRules: detection?.matchedRules || []
+      matchedRules: detection?.matchedRules || [],
+      missingRules: detection?.missingRules || [],
+      excludedRules: detection?.excludedRules || []
     },
 
     documentType,

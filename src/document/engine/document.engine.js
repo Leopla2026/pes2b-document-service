@@ -8,6 +8,8 @@ const combinadoSplitter = require(
 
 const { buildResponse } = require('./engine.response');
 
+const ENGINE_VERSION = '1.7.0';
+
 async function processarDocumentoSimples(buffer) {
     const extraction = await extractor.extract(buffer);
 
@@ -22,10 +24,23 @@ async function processarDocumentoSimples(buffer) {
 
     let data = {};
     let parserName = 'none';
+    let parserBlocked = false;
 
-    if (parser) {
+    const minimumConfidence =
+        parserDefinition?.minimumConfidence ?? 0;
+
+    if (
+        parser &&
+        detection.confidence >= minimumConfidence
+    ) {
         data = parser.parse(extraction.text);
 
+        parserName =
+            parserDefinition?.parserName ||
+            parser.name ||
+            documentType.toLowerCase();
+    } else if (parser) {
+        parserBlocked = true;
         parserName =
             parserDefinition?.parserName ||
             parser.name ||
@@ -39,7 +54,8 @@ async function processarDocumentoSimples(buffer) {
         data,
         text: extraction.text,
         detection,
-        parserDefinition
+        parserDefinition,
+        parserBlocked
     });
 }
 
@@ -92,7 +108,7 @@ async function processarDocumentoCombinado(
         success: true,
 
         engine: {
-            version: '1.6.0',
+            version: ENGINE_VERSION,
             parser: 'pgdas-combined-splitter',
             confidence: 1
         },
@@ -137,10 +153,23 @@ exports.process = async (buffer) => {
 
     let data = {};
     let parserName = 'none';
+    let parserBlocked = false;
 
-    if (parser) {
+    const minimumConfidence =
+        parserDefinition?.minimumConfidence ?? 0;
+
+    if (
+        parser &&
+        detection.confidence >= minimumConfidence
+    ) {
         data = parser.parse(extraction.text);
 
+        parserName =
+            parserDefinition?.parserName ||
+            parser.name ||
+            documentType.toLowerCase();
+    } else if (parser) {
+        parserBlocked = true;
         parserName =
             parserDefinition?.parserName ||
             parser.name ||
@@ -154,6 +183,7 @@ exports.process = async (buffer) => {
         data,
         text: extraction.text,
         detection,
-        parserDefinition
+        parserDefinition,
+        parserBlocked
     });
 };
