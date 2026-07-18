@@ -118,7 +118,7 @@ const regras = Object.freeze([
     signals: Object.freeze([
       criarSinal('PROGRAMA GERADOR DO DOCUMENTO DE ARRECADACAO', 0.25, { required: true }),
       criarSinal('DECLARATORIO', 0.15, { required: true }),
-      criarSinal('N DA DECLARACAO', 0.2, { required: true }),
+      criarSinal('NUMERO DA DECLARACAO', 0.2, { required: true }),
       criarSinal('RECIBO DE ENTREGA DA APURACAO NO PGDAS-D', 0.4, { required: true })
     ])
   }),
@@ -154,7 +154,7 @@ const regras = Object.freeze([
     signals: Object.freeze([
       criarSinal('PROGRAMA GERADOR DO DOCUMENTO DE ARRECADACAO', 0.4, { required: true }),
       criarSinal('DECLARATORIO', 0.2, { required: true }),
-      criarSinal('N DA DECLARACAO', 0.25),
+      criarSinal('NUMERO DA DECLARACAO', 0.25),
       criarSinal('RESUMO DA DECLARACAO', 0.15)
     ])
   }),

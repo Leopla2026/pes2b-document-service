@@ -73,3 +73,21 @@ test('resposta bloqueia parser abaixo da confiança mínima', () => {
   assert.equal(resposta.engine.minimumConfidence, 0.8);
   assert.match(resposta.warnings[0], /confiança 0.72 abaixo do mínimo 0.8/);
 });
+
+
+test('declaração PGDAS retificadora real não é bloqueada por variação de Nº/Número', () => {
+  const resultado = detector.detectDetailed(`
+    Programa Gerador do Documento de Arrecadação do Simples Nacional - Declaratório
+    Declaração Retificadora
+    Período de Apuração: 01/06/2026 a 30/06/2026
+    Nº da Declaração: 67600788202606002
+    2.6) Resumo da Declaração
+    Número da Declaração: 67600788202606002
+    Número do Recibo: 01.07.26197.0644583-4
+  `);
+
+  assert.equal(resultado.documentType, 'DECLARACAO_PGDAS');
+  assert.equal(resultado.confidence, 1);
+  assert.equal(resultado.confidenceLevel, 'HIGH');
+  assert.ok(resultado.matchedRules.includes('NUMERO DA DECLARACAO'));
+});

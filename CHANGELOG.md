@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.1 - 2026-07-18
+
+- Corrige falso bloqueio de declarações PGDAS quando o PDF contém “Nº da Declaração” em uma ocorrência e “Número da Declaração” em outra.
+- Adiciona teste de regressão com declaração retificadora real.
+
 ## 2.0.0 — 2026-07-15
 
 ### Adicionado
