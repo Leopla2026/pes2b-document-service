@@ -93,3 +93,20 @@ npm test
 ```
 
 A Etapa 5 possui 31 testes automatizados.
+
+## Testes end-to-end
+
+Além dos testes unitários e de contrato, o projeto possui testes end-to-end em `test/e2e-api.test.js`.
+
+Esses testes iniciam a aplicação em uma porta temporária e validam o fluxo completo:
+
+```text
+upload multipart do PDF
+→ middleware de autenticação
+→ extração do texto
+→ detecção documental
+→ execução do parser
+→ resposta HTTP consumida pelo n8n
+```
+
+As amostras PDF ficam em `test/fixtures/http/` e contêm somente dados fictícios.

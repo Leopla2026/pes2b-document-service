@@ -62,3 +62,11 @@
 - auditoria de regras encontradas e ausentes;
 - bloqueio seguro do parser abaixo de `minimumConfidence`;
 - compatibilidade preservada com `documentType` e endpoints existentes.
+
+## [2.0.0] - Etapa 6
+
+### Adicionado
+- Testes end-to-end dos endpoints HTTP da API.
+- Fixtures PDF anonimizadas para DAS, declaração PGDAS retificadora e recibo PGDAS.
+- Validação completa de upload multipart, extração, detecção, parser e contrato de resposta.
+- Teste de processamento em lote e de erro por ausência de arquivo.
