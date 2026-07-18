@@ -8,7 +8,7 @@ const combinadoSplitter = require(
 
 const { buildResponse } = require('./engine.response');
 
-const ENGINE_VERSION = '1.8.0';
+const ENGINE_VERSION = '1.9.0';
 
 async function processarDocumentoSimples(buffer) {
     const extraction = await extractor.extract(buffer);

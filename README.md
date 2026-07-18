@@ -110,3 +110,16 @@ upload multipart do PDF
 ```
 
 As amostras PDF ficam em `test/fixtures/http/` e contêm somente dados fictícios.
+
+## Observabilidade
+
+A API gera logs estruturados em JSON para facilitar a consulta no EasyPanel e a correlação com o n8n. Cada requisição possui um `requestId`.
+
+Principais eventos:
+
+- `request_started` e `request_completed`;
+- `document_processed`;
+- `batch_document_processed` e `batch_completed`;
+- `document_rejected`, `upload_failed` e `request_failed`.
+
+Os logs incluem duração, tipo documental, confiança, parser, quantidade de páginas e motivo de bloqueio, sem registrar o texto integral do PDF.

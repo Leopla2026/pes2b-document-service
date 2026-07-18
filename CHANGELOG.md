@@ -1,3 +1,14 @@
+# Changelog
+
+## 2.0.0 / Engine 1.9.0 - Etapa 7
+
+- Adicionados logs estruturados em JSON.
+- Adicionado rastreamento por `requestId` do início ao fim da requisição.
+- Adicionadas métricas de duração da requisição e do processamento documental.
+- Adicionados eventos de detecção, confiança, parser executado, bloqueio e falhas.
+- Adicionada observabilidade para processamento em lote.
+- Removida a dependência de logs soltos com `console.error`.
+
 ## 2.0.0 / Engine 1.8.0 - Padronização estrutural dos parsers
 
 

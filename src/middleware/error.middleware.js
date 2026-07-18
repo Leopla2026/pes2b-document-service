@@ -1,5 +1,6 @@
 const multer = require('multer');
 const { errorResponse } = require('../utils/api.response');
+const logger = require('../utils/logger');
 
 module.exports = function errorMiddleware(err, req, res, next) {
     if (res.headersSent) {
@@ -9,6 +10,13 @@ module.exports = function errorMiddleware(err, req, res, next) {
     if (err instanceof multer.MulterError) {
         const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
         const code = err.code === 'LIMIT_FILE_SIZE' ? 'FILE_TOO_LARGE' : 'MULTIPART_ERROR';
+
+        logger.warn('upload_failed', {
+            requestId: req.requestId,
+            code,
+            statusCode: status,
+            error: logger.normalizeError(err)
+        });
 
         return res.status(status).json(
             errorResponse({
@@ -20,7 +28,13 @@ module.exports = function errorMiddleware(err, req, res, next) {
         );
     }
 
-    console.error(`[${req.requestId}]`, err);
+    logger.error('request_failed', {
+        requestId: req.requestId,
+        method: req.method,
+        path: req.originalUrl,
+        processingContext: err.processingContext || null,
+        error: logger.normalizeError(err)
+    });
 
     return res.status(500).json(
         errorResponse({
