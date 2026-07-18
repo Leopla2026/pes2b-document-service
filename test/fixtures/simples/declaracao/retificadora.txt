@@ -1,0 +1,18 @@
+Programa Gerador do Documento de Arrecadação do Simples Nacional - Declaratório
+Declaração Retificadora
+Período de Apuração:01/06/2026 a 30/06/2026 Número da Declaração
+Nome empresarial:EMPRESA MODELO SERVICOS LTDA Data de abertura no CNPJ:21/06/2020
+CNPJ Matriz:67.600.788/0001-48
+Nº da Declaração:67600788202606002
+Receita Bruta do PA (RPA) - Competência 1.800,00 0,00 1.800,00
+Receita bruta acumulada nos doze meses anteriores ao PA (RBT12) 0,00 0,00 0,00
+Receita bruta acumulada nos doze meses anteriores ao PA proporcionalizada (RBT12p) 21.600,00 0,00 21.600,00
+Receita bruta acumulada no ano-calendário corrente (RBA) 1.800,00 0,00 1.800,00
+Receita bruta acumulada no ano-calendário anterior (RBAA) 0,00 0,00 0,00
+Limite de receita bruta proporcionalizado 2.800.000,00 2.800.000,00
+2.2) Receitas Brutas Anteriores
+Resumo da Declaração Receita Bruta Auferida Valor Total do Débito Declarado 1.800,00108,00
+Número da Declaração: 67600788202606002
+Número do Recibo: 01.07.26197.0644583-4
+Autenticação: 67002.60181.07096.88865
+Data e horário da transmissão da Declaração:16/07/2026 20:16:40

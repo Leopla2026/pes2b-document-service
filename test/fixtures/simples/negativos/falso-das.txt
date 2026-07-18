@@ -1,0 +1,3 @@
+Relatório interno sobre pagamento de tributos.
+O texto menciona Documento de Arrecadação, mas não é um DAS oficial.
+Não contém autenticação mecânica, código principal, PIX ou vencimento.

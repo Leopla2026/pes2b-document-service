@@ -1,5 +1,13 @@
 ## 2.0.0 / Engine 1.8.0 - Padronização estrutural dos parsers
 
+
+## [2.0.0] - Etapa 5 - Fixtures e testes de contrato
+
+- adicionadas fixtures textuais anonimizadas para DAS, declaração PGDAS, recibo PGDAS, extrato PGDAS, relatório do Simples e declaração de faturamento;
+- adicionada fixture negativa para proteção contra falso positivo de DAS;
+- criado teste de contrato que valida detecção, confiança mínima, execução do parser e campos essenciais;
+- cobertura automatizada ampliada de 24 para 31 testes.
+
 - Cada parser do Simples Nacional passou a possuir pasta própria com `index.js`, `parser.js`, `schema.js` e `rules.js`.
 - O registry agora carrega metadados diretamente dos arquivos `schema.js` e `rules.js`.
 - Foram mantidos wrappers compatíveis para os caminhos antigos.

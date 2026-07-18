@@ -78,3 +78,18 @@ src/document/parsers/<familia>/<tipo>/
 
 Os caminhos antigos foram preservados por wrappers para evitar quebra de integrações e testes existentes.
 
+
+## Fixtures e testes de contrato
+
+A suíte mantém amostras textuais anonimizadas em `test/fixtures/simples`. Elas representam os formatos aceitos pelos detectores e parsers sem armazenar PDFs reais de clientes.
+
+Cada fixture positiva valida: tipo documental, confiança mínima, parser registrado e campos essenciais. A pasta `negativos` contém textos semelhantes a documentos fiscais que não devem ser classificados.
+
+Para executar:
+
+```bash
+npm ci
+npm test
+```
+
+A Etapa 5 possui 31 testes automatizados.

@@ -1,0 +1,15 @@
+Empresa: Emissão: Página: 0001 16/07/2026 EMPRESA MODELO SERVICOS LTDA CNPJ: 67.600.788/0001-48
+CPF Responsável: Código de Acesso: Período: 000.000.000-00 000000000000 06/2026
+SIMPLES NACIONAL
+Total de Receitas Brutas
+Receita Bruta do período de Apuração (RPA) - Regime de Competência 1.800,00 0,00 1.800,00
+Receita bruta acumulada nos doze meses anteriores ao período de apuração 0,00 0,00 0,00
+Faixa de Enquadramento: 0,00 a 180.000,00
+Receita bruta acumulada no ano-calendário corrente (RBA) 1.800,00 0,00 1.800,00
+Receita bruta acumulada no ano-calendário anterior (RBA) 0,00 0,00 0,00
+Anexo: Anexo III - Prestação de Serviços
+Seção: Seção III - Receitas decorrentes de prestação de serviços
+Tabela: Tabela 1 - Sem retenção de ISS
+Receita Tributada Total: 1.800,00 Alíquota: 6,0000000000000 Simples Nacional Total: 108,00
+Simples Nacional a recolher: 108,00
+Sistema licenciado para ESCRITORIO MODELO LTDA
