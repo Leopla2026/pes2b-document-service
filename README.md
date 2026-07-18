@@ -59,3 +59,22 @@ A documentação detalhada está em [`docs/api.md`](docs/api.md).
 - auditoria de regras encontradas e ausentes;
 - bloqueio seguro do parser abaixo de `minimumConfidence`;
 - compatibilidade preservada com `documentType` e endpoints existentes.
+## Estrutura padronizada dos parsers
+
+Cada tipo documental deve utilizar a seguinte estrutura:
+
+```text
+src/document/parsers/<familia>/<tipo>/
+├── index.js
+├── parser.js
+├── schema.js
+└── rules.js
+```
+
+- `parser.js`: implementação da extração dos dados.
+- `schema.js`: versão e campos obrigatórios esperados.
+- `rules.js`: tipo documental, família, versão e confiança mínima.
+- `index.js`: ponto único de exportação do parser e dos metadados.
+
+Os caminhos antigos foram preservados por wrappers para evitar quebra de integrações e testes existentes.
+

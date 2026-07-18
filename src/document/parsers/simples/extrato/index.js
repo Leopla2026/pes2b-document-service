@@ -1,16 +1,9 @@
-const parseIdentificacao = require('./parse.identificacao');
-const parseExtrato = require('./parse.extrato');
+const parser = require('./parser');
+const schema = require('./schema');
+const rules = require('./rules');
 
-module.exports.parse = (text) => {
-
-    return {
-
-        identificacao: parseIdentificacao(text),
-
-        extrato: parseExtrato(text),
-
-        extras: {}
-
-    };
-
+module.exports = {
+  ...parser,
+  schema,
+  rules
 };

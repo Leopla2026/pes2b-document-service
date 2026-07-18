@@ -1,3 +1,11 @@
+## 2.0.0 / Engine 1.8.0 - Padronização estrutural dos parsers
+
+- Cada parser do Simples Nacional passou a possuir pasta própria com `index.js`, `parser.js`, `schema.js` e `rules.js`.
+- O registry agora carrega metadados diretamente dos arquivos `schema.js` e `rules.js`.
+- Foram mantidos wrappers compatíveis para os caminhos antigos.
+- Adicionados testes estruturais e de compatibilidade.
+- Engine atualizada para 1.8.0.
+
 # Changelog
 
 ## 1.7.1 - 2026-07-18

@@ -1,89 +1,41 @@
 const path = require('path');
 
+function loadParser(folderName, parserName) {
+  const parserModule = require(
+    path.join(__dirname, 'simples', folderName)
+  );
+
+  const rules = parserModule.rules || {};
+  const schema = parserModule.schema || {};
+
+  return Object.freeze({
+    documentType: rules.documentType,
+    family: rules.family,
+    parserName,
+    version: rules.parserVersion || '1.0.0',
+    schemaVersion: schema.version || '1.0',
+    status: 'active',
+    description: rules.description || '',
+    minimumConfidence:
+      Number.isFinite(rules.minimumConfidence)
+        ? rules.minimumConfidence
+        : 0.8,
+    schema,
+    rules,
+    parser: parserModule
+  });
+}
+
 const definitions = Object.freeze({
-  DAS: Object.freeze({
-    documentType: 'DAS',
-    family: 'SIMPLES_NACIONAL',
-    parserName: 'das',
-    version: '1.0.0',
-    schemaVersion: '1.0',
-    status: 'active',
-    description: 'Documento de Arrecadação do Simples Nacional.',
-    minimumConfidence: 0.8,
-    parser: require(
-      path.join(__dirname, 'simples', 'das.parser.js')
-    )
-  }),
-
-  RECIBO_PGDAS: Object.freeze({
-    documentType: 'RECIBO_PGDAS',
-    family: 'SIMPLES_NACIONAL',
-    parserName: 'recibo-pgdas',
-    version: '1.0.0',
-    schemaVersion: '1.0',
-    status: 'active',
-    description: 'Recibo de entrega da apuração do PGDAS-D.',
-    minimumConfidence: 0.8,
-    parser: require(
-      path.join(__dirname, 'simples', 'recibo.pgdas.parser.js')
-    )
-  }),
-
-  DECLARACAO_PGDAS: Object.freeze({
-    documentType: 'DECLARACAO_PGDAS',
-    family: 'SIMPLES_NACIONAL',
-    parserName: 'declaracao-pgdas',
-    version: '1.0.0',
-    schemaVersion: '1.0',
-    status: 'active',
-    description: 'Declaração de informações socioeconômicas e fiscais do PGDAS-D.',
-    minimumConfidence: 0.8,
-    parser: require(
-      path.join(__dirname, 'simples', 'declaracao')
-    )
-  }),
-
-  EXTRATO_PGDAS: Object.freeze({
-    documentType: 'EXTRATO_PGDAS',
-    family: 'SIMPLES_NACIONAL',
-    parserName: 'extrato-pgdas',
-    version: '1.0.0',
-    schemaVersion: '1.0',
-    status: 'active',
-    description: 'Extrato da apuração do Simples Nacional.',
-    minimumConfidence: 0.8,
-    parser: require(
-      path.join(__dirname, 'simples', 'extrato')
-    )
-  }),
-
-  RELATORIO_SIMPLES: Object.freeze({
-    documentType: 'RELATORIO_SIMPLES',
-    family: 'SIMPLES_NACIONAL',
-    parserName: 'relatorio-simples',
-    version: '1.0.0',
-    schemaVersion: '1.0',
-    status: 'active',
-    description: 'Relatório detalhado do cálculo do Simples Nacional.',
-    minimumConfidence: 0.8,
-    parser: require(
-      path.join(__dirname, 'simples', 'relatorio')
-    )
-  }),
-
-  DECLARACAO_FATURAMENTO: Object.freeze({
-    documentType: 'DECLARACAO_FATURAMENTO',
-    family: 'SIMPLES_NACIONAL',
-    parserName: 'declaracao-faturamento',
-    version: '1.0.0',
-    schemaVersion: '1.0',
-    status: 'active',
-    description: 'Declaração de faturamento dos últimos doze meses.',
-    minimumConfidence: 0.8,
-    parser: require(
-      path.join(__dirname, 'simples', 'declaracao-faturamento')
-    )
-  })
+  DAS: loadParser('das', 'das'),
+  RECIBO_PGDAS: loadParser('recibo', 'recibo-pgdas'),
+  DECLARACAO_PGDAS: loadParser('declaracao', 'declaracao-pgdas'),
+  EXTRATO_PGDAS: loadParser('extrato', 'extrato-pgdas'),
+  RELATORIO_SIMPLES: loadParser('relatorio', 'relatorio-simples'),
+  DECLARACAO_FATURAMENTO: loadParser(
+    'declaracao-faturamento',
+    'declaracao-faturamento'
+  )
 });
 
 function getDefinition(documentType) {
@@ -106,14 +58,22 @@ function has(documentType) {
 
 function list(options = {}) {
   const includeParser = options.includeParser === true;
+  const includeSchema = options.includeSchema === true;
+  const includeRules = options.includeRules === true;
 
   return Object.values(definitions).map(definition => {
-    if (includeParser) {
-      return definition;
-    }
+    const {
+      parser,
+      schema,
+      rules,
+      ...metadata
+    } = definition;
 
-    const { parser, ...metadata } = definition;
-    return { ...metadata };
+    if (includeParser) metadata.parser = parser;
+    if (includeSchema) metadata.schema = schema;
+    if (includeRules) metadata.rules = rules;
+
+    return metadata;
   });
 }
 
@@ -137,12 +97,27 @@ function validate() {
       errors.push(`${definition.documentType}: version não informada.`);
     }
 
+    if (!definition.schemaVersion) {
+      errors.push(`${definition.documentType}: schemaVersion não informada.`);
+    }
+
     if (!definition.status) {
       errors.push(`${definition.documentType}: status não informado.`);
     }
 
     if (typeof definition.parser?.parse !== 'function') {
       errors.push(`${definition.documentType}: parser.parse não encontrado.`);
+    }
+
+    if (!Array.isArray(definition.schema?.required)) {
+      errors.push(`${definition.documentType}: schema.required não encontrado.`);
+    }
+
+    if (
+      definition.rules?.documentType !==
+      definition.documentType
+    ) {
+      errors.push(`${definition.documentType}: rules.documentType divergente.`);
     }
   }
 
@@ -162,10 +137,6 @@ const registry = {
   validate
 };
 
-/*
- * Compatibilidade com o formato anterior:
- * registry.DAS continua devolvendo diretamente o parser.
- */
 for (const documentType of Object.keys(definitions)) {
   Object.defineProperty(registry, documentType, {
     enumerable: true,
