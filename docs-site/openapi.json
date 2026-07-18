@@ -12,51 +12,85 @@
     }
   ],
   "tags": [
-    {"name": "Status", "description": "Disponibilidade e informações do serviço"},
-    {"name": "Documentos", "description": "Extração individual e em lote"}
+    {
+      "name": "Status",
+      "description": "Disponibilidade e informações do serviço"
+    },
+    {
+      "name": "Documentos",
+      "description": "Extração individual e em lote"
+    }
   ],
   "paths": {
     "/api/v1/health": {
       "get": {
-        "tags": ["Status"],
+        "tags": [
+          "Status"
+        ],
         "summary": "Verifica a disponibilidade do serviço",
         "operationId": "healthCheck",
         "responses": {
           "200": {
             "description": "Serviço disponível",
-            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HealthResponse"}}}
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/v1/info": {
       "get": {
-        "tags": ["Status"],
+        "tags": [
+          "Status"
+        ],
         "summary": "Retorna versão e informações da API",
         "operationId": "serviceInfo",
         "responses": {
           "200": {
             "description": "Informações públicas do serviço",
-            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/InfoResponse"}}}
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfoResponse"
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/v1/pdf/extract": {
       "post": {
-        "tags": ["Documentos"],
+        "tags": [
+          "Documentos"
+        ],
         "summary": "Processa um documento PDF",
         "operationId": "extractPdf",
-        "security": [{"ApiKeyAuth": []}],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": ["file"],
+                "required": [
+                  "file"
+                ],
                 "properties": {
-                  "file": {"type": "string", "format": "binary", "description": "Arquivo PDF a ser processado"}
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Arquivo PDF a ser processado"
+                  }
                 }
               }
             }
@@ -67,7 +101,9 @@
             "description": "Documento processado",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/DocumentExtractionResponse"},
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentExtractionResponse"
+                },
                 "examples": {
                   "relatorioSimples": {
                     "summary": "Relatório do Simples Nacional",
@@ -75,8 +111,17 @@
                       "success": true,
                       "documentType": "RELATORIO_SIMPLES",
                       "data": {
-                        "identificacao": {"empresa": "EMPRESA EXEMPLO LTDA.", "cnpj": "12.345.678/0001-90", "competencia": "06/2026"},
-                        "resumo": {"receitaBrutaMesNumero": 45000.0, "rbt12Numero": 540000.0, "valorSimplesRecolherNumero": 2187.5, "cargaTributariaTotalNumero": 4.8611},
+                        "identificacao": {
+                          "empresa": "EMPRESA EXEMPLO LTDA.",
+                          "cnpj": "12.345.678/0001-90",
+                          "competencia": "06/2026"
+                        },
+                        "resumo": {
+                          "receitaBrutaMesNumero": 45000.0,
+                          "rbt12Numero": 540000.0,
+                          "valorSimplesRecolherNumero": 2187.5,
+                          "cargaTributariaTotalNumero": 4.8611
+                        },
                         "apuracoes": [],
                         "consolidacaoPorAnexo": []
                       },
@@ -89,192 +134,543 @@
               }
             }
           },
-          "400": {"description": "Arquivo inválido", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
-          "401": {"description": "API Key ausente ou inválida", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
-          "413": {"description": "Arquivo acima do limite", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
-          "422": {"description": "PDF não processável", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
-          "500": {"description": "Erro interno", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+          "400": {
+            "description": "Arquivo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API Key ausente ou inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Arquivo acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "PDF não processável",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/api/v1/pdf/extract-batch": {
       "post": {
-        "tags": ["Documentos"],
+        "tags": [
+          "Documentos"
+        ],
         "summary": "Processa até 10 documentos PDF",
         "operationId": "extractPdfBatch",
-        "security": [{"ApiKeyAuth": []}],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": ["files"],
+                "required": [
+                  "files"
+                ],
                 "properties": {
-                  "files": {"type": "array", "maxItems": 10, "items": {"type": "string", "format": "binary"}}
+                  "files": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": {"description": "Lote processado", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchExtractionResponse"}}}},
-          "400": {"description": "Requisição inválida", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
-          "401": {"description": "API Key ausente ou inválida", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
-          "500": {"description": "Erro interno", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+          "200": {
+            "description": "Lote processado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchExtractionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requisição inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API Key ausente ou inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostics": {
+      "get": {
+        "tags": [
+          "Diagnóstico"
+        ],
+        "summary": "Retorna métricas operacionais em memória",
+        "description": "Exige X-API-Key. As métricas reiniciam quando o processo é reiniciado.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Diagnóstico operacional retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API Key ausente ou inválida"
+          }
         }
       }
     }
   },
   "components": {
     "securitySchemes": {
-      "ApiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-API-Key", "description": "Chave de acesso fornecida pela P&S2B"}
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Chave de acesso fornecida pela P&S2B"
+      }
     },
     "schemas": {
       "HealthResponse": {
         "type": "object",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "properties": {
-          "status": {"type": "string", "example": "UP"},
-          "service": {"type": "string", "example": "pes2b-document-service"},
-          "version": {"type": "string", "example": "2.0.0"}
+          "status": {
+            "type": "string",
+            "example": "UP"
+          },
+          "service": {
+            "type": "string",
+            "example": "pes2b-document-service"
+          },
+          "version": {
+            "type": "string",
+            "example": "2.0.0"
+          }
         }
       },
       "InfoResponse": {
         "type": "object",
         "properties": {
-          "name": {"type": "string", "example": "P&S2B Document Service API"},
-          "version": {"type": "string", "example": "2.0.0"},
-          "environment": {"type": "string", "example": "production"}
+          "name": {
+            "type": "string",
+            "example": "P&S2B Document Service API"
+          },
+          "version": {
+            "type": "string",
+            "example": "2.0.0"
+          },
+          "environment": {
+            "type": "string",
+            "example": "production"
+          }
         }
       },
       "Identification": {
         "type": "object",
         "properties": {
-          "empresa": {"type": "string", "example": "EMPRESA EXEMPLO LTDA."},
-          "cnpj": {"type": "string", "example": "12.345.678/0001-90"},
-          "competencia": {"type": "string", "example": "06/2026"}
+          "empresa": {
+            "type": "string",
+            "example": "EMPRESA EXEMPLO LTDA."
+          },
+          "cnpj": {
+            "type": "string",
+            "example": "12.345.678/0001-90"
+          },
+          "competencia": {
+            "type": "string",
+            "example": "06/2026"
+          }
         }
       },
       "DeclarationData": {
         "type": "object",
         "properties": {
-          "tipo": {"type": "string", "example": "DECLARACAO_PGDAS"},
-          "tipoDeclaracao": {"type": "string", "enum": ["ORIGINAL", "RETIFICADORA", "NAO_IDENTIFICADO"]},
-          "ehRetificadora": {"type": "boolean"},
-          "numeroDeclaracao": {"type": "string"},
-          "numeroRecibo": {"type": "string"}
+          "tipo": {
+            "type": "string",
+            "example": "DECLARACAO_PGDAS"
+          },
+          "tipoDeclaracao": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL",
+              "RETIFICADORA",
+              "NAO_IDENTIFICADO"
+            ]
+          },
+          "ehRetificadora": {
+            "type": "boolean"
+          },
+          "numeroDeclaracao": {
+            "type": "string"
+          },
+          "numeroRecibo": {
+            "type": "string"
+          }
         }
       },
       "DasData": {
         "type": "object",
         "properties": {
-          "numeroDocumento": {"type": "string"},
-          "valor": {"type": "number", "format": "double", "example": 2187.5},
-          "vencimento": {"type": "string", "format": "date", "example": "2026-07-20"},
-          "codigoBarras": {"type": "string"}
+          "numeroDocumento": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double",
+            "example": 2187.5
+          },
+          "vencimento": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-07-20"
+          },
+          "codigoBarras": {
+            "type": "string"
+          }
         }
       },
       "RevenueStatementData": {
         "type": "object",
         "properties": {
-          "periodoInicial": {"type": "string", "format": "date"},
-          "periodoFinal": {"type": "string", "format": "date"},
-          "faturamentoTotal": {"type": "number", "format": "double", "example": 45000.0},
-          "assinada": {"type": "boolean"}
+          "periodoInicial": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodoFinal": {
+            "type": "string",
+            "format": "date"
+          },
+          "faturamentoTotal": {
+            "type": "number",
+            "format": "double",
+            "example": 45000.0
+          },
+          "assinada": {
+            "type": "boolean"
+          }
         }
       },
       "SimplesSummary": {
         "type": "object",
         "properties": {
-          "receitaBrutaMesNumero": {"type": "number", "format": "double", "example": 45000.0},
-          "rbt12Numero": {"type": "number", "format": "double", "example": 540000.0},
-          "faixaEnquadramento": {"type": "string"},
-          "valorSimplesRecolherNumero": {"type": "number", "format": "double", "example": 2187.5},
-          "cargaTributariaTotalNumero": {"type": "number", "format": "double", "example": 4.8611}
+          "receitaBrutaMesNumero": {
+            "type": "number",
+            "format": "double",
+            "example": 45000.0
+          },
+          "rbt12Numero": {
+            "type": "number",
+            "format": "double",
+            "example": 540000.0
+          },
+          "faixaEnquadramento": {
+            "type": "string"
+          },
+          "valorSimplesRecolherNumero": {
+            "type": "number",
+            "format": "double",
+            "example": 2187.5
+          },
+          "cargaTributariaTotalNumero": {
+            "type": "number",
+            "format": "double",
+            "example": 4.8611
+          }
         }
       },
       "SimplesAssessment": {
         "type": "object",
         "properties": {
-          "ordem": {"type": "integer"},
-          "anexo": {"type": "string", "example": "III"},
-          "descricaoAnexo": {"type": "string"},
-          "secao": {"type": "string"},
-          "tabela": {"type": "string"},
-          "tratamentoTributario": {"type": "string"},
-          "receitaTributadaNumero": {"type": "number", "format": "double"},
-          "aliquotaEfetivaNumero": {"type": "number", "format": "double"},
-          "valorSimplesNumero": {"type": "number", "format": "double"}
+          "ordem": {
+            "type": "integer"
+          },
+          "anexo": {
+            "type": "string",
+            "example": "III"
+          },
+          "descricaoAnexo": {
+            "type": "string"
+          },
+          "secao": {
+            "type": "string"
+          },
+          "tabela": {
+            "type": "string"
+          },
+          "tratamentoTributario": {
+            "type": "string"
+          },
+          "receitaTributadaNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "aliquotaEfetivaNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorSimplesNumero": {
+            "type": "number",
+            "format": "double"
+          }
         }
       },
       "SimplesAnnexConsolidation": {
         "type": "object",
         "properties": {
-          "anexo": {"type": "string"},
-          "descricaoAnexo": {"type": "string"},
-          "receitaTributadaNumero": {"type": "number", "format": "double"},
-          "valorSimplesNumero": {"type": "number", "format": "double"},
-          "quantidadeApuracoes": {"type": "integer"},
-          "aliquotaMediaNumero": {"type": "number", "format": "double"}
+          "anexo": {
+            "type": "string"
+          },
+          "descricaoAnexo": {
+            "type": "string"
+          },
+          "receitaTributadaNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorSimplesNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidadeApuracoes": {
+            "type": "integer"
+          },
+          "aliquotaMediaNumero": {
+            "type": "number",
+            "format": "double"
+          }
         }
       },
       "ExtractedDocumentData": {
         "type": "object",
         "description": "Estrutura variável conforme o tipo documental reconhecido.",
         "properties": {
-          "identificacao": {"$ref": "#/components/schemas/Identification"},
-          "documento": {"$ref": "#/components/schemas/DeclarationData"},
-          "das": {"$ref": "#/components/schemas/DasData"},
-          "declaracaoFaturamento": {"$ref": "#/components/schemas/RevenueStatementData"},
-          "resumo": {"$ref": "#/components/schemas/SimplesSummary"},
-          "apuracoes": {"type": "array", "items": {"$ref": "#/components/schemas/SimplesAssessment"}},
-          "consolidacaoPorAnexo": {"type": "array", "items": {"$ref": "#/components/schemas/SimplesAnnexConsolidation"}}
+          "identificacao": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "documento": {
+            "$ref": "#/components/schemas/DeclarationData"
+          },
+          "das": {
+            "$ref": "#/components/schemas/DasData"
+          },
+          "declaracaoFaturamento": {
+            "$ref": "#/components/schemas/RevenueStatementData"
+          },
+          "resumo": {
+            "$ref": "#/components/schemas/SimplesSummary"
+          },
+          "apuracoes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimplesAssessment"
+            }
+          },
+          "consolidacaoPorAnexo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimplesAnnexConsolidation"
+            }
+          }
         },
         "additionalProperties": true
       },
       "ApiError": {
         "type": "object",
         "properties": {
-          "code": {"type": "string", "example": "INVALID_FILE"},
-          "message": {"type": "string", "example": "O arquivo enviado não é um PDF válido."},
-          "field": {"type": "string", "nullable": true}
+          "code": {
+            "type": "string",
+            "example": "INVALID_FILE"
+          },
+          "message": {
+            "type": "string",
+            "example": "O arquivo enviado não é um PDF válido."
+          },
+          "field": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "DocumentExtractionResponse": {
         "type": "object",
-        "required": ["success", "documentType", "data", "requestId"],
+        "required": [
+          "success",
+          "documentType",
+          "data",
+          "requestId"
+        ],
         "properties": {
-          "success": {"type": "boolean", "example": true},
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
           "documentType": {
             "type": "string",
-            "enum": ["DECLARACAO_PGDAS", "RECIBO_PGDAS", "DAS", "EXTRATO_PGDAS", "RELATORIO_SIMPLES", "DECLARACAO_FATURAMENTO", "COMBINADO_DECLARACAO_RECIBO_PGDAS", "NAO_IDENTIFICADO"]
+            "enum": [
+              "DECLARACAO_PGDAS",
+              "RECIBO_PGDAS",
+              "DAS",
+              "EXTRATO_PGDAS",
+              "RELATORIO_SIMPLES",
+              "DECLARACAO_FATURAMENTO",
+              "COMBINADO_DECLARACAO_RECIBO_PGDAS",
+              "NAO_IDENTIFICADO"
+            ]
           },
-          "data": {"$ref": "#/components/schemas/ExtractedDocumentData"},
-          "warnings": {"type": "array", "items": {"type": "string"}},
-          "errors": {"type": "array", "items": {"$ref": "#/components/schemas/ApiError"}},
-          "requestId": {"type": "string", "format": "uuid"}
+          "data": {
+            "$ref": "#/components/schemas/ExtractedDocumentData"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       },
       "BatchExtractionResponse": {
         "type": "object",
         "properties": {
-          "success": {"type": "boolean"},
-          "total": {"type": "integer", "example": 2},
-          "processed": {"type": "integer", "example": 2},
-          "results": {"type": "array", "items": {"$ref": "#/components/schemas/DocumentExtractionResponse"}},
-          "requestId": {"type": "string", "format": "uuid"}
+          "success": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer",
+            "example": 2
+          },
+          "processed": {
+            "type": "integer",
+            "example": 2
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentExtractionResponse"
+            }
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       },
       "ErrorResponse": {
         "type": "object",
         "properties": {
-          "success": {"type": "boolean", "example": false},
-          "message": {"type": "string"},
-          "requestId": {"type": "string", "format": "uuid"},
-          "data": {"nullable": true},
-          "errors": {"type": "array", "items": {"$ref": "#/components/schemas/ApiError"}},
-          "warnings": {"type": "array", "items": {"type": "string"}}
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "data": {
+            "nullable": true
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     }

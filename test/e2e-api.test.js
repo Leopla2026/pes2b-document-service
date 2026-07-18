@@ -65,7 +65,7 @@ test('E2E: upload de DAS percorre HTTP, extração, detecção e parser', async 
     assert.equal(response.status, 200);
     assert.equal(body.success, true);
     assert.equal(body.documentType, 'DAS');
-    assert.equal(body.engine.version, '1.9.0');
+    assert.equal(body.engine.version, '1.10.0');
     assert.equal(body.engine.parserExecuted, true);
     assert.equal(body.engine.parserBlocked, false);
     assert.equal(body.data.identificacao.cnpj, '67.600.788/0001-48');

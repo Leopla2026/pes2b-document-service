@@ -123,3 +123,14 @@ Principais eventos:
 - `document_rejected`, `upload_failed` e `request_failed`.
 
 Os logs incluem duração, tipo documental, confiança, parser, quantidade de páginas e motivo de bloqueio, sem registrar o texto integral do PDF.
+
+## Diagnóstico operacional
+
+O endpoint abaixo exige o mesmo cabeçalho `X-API-Key` usado no processamento de PDFs:
+
+```http
+GET /api/v1/diagnostics
+X-API-Key: sua-chave
+```
+
+Ele retorna contadores de documentos processados, taxa de sucesso, bloqueios por confiança, documentos desconhecidos, tempo médio e distribuição por tipo documental. As métricas são locais ao processo e reiniciam a cada novo deploy ou reinício do contêiner.

@@ -6,6 +6,7 @@ const healthRoutes = require('./routes/health.routes');
 const infoRoutes = require('./routes/info.routes');
 const openApiRoutes = require('./routes/openapi.routes');
 const pdfRoutes = require('./routes/pdf.routes');
+const diagnosticsRoutes = require('./routes/diagnostics.routes');
 const requestIdMiddleware = require('./middleware/request-id.middleware');
 const requestObservabilityMiddleware = require('./middleware/request-observability.middleware');
 const apiKeyMiddleware = require('./middleware/api-key.middleware');
@@ -24,6 +25,7 @@ app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/info', infoRoutes);
 app.use('/openapi.json', openApiRoutes);
 
+app.use('/api/v1/diagnostics', apiKeyMiddleware, diagnosticsRoutes);
 app.use('/api/v1/pdf', apiKeyMiddleware, pdfRoutes);
 
 app.use(notFoundMiddleware);

@@ -1,6 +1,7 @@
 const engine = require('../document/engine/document.engine');
 const { errorResponse } = require('../utils/api.response');
 const logger = require('../utils/logger');
+const metrics = require('../metrics/operational-metrics');
 
 function buildLogDetails(req, file, result, durationMs) {
     return {
@@ -25,6 +26,8 @@ function buildLogDetails(req, file, result, durationMs) {
 exports.extract = async (req, res, next) => {
     try {
         if (!req.file) {
+            metrics.recordRejectedUpload();
+
             logger.warn('document_rejected', {
                 requestId: req.requestId,
                 reason: 'FILE_REQUIRED'
@@ -44,6 +47,8 @@ exports.extract = async (req, res, next) => {
         const startedAt = process.hrtime.bigint();
         const result = await engine.process(req.file.buffer);
         const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+
+        metrics.recordDocument(result, durationMs);
 
         logger.info('document_processed', buildLogDetails(
             req,
@@ -69,6 +74,8 @@ exports.extract = async (req, res, next) => {
 exports.extractBatch = async (req, res, next) => {
     try {
         if (!req.files || req.files.length === 0) {
+            metrics.recordRejectedUpload();
+
             logger.warn('batch_rejected', {
                 requestId: req.requestId,
                 reason: 'FILES_REQUIRED'
@@ -95,6 +102,8 @@ exports.extractBatch = async (req, res, next) => {
                 const result = await engine.process(file.buffer);
                 const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
 
+                metrics.recordDocument(result, durationMs);
+
                 logger.info('batch_document_processed', buildLogDetails(
                     req,
                     file,
@@ -110,6 +119,8 @@ exports.extractBatch = async (req, res, next) => {
                 });
             } catch (err) {
                 const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+
+                metrics.recordFailure(durationMs);
 
                 logger.error('batch_document_failed', {
                     requestId: req.requestId,

@@ -1,3 +1,17 @@
+## [2.0.0-etapa8] - 2026-07-18
+
+### Adicionado
+- Endpoint autenticado `GET /api/v1/diagnostics`.
+- Métricas operacionais em memória por documento, confiança e tipo documental.
+- Contadores de bloqueios por confiança, documentos desconhecidos e uploads rejeitados.
+- Testes unitários e HTTP do diagnóstico operacional.
+
+### Alterado
+- Engine interna atualizada para `1.10.0`.
+
+### Observação
+- As métricas reiniciam quando o processo da API é reiniciado.
+
 # Changelog
 
 ## 2.0.0 / Engine 1.9.0 - Etapa 7

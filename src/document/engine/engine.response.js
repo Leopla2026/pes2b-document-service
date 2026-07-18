@@ -1,4 +1,4 @@
-const ENGINE_VERSION = '1.9.0';
+const ENGINE_VERSION = '1.10.0';
 
 exports.buildResponse = ({
   documentType,
@@ -63,3 +63,5 @@ exports.buildResponse = ({
     text
   };
 };
+
+exports.ENGINE_VERSION = ENGINE_VERSION;
