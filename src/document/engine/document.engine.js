@@ -14,7 +14,11 @@ async function processarDocumentoSimples(buffer) {
     const detection = detector.detectDetailed(extraction.text);
     const documentType = detection.documentType;
 
-    const parser = registry[documentType];
+    const parserDefinition =
+        registry.getDefinition(documentType);
+
+    const parser =
+        registry.getParser(documentType);
 
     let data = {};
     let parserName = 'none';
@@ -23,6 +27,7 @@ async function processarDocumentoSimples(buffer) {
         data = parser.parse(extraction.text);
 
         parserName =
+            parserDefinition?.parserName ||
             parser.name ||
             documentType.toLowerCase();
     }
@@ -33,7 +38,8 @@ async function processarDocumentoSimples(buffer) {
         pages: extraction.pages,
         data,
         text: extraction.text,
-        detection
+        detection,
+        parserDefinition
     });
 }
 
@@ -86,7 +92,7 @@ async function processarDocumentoCombinado(
         success: true,
 
         engine: {
-            version: '1.5.0',
+            version: '1.6.0',
             parser: 'pgdas-combined-splitter',
             confidence: 1
         },
@@ -123,7 +129,11 @@ exports.process = async (buffer) => {
         );
     }
 
-    const parser = registry[documentType];
+    const parserDefinition =
+        registry.getDefinition(documentType);
+
+    const parser =
+        registry.getParser(documentType);
 
     let data = {};
     let parserName = 'none';
@@ -132,6 +142,7 @@ exports.process = async (buffer) => {
         data = parser.parse(extraction.text);
 
         parserName =
+            parserDefinition?.parserName ||
             parser.name ||
             documentType.toLowerCase();
     }
@@ -142,6 +153,7 @@ exports.process = async (buffer) => {
         pages: extraction.pages,
         data,
         text: extraction.text,
-        detection
+        detection,
+        parserDefinition
     });
 };

@@ -4,7 +4,8 @@ exports.buildResponse = ({
   pages,
   data,
   text,
-  detection
+  detection,
+  parserDefinition
 }) => {
   const warnings = [];
 
@@ -28,8 +29,11 @@ exports.buildResponse = ({
     success: true,
 
     engine: {
-      version: '1.5.0',
+      version: '1.6.0',
       parser,
+      parserVersion: parserDefinition?.version || null,
+      parserStatus: parserDefinition?.status || null,
+      schemaVersion: parserDefinition?.schemaVersion || null,
       confidence,
       family: detection?.family || 'UNKNOWN',
       detector: detection?.detector || 'none',
