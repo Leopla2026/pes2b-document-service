@@ -69,3 +69,43 @@ test('calcula carga tributária total', () => {
     assert.equal(result.resumo.valorSimplesRecolherNumero, '332.78');
     assert.equal(result.resumo.cargaTributariaTotalNumero, 3.2504);
 });
+
+test('seleciona faixa de enquadramento do mercado interno quando existem duas faixas', () => {
+    const texto = `
+Empresa: CONFIDENCE ADM E LOCAÇÕES DE IMOV. LTDA CNPJ: 22.426.955/0001-48
+Período: 07/2026
+SIMPLES NACIONAL
+Receita Bruta do período de Apuração (RPA) - Regime de Competência 41.439,39 0,00 41.439,39
+Receita bruta acumulada nos doze meses anteriores ao período de apuração 538.083,49 0,00 538.083,49
+Faixa de Enquadramento: 360.000,01 a 720.000,00 0,00 a 180.000,00
+Receita bruta acumulada no ano-calendário corrente (RBA) 315.435,48 0,00 315.435,48
+Receita bruta acumulada no ano-calendário anterior (RBA) 512.894,91 0,00 512.894,91
+Simples Nacional a recolher: 4.235,80
+`;
+
+    const result = parser.parse(texto);
+
+    assert.equal(result.resumo.rbt12, '538.083,49');
+    assert.equal(result.resumo.faixaEnquadramento, '360.000,01 a 720.000,00');
+    assert.equal(result.resumo.faixaEnquadramentoMercadoInterno, '360.000,01 a 720.000,00');
+    assert.equal(result.resumo.faixaEnquadramentoMercadoExterno, '0,00 a 180.000,00');
+});
+
+test('identifica mercado interno mesmo quando o PDF extrai as faixas em ordem invertida', () => {
+    const texto = `
+Empresa: CONFIDENCE ADM E LOCAÇÕES DE IMOV. LTDA CNPJ: 22.426.955/0001-48
+Período: 07/2026
+SIMPLES NACIONAL
+Receita Bruta do período de Apuração (RPA) - Regime de Competência 41.439,39 0,00 41.439,39
+Receita bruta acumulada nos doze meses anteriores ao período de apuração 538.083,49 0,00 538.083,49
+Faixa de Enquadramento: 0,00 a 180.000,00 360.000,01 a 720.000,00
+Receita bruta acumulada no ano-calendário corrente (RBA) 315.435,48 0,00 315.435,48
+Simples Nacional a recolher: 4.235,80
+`;
+
+    const result = parser.parse(texto);
+
+    assert.equal(result.resumo.faixaEnquadramento, '360.000,01 a 720.000,00');
+    assert.equal(result.resumo.faixaEnquadramentoMercadoInterno, '360.000,01 a 720.000,00');
+    assert.equal(result.resumo.faixaEnquadramentoMercadoExterno, '0,00 a 180.000,00');
+});

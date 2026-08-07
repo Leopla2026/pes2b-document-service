@@ -95,3 +95,10 @@
 - Fixtures PDF anonimizadas para DAS, declaração PGDAS retificadora e recibo PGDAS.
 - Validação completa de upload multipart, extração, detecção, parser e contrato de resposta.
 - Teste de processamento em lote e de erro por ausência de arquivo.
+
+## Hotfix - Faixa de enquadramento do Relatório Simples
+
+- Corrige a leitura de `Faixa de Enquadramento` quando o relatório da Domínio apresenta simultaneamente Mercado Interno e Mercado Externo.
+- `resumo.faixaEnquadramento` permanece compatível e passa a representar sempre o Mercado Interno.
+- Adiciona `faixaEnquadramentoMercadoInterno` e `faixaEnquadramentoMercadoExterno` ao resumo.
+- Atualiza o parser `RELATORIO_SIMPLES` para a versão `1.0.1`.
