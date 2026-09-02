@@ -305,14 +305,29 @@ test('E2E: DEC POA valida contexto esperado via multipart', async () => {
       '2026-07'
     );
 
-    assert.deepStrictEqual(
-      body.data.municipality,
-      {
-        ibgeCode: '4314902',
-        name: 'Porto Alegre',
-        uf: 'RS',
-      }
-    );
+    assert.equal(
+  body.data.municipality.ibgeCode,
+  '4314902'
+);
+
+assert.equal(
+  body.data.municipality.name,
+  'Porto Alegre'
+);
+
+assert.equal(
+  body.data.municipality.uf,
+  'RS'
+);
+
+assert.deepStrictEqual(
+  body.data.municipality.portal,
+  {
+    vendor: 'DEC',
+    name: 'DEC POA',
+    url: null
+  }
+);
   });
 });
 

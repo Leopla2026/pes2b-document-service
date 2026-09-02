@@ -2,12 +2,24 @@ const detector = require('../detectors/document.detector');
 const registry = require('../parsers/registry');
 const extractor = require('../extractors/pdf.extractor');
 const {
+    buildDecPoaConfidence
+} = require('../metadata/dec-poa.confidence');
+
+const {
     buildActualContext
 } = require('../validators/context.adapter');
 
 const {
     validateExpectedContext
 } = require('../validators/context.validator');
+
+const {
+    createParseId,
+    buildContractMetadata,
+    buildDocumentMetadata,
+    buildProcessingMetadata,
+    resolveIsExpectedDocument
+} = require('../metadata/document.metadata');
 
 const combinadoSplitter = require(
     '../splitters/pgdas.combined.splitter'
@@ -52,6 +64,7 @@ async function processarDocumentoSimples(buffer) {
             documentType.toLowerCase();
     } else if (parser) {
         parserBlocked = true;
+
         parserName =
             parserDefinition?.parserName ||
             parser.name ||
@@ -181,15 +194,84 @@ async function adicionarPartesDecPoa(
     };
 }
 
+function adicionarMetadadosDecPoa({
+    response,
+    buffer,
+    pages,
+    parserName,
+    expected,
+    validation,
+    startedAt,
+    startedAtMs
+}) {
+    const finishedAtMs = Date.now();
+    const finishedAt =
+        new Date(finishedAtMs).toISOString();
+
+    return {
+        ...response,
+
+classification:
+    'DECLARACAO_MENSAL',
+
+confidence:
+    buildDecPoaConfidence(
+        response.data || {}
+    ),
+
+        parseId:
+            createParseId(),
+
+        contract:
+            buildContractMetadata({
+                adapter: parserName,
+                layoutVersion: '2026.1'
+            }),
+
+        document:
+            buildDocumentMetadata({
+                buffer,
+                pages
+            }),
+
+        processing:
+            buildProcessingMetadata({
+                startedAt,
+                finishedAt,
+                durationMs:
+                    finishedAtMs - startedAtMs,
+                engineVersion:
+                    ENGINE_VERSION
+            }),
+
+        isExpectedDocument:
+            resolveIsExpectedDocument({
+                expected,
+                validation
+            })
+    };
+}
+
 exports.process = async (
     buffer,
     options = {}
 ) => {
+    const startedAtMs = Date.now();
+    const startedAt =
+        new Date(startedAtMs).toISOString();
+
     const extraction = await extractor.extract(buffer);
 
-    const detection = detector.detectDetailed(extraction.text);
+    const detection = detector.detectDetailed(
+        extraction.text
+    );
+
     const documentType = detection.documentType;
 
+    /*
+     * Fluxo combinado PGDAS permanece exatamente
+     * no caminho legado, sem novos metadados.
+     */
     if (
         documentType ===
         'COMBINADO_DECLARACAO_RECIBO_PGDAS'
@@ -225,6 +307,7 @@ exports.process = async (
             documentType.toLowerCase();
     } else if (parser) {
         parserBlocked = true;
+
         parserName =
             parserDefinition?.parserName ||
             parser.name ||
@@ -232,47 +315,73 @@ exports.process = async (
     }
 
     let response = buildResponse({
-    documentType,
-    parser: parserName,
-    pages: extraction.pages,
-    data,
-    text: extraction.text,
-    detection,
-    parserDefinition,
-    parserBlocked
-});
+        documentType,
+        parser: parserName,
+        pages: extraction.pages,
+        data,
+        text: extraction.text,
+        detection,
+        parserDefinition,
+        parserBlocked
+    });
 
-/*
- * DEC POA:
- * depois do parser conhecer empresa e competência,
- * separamos fisicamente declaração, guia e recibo.
- */
-if (
-    documentType ===
-    'DEC_POA_DECLARACAO_MENSAL'
-) {
-    response = await adicionarPartesDecPoa(
-        response,
-        buffer,
-        data
-    );
-}
+    /*
+     * A partir daqui, somente DEC POA recebe
+     * as extensões do novo contrato.
+     */
+    if (
+        documentType ===
+        'DEC_POA_DECLARACAO_MENSAL'
+    ) {
+        response = await adicionarPartesDecPoa(
+            response,
+            buffer,
+            data
+        );
+    }
 
-if (!options.expected) {
+    let validation = null;
+
+    if (options.expected) {
+        const actualContext =
+            buildActualContext({
+                data
+            });
+
+        validation =
+            validateExpectedContext({
+                expected: options.expected,
+                actual: actualContext
+            });
+
+        response = {
+            ...response,
+            validation
+        };
+    }
+
+    /*
+     * Metadados novos são adicionados exclusivamente
+     * ao DEC POA.
+     *
+     * Simples Nacional e demais documentos mantêm
+     * o contrato anterior.
+     */
+    if (
+        documentType ===
+        'DEC_POA_DECLARACAO_MENSAL'
+    ) {
+        response = adicionarMetadadosDecPoa({
+            response,
+            buffer,
+            pages: extraction.pages,
+            parserName,
+            expected: options.expected || null,
+            validation,
+            startedAt,
+            startedAtMs
+        });
+    }
+
     return response;
-}
-
-const actualContext = buildActualContext({
-    data
-});
-
-const validation = validateExpectedContext({
-    expected: options.expected,
-    actual: actualContext
-});
-
-return {
-    ...response,
-    validation
-};
 };

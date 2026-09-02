@@ -288,6 +288,7 @@ function extrairFinanceiroDeclaracao(texto) {
     servicesRevenue,
     deductions,
     taxBase,
+    taxRate: null,
     issOwn,
     issWithheldSubstitution,
     issWithheldFromThirdParties,
@@ -580,10 +581,16 @@ function extrairGuia(texto) {
 function parse(texto) {
   return {
     municipality: {
-      ibgeCode: '4314902',
-      name: 'Porto Alegre',
-      uf: 'RS'
-    },
+  ibgeCode: '4314902',
+  name: 'Porto Alegre',
+  uf: 'RS',
+
+  portal: {
+    vendor: 'DEC',
+    name: 'DEC POA',
+    url: null
+  }
+},
 
     company: {
       cnpj: extrairCnpj(texto),
