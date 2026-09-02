@@ -280,10 +280,20 @@
       <div class="table-wrapper"><table><thead><tr><th>Objeto</th><th>Campos principais</th></tr></thead><tbody>
         <tr><td><code>data.company</code></td><td><code>cnpj</code>, <code>razaoSocial</code>, <code>inscricaoMunicipal</code>.</td></tr>
         <tr><td><code>data.competence</code></td><td><code>year</code>, <code>month</code>, <code>reference</code>, <code>display</code>.</td></tr>
-        <tr><td><code>data.municipality</code></td><td><code>ibgeCode</code>, <code>name</code>, <code>uf</code>.</td></tr>
-        <tr><td><code>data.financial</code></td><td>Receita, deduções, base, ISS próprio, retenções e totais.</td></tr>
+        <tr><td><code>data.municipality</code></td><td><code>ibgeCode</code>, <code>name</code>, <code>uf</code> e <code>portal</code> (<code>vendor</code>, <code>name</code>, <code>url</code>).</td></tr>
+        <tr><td><code>data.financial</code></td><td>Receita, deduções, base, <code>taxRate</code>, ISS próprio, retenções e totais. <code>taxRate</code> fica <code>null</code> quando a alíquota não estiver explicitamente presente; nunca é inferida.</td></tr>
         <tr><td><code>data.receipt</code></td><td><code>status</code>, <code>submittedAt</code>, <code>authentication</code>.</td></tr>
         <tr><td><code>data.guide</code></td><td>Dados da guia quando existente. Em declarações sem guia, pode ser <code>null</code>.</td></tr>
+      </tbody></table></div>
+
+      <h3>Contrato municipal 1.0.0</h3>
+      <p>O DEC POA adiciona metadados auditáveis sem remover ou renomear campos existentes: <code>parseId</code>, <code>contract</code>, <code>document</code>, <code>processing</code>, <code>isExpectedDocument</code>, <code>classification</code> e <code>confidence</code>.</p>
+      <div class="table-wrapper"><table><thead><tr><th>Campo</th><th>Regra</th></tr></thead><tbody>
+        <tr><td><code>contract</code></td><td><code>version=1.0.0</code>, <code>adapter=dec-poa</code>, <code>layoutVersion=2026.1</code>.</td></tr>
+        <tr><td><code>document.sha256</code></td><td>SHA-256 do PDF original, além de páginas e tamanho em bytes.</td></tr>
+        <tr><td><code>processing</code></td><td>Início, fim, duração, engine e versão real do engine.</td></tr>
+        <tr><td><code>classification</code></td><td>Atualmente <code>DECLARACAO_MENSAL</code>. Enum preparado para retificadora, sem/com movimento, guia avulsa, recibo e outros.</td></tr>
+        <tr><td><code>confidence</code></td><td>Por grupo: company, competence, financial, receipt e guide. Valor <code>1</code> indica presença dos campos mínimos objetivos; <code>null</code> indica evidência insuficiente. Não é probabilidade estatística.</td></tr>
       </tbody></table></div>
 
       <h3>Validação opcional do contexto esperado</h3>
@@ -314,12 +324,20 @@
         <tr><td><code>DECLARACAO</code></td><td>Sempre</td><td>Uma ou mais páginas da declaração mensal.</td></tr>
         <tr><td><code>GUIA</code></td><td>Quando o PDF contém guia</td><td>Guia para pagamento de ISSQN.</td></tr>
         <tr><td><code>RECIBO</code></td><td>Sempre</td><td>Recibo de entrega da declaração mensal.</td></tr>
+        <tr><td colspan="3">Roles preparados no contrato: <code>DECLARACAO</code>, <code>GUIA</code>, <code>RECIBO</code>, <code>PROTOCOLO</code>, <code>RELATORIO</code>, <code>ANEXO</code> e <code>OUTRO</code>.</td></tr>
       </tbody></table></div>
       <p>Os nomes seguem o padrão <code>RAZAO_SOCIAL__CNPJ__MM-AAAA_sufixo.pdf</code>, com sufixos <code>declaracao</code>, <code>guia</code> e <code>recibo</code>.</p>
 
       <div class="code-card"><button class="copy-button" data-copy-target="json-dec-poa">Copiar</button><pre id="json-dec-poa"><code>{
   "success": true,
   "documentType": "DEC_POA_DECLARACAO_MENSAL",
+  "classification": "DECLARACAO_MENSAL",
+  "parseId": "e495bf27-fc09-47fc-b7c3-101801946144",
+  "contract": { "version": "1.0.0", "adapter": "dec-poa", "layoutVersion": "2026.1" },
+  "document": { "sha256": "82cea2978caabcf03a391037f3600331e6f8dbf3a30eff1590d00707cb85c473", "pages": 4, "size": 21807 },
+  "processing": { "startedAt": "2026-09-02T18:49:30.000Z", "finishedAt": "2026-09-02T18:49:30.682Z", "durationMs": 682, "engine": "pes2b-document-engine", "engineVersion": "1.9.0" },
+  "isExpectedDocument": true,
+  "confidence": { "company": 1, "competence": 1, "financial": 1, "receipt": 1, "guide": 1 },
   "compound": true,
   "engine": {
     "family": "DECLARACAO_MUNICIPAL",
@@ -332,7 +350,8 @@
     "municipality": {
       "ibgeCode": "4314902",
       "name": "Porto Alegre",
-      "uf": "RS"
+      "uf": "RS",
+      "portal": { "vendor": "DEC", "name": "DEC POA", "url": null }
     },
     "company": {
       "cnpj": "12345678000190",
@@ -347,6 +366,7 @@
     },
     "financial": {
       "servicesRevenue": 20000.00,
+      "taxRate": null,
       "issOwn": 1000.00,
       "issWithheldFromThirdParties": 0.00,
       "totalTaxDue": 1000.00,
@@ -842,7 +862,7 @@ item 2: role = RECIBO     | binary.file</code></pre></div>
         <article class="feature-card"><strong>Detecção por família</strong><p>Regras ponderadas identificam o documento, registram regras encontradas e calculam confiança real.</p></article>
         <article class="feature-card"><strong>Registry central</strong><p>Cada parser declara família, versão, status, schema e confiança mínima.</p></article>
         <article class="feature-card"><strong>Parser modular</strong><p>Cada documento possui <code>index.js</code>, <code>parser.js</code>, <code>schema.js</code> e <code>rules.js</code>.</p></article>
-        <article class="feature-card"><strong>Qualidade automatizada</strong><p>Fixtures anonimizadas e testes unitários, de contrato e end-to-end protegem os formatos homologados. A homologação DEC POA foi concluída com 101 testes automatizados aprovados.</p></article>
+        <article class="feature-card"><strong>Qualidade automatizada</strong><p>Fixtures anonimizadas e testes unitários, de contrato e end-to-end protegem os formatos homologados. O contrato DEC POA 1.0.0 foi homologado em produção após 115 testes automatizados aprovados.</p></article>
         <article class="feature-card"><strong>Logs estruturados</strong><p>Eventos JSON registram requestId, documento, confiança, parser, duração e motivo de falha.</p></article>
         <article class="feature-card"><strong>Métricas operacionais</strong><p>O endpoint de diagnóstico consolida volume, taxa de sucesso, tempo médio e níveis de confiança.</p></article>
         <article class="feature-card"><strong>Validadores de contexto</strong><p>Comparam dados esperados e extraídos sem acoplar regras de negócio ao parser.</p></article>

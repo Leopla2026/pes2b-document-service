@@ -134,8 +134,27 @@
           ]
         },
         "url": "{{baseUrl}}/api/v1/pdf/extract",
-        "description": "DEC Porto Alegre: valida contexto e retorna data estruturado + documents com DECLARACAO, GUIA opcional e RECIBO em Base64."
-      }
+        "description": "Processa DEC POA com contexto esperado. O contrato municipal 1.0.0 retorna metadados aditivos (parseId, contract, document, processing, isExpectedDocument, classification e confidence), além de municipality.portal e financial.taxRate."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('DEC POA contrato 1.0.0', function () {",
+              "  const r = pm.response.json();",
+              "  pm.expect(r.documentType).to.eql('DEC_POA_DECLARACAO_MENSAL');",
+              "  pm.expect(r.contract.version).to.eql('1.0.0');",
+              "  pm.expect(r.contract.adapter).to.eql('dec-poa');",
+              "  pm.expect(r.classification).to.eql('DECLARACAO_MENSAL');",
+              "  pm.expect(r.isExpectedDocument).to.eql(true);",
+              "  pm.expect(r.data.municipality.portal.name).to.eql('DEC POA');",
+              "});"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "Processar lote",

@@ -184,7 +184,7 @@ A engine `1.10.0` utiliza:
 - logs estruturados em JSON;
 - rastreamento por `requestId`;
 - métricas operacionais em memória;
-- homologação DEC POA concluída com 101 testes automatizados aprovados.
+- contrato DEC POA 1.0.0 homologado em produção após 115 testes automatizados aprovados.
 
 ## Declarações municipais — DEC Porto Alegre
 
@@ -194,10 +194,25 @@ A API extrai:
 
 - `data.company`: CNPJ, razão social e inscrição municipal;
 - `data.competence`: ano, mês, referência `AAAA-MM` e exibição `MM/AAAA`;
-- `data.municipality`: código IBGE, nome e UF;
-- `data.financial`: receita, deduções, base, ISS próprio, retenções, imposto devido e total a recolher;
+- `data.municipality`: código IBGE, nome, UF e `portal` (`vendor`, `name`, `url`);
+- `data.financial`: receita, deduções, base, `taxRate`, ISS próprio, retenções, imposto devido e total a recolher. `taxRate` é `null` quando a alíquota não estiver explicitamente presente e nunca é inferida;
 - `data.receipt`: situação da entrega, data/hora e autenticação;
 - `data.guide`: dados da guia quando existente.
+
+
+### Contrato municipal 1.0.0
+
+O DEC POA adiciona, sem remover ou renomear campos existentes:
+
+- `parseId`: UUID único por interpretação;
+- `contract`: `version=1.0.0`, `adapter=dec-poa`, `layoutVersion=2026.1`;
+- `document`: SHA-256 do PDF original, número de páginas e tamanho em bytes;
+- `processing`: `startedAt`, `finishedAt`, `durationMs`, `engine=pes2b-document-engine` e `engineVersion=1.9.0`;
+- `isExpectedDocument`: `true` quando o contexto esperado foi enviado e validado, `false` quando diverge e `null` quando não foi enviado;
+- `classification`: atualmente `DECLARACAO_MENSAL`; enum preparado para `DECLARACAO_RETIFICADORA`, `DECLARACAO_SEM_MOVIMENTO`, `DECLARACAO_COM_MOVIMENTO`, `GUIA_AVULSA`, `RECIBO` e `OUTRO`;
+- `confidence`: `company`, `competence`, `financial`, `receipt` e `guide`. `1` significa que os campos mínimos objetivos estão presentes; `null` significa evidência insuficiente. Não é uma probabilidade estatística.
+
+Roles preparados no contrato: `DECLARACAO`, `GUIA`, `RECIBO`, `PROTOCOLO`, `RELATORIO`, `ANEXO` e `OUTRO`.
 
 ### Separação física automática
 
@@ -239,6 +254,13 @@ Quando não existe guia, o array `documents` contém somente `DECLARACAO` e `REC
 {
   "success": true,
   "documentType": "DEC_POA_DECLARACAO_MENSAL",
+  "classification": "DECLARACAO_MENSAL",
+  "parseId": "e495bf27-fc09-47fc-b7c3-101801946144",
+  "contract": { "version": "1.0.0", "adapter": "dec-poa", "layoutVersion": "2026.1" },
+  "document": { "sha256": "82cea2978caabcf03a391037f3600331e6f8dbf3a30eff1590d00707cb85c473", "pages": 4, "size": 21807 },
+  "processing": { "durationMs": 682, "engine": "pes2b-document-engine", "engineVersion": "1.9.0" },
+  "isExpectedDocument": true,
+  "confidence": { "company": 1, "competence": 1, "financial": 1, "receipt": 1, "guide": 1 },
   "compound": true,
   "engine": {
     "family": "DECLARACAO_MUNICIPAL",
@@ -251,7 +273,8 @@ Quando não existe guia, o array `documents` contém somente `DECLARACAO` e `REC
     "municipality": {
       "ibgeCode": "4314902",
       "name": "Porto Alegre",
-      "uf": "RS"
+      "uf": "RS",
+      "portal": { "vendor": "DEC", "name": "DEC POA", "url": null }
     },
     "company": {
       "cnpj": "12345678000190",
@@ -266,6 +289,7 @@ Quando não existe guia, o array `documents` contém somente `DECLARACAO` e `REC
     },
     "financial": {
       "servicesRevenue": 20000,
+      "taxRate": null,
       "issOwn": 1000,
       "issWithheldFromThirdParties": 0,
       "totalTaxDue": 1000,

@@ -822,6 +822,41 @@
               "$ref": "#/components/schemas/SplitDocument"
             },
             "description": "Partes físicas separadas. Em DEC POA: declaração, guia opcional e recibo."
+          },
+          "parseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identificador único da interpretação. Atualmente adicionado ao contrato DEC POA."
+          },
+          "contract": {
+            "$ref": "#/components/schemas/ContractMetadata"
+          },
+          "document": {
+            "$ref": "#/components/schemas/DocumentFingerprint"
+          },
+          "processing": {
+            "$ref": "#/components/schemas/ProcessingMetadata"
+          },
+          "isExpectedDocument": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "true quando expected foi enviado e validado; false em divergência; null quando não há contexto esperado."
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "DECLARACAO_MENSAL",
+              "DECLARACAO_RETIFICADORA",
+              "DECLARACAO_SEM_MOVIMENTO",
+              "DECLARACAO_COM_MOVIMENTO",
+              "GUIA_AVULSA",
+              "RECIBO",
+              "OUTRO"
+            ],
+            "description": "Classificação semântica preparada para documentos municipais. O DEC POA homologado atualmente retorna DECLARACAO_MENSAL."
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/DecPoaConfidence"
           }
         }
       },
@@ -1227,7 +1262,11 @@
             "enum": [
               "DECLARACAO",
               "GUIA",
-              "RECIBO"
+              "RECIBO",
+              "PROTOCOLO",
+              "RELATORIO",
+              "ANEXO",
+              "OUTRO"
             ],
             "example": "GUIA"
           },
@@ -1268,6 +1307,9 @@
           "uf": {
             "type": "string",
             "example": "RS"
+          },
+          "portal": {
+            "$ref": "#/components/schemas/MunicipalPortal"
           }
         }
       },
@@ -1351,6 +1393,12 @@
           "totalToCollect": {
             "type": "number",
             "example": 1000
+          },
+          "taxRate": {
+            "type": "number",
+            "nullable": true,
+            "description": "Alíquota somente quando explicitamente presente no documento. Nunca é inferida por cálculo.",
+            "example": null
           }
         }
       },
@@ -1406,6 +1454,124 @@
           "revenue": {
             "type": "number",
             "example": 20000
+          }
+        }
+      },
+      "MunicipalPortal": {
+        "type": "object",
+        "properties": {
+          "vendor": {
+            "type": "string",
+            "example": "DEC"
+          },
+          "name": {
+            "type": "string",
+            "example": "DEC POA"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          }
+        }
+      },
+      "ContractMetadata": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "example": "1.0.0"
+          },
+          "adapter": {
+            "type": "string",
+            "nullable": true,
+            "example": "dec-poa"
+          },
+          "layoutVersion": {
+            "type": "string",
+            "nullable": true,
+            "example": "2026.1"
+          }
+        }
+      },
+      "DocumentFingerprint": {
+        "type": "object",
+        "properties": {
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "pages": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Tamanho do PDF original em bytes."
+          }
+        }
+      },
+      "ProcessingMetadata": {
+        "type": "object",
+        "properties": {
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "number"
+          },
+          "engine": {
+            "type": "string",
+            "example": "pes2b-document-engine"
+          },
+          "engineVersion": {
+            "type": "string",
+            "example": "1.9.0"
+          }
+        }
+      },
+      "DecPoaConfidence": {
+        "type": "object",
+        "description": "Confiança objetiva por grupo. 1 significa que os campos mínimos definidos estão presentes; null significa que não há evidência suficiente. Não representa probabilidade estatística.",
+        "properties": {
+          "company": {
+            "type": "number",
+            "enum": [
+              1
+            ],
+            "nullable": true
+          },
+          "competence": {
+            "type": "number",
+            "enum": [
+              1
+            ],
+            "nullable": true
+          },
+          "financial": {
+            "type": "number",
+            "enum": [
+              1
+            ],
+            "nullable": true
+          },
+          "receipt": {
+            "type": "number",
+            "enum": [
+              1
+            ],
+            "nullable": true
+          },
+          "guide": {
+            "type": "number",
+            "enum": [
+              1
+            ],
+            "nullable": true
           }
         }
       }
