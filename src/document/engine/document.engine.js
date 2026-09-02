@@ -13,6 +13,10 @@ const combinadoSplitter = require(
     '../splitters/pgdas.combined.splitter'
 );
 
+const decPoaSplitter = require(
+    '../splitters/dec-poa.splitter'
+);
+
 const { buildResponse } = require('./engine.response');
 
 const ENGINE_VERSION = '1.9.0';
@@ -136,6 +140,47 @@ async function processarDocumentoCombinado(
     };
 }
 
+async function adicionarPartesDecPoa(
+    response,
+    buffer,
+    data
+) {
+    const partes = await decPoaSplitter.split(
+        buffer,
+        {
+            razaoSocial:
+                data?.company?.razaoSocial,
+
+            cnpj:
+                data?.company?.cnpj,
+
+            competence:
+                data?.competence
+        }
+    );
+
+    const documents = partes.map(parte => ({
+        role: parte.role,
+        suggestedSuffix: parte.suggestedSuffix,
+        fileName: parte.fileName,
+        pages: parte.pages,
+
+        file: {
+            fileName: parte.fileName,
+            mimeType: 'application/pdf',
+            extension: 'pdf',
+            size: parte.buffer.length,
+            base64: parte.buffer.toString('base64')
+        }
+    }));
+
+    return {
+        ...response,
+        compound: documents.length > 1,
+        documents
+    };
+}
+
 exports.process = async (
     buffer,
     options = {}
@@ -186,7 +231,7 @@ exports.process = async (
             documentType.toLowerCase();
     }
 
-    const response = buildResponse({
+    let response = buildResponse({
     documentType,
     parser: parserName,
     pages: extraction.pages,
@@ -196,6 +241,22 @@ exports.process = async (
     parserDefinition,
     parserBlocked
 });
+
+/*
+ * DEC POA:
+ * depois do parser conhecer empresa e competência,
+ * separamos fisicamente declaração, guia e recibo.
+ */
+if (
+    documentType ===
+    'DEC_POA_DECLARACAO_MENSAL'
+) {
+    response = await adicionarPartesDecPoa(
+        response,
+        buffer,
+        data
+    );
+}
 
 if (!options.expected) {
     return response;

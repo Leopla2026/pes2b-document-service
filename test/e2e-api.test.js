@@ -315,3 +315,94 @@ test('E2E: DEC POA valida contexto esperado via multipart', async () => {
     );
   });
 });
+
+test('E2E: DEC POA retorna PDFs separados com nomes padronizados', async () => {
+  await withServer(async baseUrl => {
+    const fixture = path.join(
+      __dirname,
+      'fixtures',
+      'municipal',
+      'dec-poa',
+      'declaracao-di-lorenzo.pdf'
+    );
+
+    const buffer = fs.readFileSync(fixture);
+
+    const form = new FormData();
+
+    form.append(
+      'file',
+      new Blob(
+        [buffer],
+        { type: 'application/pdf' }
+      ),
+      'declaracao-di-lorenzo.pdf'
+    );
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/pdf/extract`,
+      {
+        method: 'POST',
+        headers: {
+          'X-API-Key': API_KEY
+        },
+        body: form
+      }
+    );
+
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.success, true);
+
+    assert.equal(
+      body.documentType,
+      'DEC_POA_DECLARACAO_MENSAL'
+    );
+
+    assert.equal(
+      body.compound,
+      true
+    );
+
+    assert.equal(
+      body.documents.length,
+      3
+    );
+
+    assert.deepEqual(
+      body.documents.map(documento => ({
+        role: documento.role,
+        fileName: documento.fileName
+      })),
+      [
+        {
+          role: 'DECLARACAO',
+          fileName:
+            'INCORPORADORA_DI_LORENZO_APPEL_SPE_LTDA__49305799000113__07-2026_declaracao.pdf'
+        },
+        {
+          role: 'GUIA',
+          fileName:
+            'INCORPORADORA_DI_LORENZO_APPEL_SPE_LTDA__49305799000113__07-2026_guia.pdf'
+        },
+        {
+          role: 'RECIBO',
+          fileName:
+            'INCORPORADORA_DI_LORENZO_APPEL_SPE_LTDA__49305799000113__07-2026_recibo.pdf'
+        }
+      ]
+    );
+
+    for (const documento of body.documents) {
+      assert.equal(
+        documento.file.mimeType,
+        'application/pdf'
+      );
+
+      assert.ok(
+        documento.file.base64.length > 0
+      );
+    }
+  });
+});
