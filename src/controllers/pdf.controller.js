@@ -2,6 +2,11 @@ const engine = require('../document/engine/document.engine');
 const { errorResponse } = require('../utils/api.response');
 const logger = require('../utils/logger');
 const metrics = require('../metrics/operational-metrics');
+const {
+    buildExpectedContext
+} = require(
+    '../document/validators/expected-context.builder'
+);
 
 function buildLogDetails(req, file, result, durationMs) {
     return {
@@ -45,7 +50,17 @@ exports.extract = async (req, res, next) => {
         }
 
         const startedAt = process.hrtime.bigint();
-        const result = await engine.process(req.file.buffer);
+
+const expected = buildExpectedContext(
+    req.body || {}
+);
+
+const result = await engine.process(
+    req.file.buffer,
+    expected
+        ? { expected }
+        : {}
+);
         const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
 
         metrics.recordDocument(result, durationMs);

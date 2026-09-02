@@ -227,3 +227,91 @@ test('E2E: DEC POA percorre HTTP, detecção e parser municipal', async () => {
     );
   });
 });
+
+test('E2E: DEC POA valida contexto esperado via multipart', async () => {
+  await withServer(async baseUrl => {
+    const fixture = path.join(
+      __dirname,
+      'fixtures',
+      'municipal',
+      'dec-poa',
+      'declaracao-di-lorenzo.pdf'
+    );
+
+    const buffer = fs.readFileSync(fixture);
+
+    const form = new FormData();
+
+    form.append(
+      'file',
+      new Blob(
+        [buffer],
+        { type: 'application/pdf' }
+      ),
+      'declaracao-di-lorenzo.pdf'
+    );
+
+    form.append(
+      'expectedCnpj',
+      '49.305.799/0001-13'
+    );
+
+    form.append(
+      'expectedCompetence',
+      '2026-07'
+    );
+
+    form.append(
+      'expectedMunicipalityIbge',
+      '4314902'
+    );
+
+    form.append(
+      'expectedUf',
+      'RS'
+    );
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/pdf/extract`,
+      {
+        method: 'POST',
+        headers: {
+  'X-API-Key': API_KEY,
+},
+        body: form,
+      }
+    );
+
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.success, true);
+
+    assert.deepStrictEqual(
+      body.validation,
+      {
+        valid: true,
+        mismatches: [],
+      }
+    );
+
+    assert.equal(
+      body.data.company.cnpj,
+      '49305799000113'
+    );
+
+    assert.equal(
+      body.data.competence.reference,
+      '2026-07'
+    );
+
+    assert.deepStrictEqual(
+      body.data.municipality,
+      {
+        ibgeCode: '4314902',
+        name: 'Porto Alegre',
+        uf: 'RS',
+      }
+    );
+  });
+});

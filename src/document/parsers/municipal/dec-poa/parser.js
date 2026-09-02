@@ -579,6 +579,12 @@ function extrairGuia(texto) {
 
 function parse(texto) {
   return {
+    municipality: {
+      ibgeCode: '4314902',
+      name: 'Porto Alegre',
+      uf: 'RS'
+    },
+
     company: {
       cnpj: extrairCnpj(texto),
       razaoSocial: extrairRazaoSocial(texto),

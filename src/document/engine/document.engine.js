@@ -1,6 +1,13 @@
 const detector = require('../detectors/document.detector');
 const registry = require('../parsers/registry');
 const extractor = require('../extractors/pdf.extractor');
+const {
+    buildActualContext
+} = require('../validators/context.adapter');
+
+const {
+    validateExpectedContext
+} = require('../validators/context.validator');
 
 const combinadoSplitter = require(
     '../splitters/pgdas.combined.splitter'
@@ -129,7 +136,10 @@ async function processarDocumentoCombinado(
     };
 }
 
-exports.process = async (buffer) => {
+exports.process = async (
+    buffer,
+    options = {}
+) => {
     const extraction = await extractor.extract(buffer);
 
     const detection = detector.detectDetailed(extraction.text);
@@ -176,14 +186,32 @@ exports.process = async (buffer) => {
             documentType.toLowerCase();
     }
 
-    return buildResponse({
-        documentType,
-        parser: parserName,
-        pages: extraction.pages,
-        data,
-        text: extraction.text,
-        detection,
-        parserDefinition,
-        parserBlocked
-    });
+    const response = buildResponse({
+    documentType,
+    parser: parserName,
+    pages: extraction.pages,
+    data,
+    text: extraction.text,
+    detection,
+    parserDefinition,
+    parserBlocked
+});
+
+if (!options.expected) {
+    return response;
+}
+
+const actualContext = buildActualContext({
+    data
+});
+
+const validation = validateExpectedContext({
+    expected: options.expected,
+    actual: actualContext
+});
+
+return {
+    ...response,
+    validation
+};
 };
