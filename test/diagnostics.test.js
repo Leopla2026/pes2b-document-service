@@ -120,7 +120,7 @@ test('endpoint de diagnóstico reflete documento processado', async () => {
     assert.equal(body.data.failedDocuments, 0);
     assert.equal(body.data.byDocumentType.DAS, 1);
     assert.ok(body.data.averageProcessingMs >= 0);
-    assert.equal(body.data.parsers.active, 6);
+    assert.equal(body.data.parsers.active, 7);
     assert.ok(body.requestId);
     assert.equal(body.warnings.length, 1);
   });

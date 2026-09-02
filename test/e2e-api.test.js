@@ -148,7 +148,7 @@ test('E2E: ausência de arquivo mantém erro HTTP compatível com o n8n', async 
   });
 });
 
-test('E2E: DEC POA percorre HTTP e é reconhecido sem parser municipal', async () => {
+test('E2E: DEC POA percorre HTTP, detecção e parser municipal', async () => {
   await withServer(async baseUrl => {
     const response = await postPdf(
       baseUrl,
@@ -182,12 +182,12 @@ test('E2E: DEC POA percorre HTTP e é reconhecido sem parser municipal', async (
 
     assert.equal(
       body.engine.parser,
-      'none'
+      'dec-poa'
     );
 
     assert.equal(
       body.engine.parserExecuted,
-      false
+      true
     );
 
     assert.equal(
@@ -196,8 +196,22 @@ test('E2E: DEC POA percorre HTTP e é reconhecido sem parser municipal', async (
     );
 
     assert.deepEqual(
-      body.data,
-      {}
+      body.data.company,
+      {
+        cnpj: '14572545000187',
+        razaoSocial: '4 LEDS COMPONENTES ELÉTRICOS LTDA.',
+        inscricaoMunicipal: '256657-2-3'
+      }
+    );
+
+    assert.deepEqual(
+      body.data.competence,
+      {
+        year: 2026,
+        month: 7,
+        reference: '2026-07',
+        display: '07/2026'
+      }
     );
 
     assert.deepEqual(

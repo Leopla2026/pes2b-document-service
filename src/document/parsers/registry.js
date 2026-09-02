@@ -1,8 +1,8 @@
 const path = require('path');
 
-function loadParser(folderName, parserName) {
+function loadParser(folderName, parserName, familyFolder = 'simples') {
   const parserModule = require(
-    path.join(__dirname, 'simples', folderName)
+    path.join(__dirname, familyFolder, folderName)
   );
 
   const rules = parserModule.rules || {};
@@ -28,13 +28,36 @@ function loadParser(folderName, parserName) {
 
 const definitions = Object.freeze({
   DAS: loadParser('das', 'das'),
-  RECIBO_PGDAS: loadParser('recibo', 'recibo-pgdas'),
-  DECLARACAO_PGDAS: loadParser('declaracao', 'declaracao-pgdas'),
-  EXTRATO_PGDAS: loadParser('extrato', 'extrato-pgdas'),
-  RELATORIO_SIMPLES: loadParser('relatorio', 'relatorio-simples'),
+
+  RECIBO_PGDAS: loadParser(
+    'recibo',
+    'recibo-pgdas'
+  ),
+
+  DECLARACAO_PGDAS: loadParser(
+    'declaracao',
+    'declaracao-pgdas'
+  ),
+
+  EXTRATO_PGDAS: loadParser(
+    'extrato',
+    'extrato-pgdas'
+  ),
+
+  RELATORIO_SIMPLES: loadParser(
+    'relatorio',
+    'relatorio-simples'
+  ),
+
   DECLARACAO_FATURAMENTO: loadParser(
     'declaracao-faturamento',
     'declaracao-faturamento'
+  ),
+
+  DEC_POA_DECLARACAO_MENSAL: loadParser(
+    'dec-poa',
+    'dec-poa',
+    'municipal'
   )
 });
 
