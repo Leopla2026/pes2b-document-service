@@ -13,6 +13,91 @@ function normalizarCnpj(valor) {
     : null;
 }
 
+function numeroBr(valor) {
+  if (valor === null || valor === undefined) {
+    return null;
+  }
+
+  const texto = String(valor)
+    .trim()
+    .replace(/\./g, '')
+    .replace(',', '.');
+
+  const numero = Number(texto);
+
+  return Number.isFinite(numero)
+    ? numero
+    : null;
+}
+
+function somarValores(valores) {
+  const validos = valores.filter(
+    valor => valor !== null
+  );
+
+  if (validos.length === 0) {
+    return null;
+  }
+
+  return Number(
+    validos.reduce(
+      (total, valor) => total + valor,
+      0
+    ).toFixed(2)
+  );
+}
+
+function extrairTodosValores(texto, regex) {
+  const valores = [];
+
+  for (const match of String(texto || '').matchAll(regex)) {
+    const valor = numeroBr(match[1]);
+
+    if (valor !== null) {
+      valores.push(valor);
+    }
+  }
+
+  return valores;
+}
+
+function extrairUltimoValor(texto, regex) {
+  const valores = extrairTodosValores(
+    texto,
+    regex
+  );
+
+  if (valores.length === 0) {
+    return null;
+  }
+
+  return valores[valores.length - 1];
+}
+
+function extrairBlocoDeclaracao(texto) {
+  const conteudo = String(texto || '');
+
+  const marcadoresFim = [
+    /GUIA PARA PAGAMENTO DE ISSQN/i,
+    /RECIBO DE ENTREGA\s*-\s*DECLARA[CÇ][AÃ]O MENSAL/i
+  ];
+
+  let fim = conteudo.length;
+
+  for (const marcador of marcadoresFim) {
+    const indice = conteudo.search(marcador);
+
+    if (
+      indice >= 0 &&
+      indice < fim
+    ) {
+      fim = indice;
+    }
+  }
+
+  return conteudo.slice(0, fim);
+}
+
 function extrairCnpj(texto) {
   const match = String(texto || '').match(
     /\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/
@@ -50,17 +135,6 @@ function extrairRazaoSocial(texto) {
     return null;
   }
 
-  /*
-   * Trabalhamos somente com o trecho anterior à primeira
-   * ocorrência de "Prefeitura de Porto Alegre".
-   *
-   * No PDF extraído pela biblioteca, a inscrição municipal
-   * pode ficar colada ao início da razão social, por exemplo:
-   *
-   * 256657-2-34 LEDS COMPONENTES ELÉTRICOS LTDA.
-   *
-   * Por isso não exigimos espaço depois da inscrição.
-   */
   const blocoIdentificacao = conteudo.slice(
     0,
     indicePrefeitura
@@ -111,8 +185,8 @@ function extrairCompetencia(texto) {
   const conteudo = String(texto || '');
 
   const match = conteudo.match(
-  /Declara[cç][aã]o Mensal\s*-\s*ISSQN\s*([A-Za-zÀ-ÿ]{3})\/(\d{4})/i
-);
+    /Declara[cç][aã]o Mensal\s*-\s*ISSQN\s*([A-Za-zÀ-ÿ]{3})\/(\d{4})/i
+  );
 
   if (!match) {
     return null;
@@ -132,7 +206,374 @@ function extrairCompetencia(texto) {
     year,
     month,
     reference,
-    display: `${String(month).padStart(2, '0')}/${year}`
+    display:
+      `${String(month).padStart(2, '0')}/${year}`
+  };
+}
+
+function extrairFinanceiroDeclaracao(texto) {
+  const declaracao = extrairBlocoDeclaracao(
+    texto
+  );
+
+  const servicesRevenue = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Base de C[aá]lculo\s+Receita Bruta\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const deductions = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Dedu[cç][oõ]es Legais\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const taxBase = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Base de c[aá]lculo\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const issOwn = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Imposto de Responsabilidade Pr[oó]pria Total\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const issWithheldSubstitution = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Imposto retido por Substitui[cç][aã]o tribut[aá]ria\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const issWithheldFromThirdParties = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Imposto retido de contribuinte substitu[ií]do\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const issSolidaryResponsibility = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Imposto retido por Responsabilidade Solid[aá]ria\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const issCpom = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Imposto retido por falta de inscri[cç][aã]o no CPOM\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const totalTaxDue = somarValores(
+    extrairTodosValores(
+      declaracao,
+      /Total do imposto devido\s*(-?[\d.]+,\d{2})/gi
+    )
+  );
+
+  const totalToCollect = extrairUltimoValor(
+    declaracao,
+    /Total Geral A Recolher\s*(-?[\d.]+,\d{2})/gi
+  );
+
+  return {
+    servicesRevenue,
+    deductions,
+    taxBase,
+    issOwn,
+    issWithheldSubstitution,
+    issWithheldFromThirdParties,
+    issSolidaryResponsibility,
+    issCpom,
+    totalTaxDue,
+    totalToCollect
+  };
+}
+
+function extrairBlocoRecibo(texto) {
+  const conteudo = String(texto || '');
+
+  const match = conteudo.match(
+    /RECIBO DE ENTREGA\s*-\s*DECLARA[CÇ][AÃ]O MENSAL([\s\S]*)$/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return match[0];
+}
+
+function extrairSubmittedAtRecibo(texto) {
+  const bloco = extrairBlocoRecibo(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /(\d{2})\/(\d{2})\/(\d{4})\s+[àa]s\s+(\d{2}):(\d{2}):(\d{2})/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const [, dia, mes, ano, hora, minuto, segundo] = match;
+
+  return (
+    `${ano}-${mes}-${dia}` +
+    `T${hora}:${minuto}:${segundo}-03:00`
+  );
+}
+
+function extrairAutenticacaoRecibo(texto) {
+  const bloco = extrairBlocoRecibo(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /AUTENTICA[CÇ][AÃ]O\s+((?:[0-9A-F]{2}\s+){15}[0-9A-F]{2})/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return normalizarEspacos(
+    match[1].toUpperCase()
+  );
+}
+
+function extrairRecibo(texto) {
+  const bloco = extrairBlocoRecibo(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const recebido = /DECLARA[CÇ][AÃ]O RECEBIDA EM/i.test(
+    bloco
+  );
+
+  return {
+    status: recebido
+      ? 'ENTREGUE'
+      : null,
+
+    submittedAt:
+      extrairSubmittedAtRecibo(texto),
+
+    authentication:
+      extrairAutenticacaoRecibo(texto)
+  };
+}
+
+function extrairBlocoGuia(texto) {
+  const conteudo = String(texto || '');
+
+  const inicio = conteudo.search(
+    /GUIA PARA PAGAMENTO DE ISSQN/i
+  );
+
+  if (inicio < 0) {
+    return null;
+  }
+
+  const trecho = conteudo.slice(inicio);
+
+  const fim = trecho.search(
+    /RECIBO DE ENTREGA\s*-\s*DECLARA[CÇ][AÃ]O MENSAL/i
+  );
+
+  if (fim >= 0) {
+    return trecho.slice(0, fim);
+  }
+
+  return trecho;
+}
+
+function extrairCodigoArrecadacaoGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  /*
+   * No texto extraído pelo pdf-parse, o código de arrecadação
+   * pode ficar colado à inscrição municipal.
+   *
+   * Exemplo:
+   * 328300332127217332127-2-4
+   *
+   * Por isso usamos como âncora o trecho "DOSEQ", que aparece
+   * imediatamente antes da primeira ocorrência do código.
+   */
+  const match = bloco.match(
+    /DOSEQ\s*(3283\d{11})/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return match[1];
+}
+
+function extrairVencimentoGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /At[eé]\s+(\d{2})\/(\d{2})\/(\d{4})/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const [, dia, mes, ano] = match;
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function extrairGeracaoGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /ISSQN-e\s+(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const [, dia, mes, ano, hora, minuto] = match;
+
+  return (
+    `${ano}-${mes}-${dia}` +
+    `T${hora}:${minuto}:00-03:00`
+  );
+}
+
+function extrairCodigoBarrasGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /\b(\d{12})\s+(\d{12})\s+(\d{12})\s+(\d{12})\b/
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return [
+    match[1],
+    match[2],
+    match[3],
+    match[4]
+  ].join(' ');
+}
+
+function extrairValorImpostoGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /IMPOSTO:\s*R\$\s*(-?[\d.]+,\d{2})/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return numeroBr(match[1]);
+}
+
+function extrairValorPagarGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /N[AÃ]O RECEBER ESTA GUIA AP[OÓ]S\s+\d{2}\/\d{2}\/\d{4}\s+Declara[cç][aã]o Mensal\s+[A-Za-zÀ-ÿ]{3}\/\d{4}\s+R\$\s*([\d.]+,\d{2})/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return numeroBr(match[1]);
+}
+
+function extrairReceitaBrutaGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  const match = bloco.match(
+    /IMPORTANTE\s+R\$\s*([\d.]+,\d{2})\s*R\$/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return numeroBr(match[1]);
+}
+
+function extrairGuia(texto) {
+  const bloco = extrairBlocoGuia(texto);
+
+  if (!bloco) {
+    return null;
+  }
+
+  return {
+    present: true,
+    collectionCode:
+      extrairCodigoArrecadacaoGuia(texto),
+    dueDate:
+      extrairVencimentoGuia(texto),
+    generatedAt:
+      extrairGeracaoGuia(texto),
+    barcode:
+      extrairCodigoBarrasGuia(texto),
+    taxAmount:
+      extrairValorImpostoGuia(texto),
+    amountToPay:
+      extrairValorPagarGuia(texto),
+    revenue:
+      extrairReceitaBrutaGuia(texto)
   };
 }
 
@@ -141,9 +582,21 @@ function parse(texto) {
     company: {
       cnpj: extrairCnpj(texto),
       razaoSocial: extrairRazaoSocial(texto),
-      inscricaoMunicipal: extrairInscricaoMunicipal(texto)
+      inscricaoMunicipal:
+        extrairInscricaoMunicipal(texto)
     },
-    competence: extrairCompetencia(texto)
+
+    competence:
+      extrairCompetencia(texto),
+
+    financial:
+      extrairFinanceiroDeclaracao(texto),
+
+    receipt:
+      extrairRecibo(texto),
+
+    guide:
+      extrairGuia(texto)
   };
 }
 
@@ -152,5 +605,20 @@ module.exports = {
   extrairCnpj,
   extrairRazaoSocial,
   extrairInscricaoMunicipal,
-  extrairCompetencia
+  extrairCompetencia,
+  extrairBlocoDeclaracao,
+  extrairFinanceiroDeclaracao,
+  extrairBlocoRecibo,
+  extrairSubmittedAtRecibo,
+  extrairAutenticacaoRecibo,
+  extrairRecibo,
+  extrairBlocoGuia,
+  extrairCodigoArrecadacaoGuia,
+  extrairVencimentoGuia,
+  extrairGeracaoGuia,
+  extrairCodigoBarrasGuia,
+  extrairValorImpostoGuia,
+  extrairValorPagarGuia,
+  extrairReceitaBrutaGuia,
+  extrairGuia
 };
