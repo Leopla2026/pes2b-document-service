@@ -61,10 +61,80 @@
               "key": "file",
               "type": "file",
               "src": []
+            },
+            {
+              "key": "expectedCnpj",
+              "type": "text",
+              "value": "",
+              "description": "Opcional. CNPJ esperado."
+            },
+            {
+              "key": "expectedCompetence",
+              "type": "text",
+              "value": "",
+              "description": "Opcional. AAAA-MM ou MM/AAAA."
+            },
+            {
+              "key": "expectedMunicipalityIbge",
+              "type": "text",
+              "value": "",
+              "description": "Opcional. Código IBGE esperado."
+            },
+            {
+              "key": "expectedUf",
+              "type": "text",
+              "value": "",
+              "description": "Opcional. UF esperada."
             }
           ]
         },
-        "url": "{{baseUrl}}/api/v1/pdf/extract"
+        "url": "{{baseUrl}}/api/v1/pdf/extract",
+        "description": "Processa um PDF. Os campos expected* são opcionais e habilitam validação de contexto."
+      }
+    },
+    {
+      "name": "Processar DEC POA com validação",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "expectedCnpj",
+              "type": "text",
+              "value": "12.345.678/0001-90"
+            },
+            {
+              "key": "expectedCompetence",
+              "type": "text",
+              "value": "2026-07"
+            },
+            {
+              "key": "expectedMunicipalityIbge",
+              "type": "text",
+              "value": "4314902"
+            },
+            {
+              "key": "expectedUf",
+              "type": "text",
+              "value": "RS"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/api/v1/pdf/extract",
+        "description": "DEC Porto Alegre: valida contexto e retorna data estruturado + documents com DECLARACAO, GUIA opcional e RECIBO em Base64."
       }
     },
     {

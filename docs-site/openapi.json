@@ -94,6 +94,26 @@
                     "type": "string",
                     "format": "binary",
                     "description": "Arquivo PDF a ser processado"
+                  },
+                  "expectedCnpj": {
+                    "type": "string",
+                    "description": "CNPJ esperado. Opcional; quando informado, é comparado ao CNPJ extraído.",
+                    "example": "12.345.678/0001-90"
+                  },
+                  "expectedCompetence": {
+                    "type": "string",
+                    "description": "Competência esperada em AAAA-MM ou MM/AAAA.",
+                    "example": "2026-07"
+                  },
+                  "expectedMunicipalityIbge": {
+                    "type": "string",
+                    "description": "Código IBGE esperado do município.",
+                    "example": "4314902"
+                  },
+                  "expectedUf": {
+                    "type": "string",
+                    "description": "UF esperada com duas letras.",
+                    "example": "RS"
                   }
                 }
               }
@@ -132,6 +152,106 @@
                       "warnings": [],
                       "errors": [],
                       "requestId": "00000000-0000-4000-8000-000000000001"
+                    }
+                  },
+                  "decPoa": {
+                    "summary": "DEC Porto Alegre com contexto e PDFs separados",
+                    "value": {
+                      "success": true,
+                      "documentType": "DEC_POA_DECLARACAO_MENSAL",
+                      "compound": true,
+                      "engine": {
+                        "family": "DECLARACAO_MUNICIPAL",
+                        "parser": "dec-poa",
+                        "confidence": 1,
+                        "confidenceLevel": "HIGH",
+                        "parserExecuted": true
+                      },
+                      "data": {
+                        "municipality": {
+                          "ibgeCode": "4314902",
+                          "name": "Porto Alegre",
+                          "uf": "RS"
+                        },
+                        "company": {
+                          "cnpj": "12345678000190",
+                          "razaoSocial": "EMPRESA EXEMPLO PORTO ALEGRE LTDA.",
+                          "inscricaoMunicipal": "123456-7-8"
+                        },
+                        "competence": {
+                          "year": 2026,
+                          "month": 7,
+                          "reference": "2026-07",
+                          "display": "07/2026"
+                        },
+                        "financial": {
+                          "servicesRevenue": 20000,
+                          "totalTaxDue": 1000,
+                          "totalToCollect": 1000
+                        },
+                        "receipt": {
+                          "status": "ENTREGUE",
+                          "submittedAt": "2026-08-04T19:19:45-03:00",
+                          "authentication": "AA BB CC DD EE FF 00 11 22 33 44 55 66 77 88 99"
+                        },
+                        "guide": {
+                          "present": true,
+                          "dueDate": "2026-09-30",
+                          "amountToPay": 1110
+                        }
+                      },
+                      "validation": {
+                        "valid": true,
+                        "mismatches": []
+                      },
+                      "documents": [
+                        {
+                          "role": "DECLARACAO",
+                          "suggestedSuffix": "declaracao",
+                          "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_declaracao.pdf",
+                          "pages": [
+                            1,
+                            2
+                          ],
+                          "file": {
+                            "mimeType": "application/pdf",
+                            "extension": "pdf",
+                            "size": 4200,
+                            "base64": "JVBERi0xLjcKLi4u"
+                          }
+                        },
+                        {
+                          "role": "GUIA",
+                          "suggestedSuffix": "guia",
+                          "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_guia.pdf",
+                          "pages": [
+                            3
+                          ],
+                          "file": {
+                            "mimeType": "application/pdf",
+                            "extension": "pdf",
+                            "size": 13000,
+                            "base64": "JVBERi0xLjcKLi4u"
+                          }
+                        },
+                        {
+                          "role": "RECIBO",
+                          "suggestedSuffix": "recibo",
+                          "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_recibo.pdf",
+                          "pages": [
+                            4
+                          ],
+                          "file": {
+                            "mimeType": "application/pdf",
+                            "extension": "pdf",
+                            "size": 5300,
+                            "base64": "JVBERi0xLjcKLi4u"
+                          }
+                        }
+                      ],
+                      "warnings": [],
+                      "errors": [],
+                      "requestId": "00000000-0000-4000-8000-000000000101"
                     }
                   }
                 }
@@ -310,8 +430,8 @@
                     "rejectedUploads": 0,
                     "averageProcessingMs": 0,
                     "parsers": {
-                      "total": 6,
-                      "active": 6,
+                      "total": 7,
+                      "active": 7,
                       "inactive": 0
                     },
                     "byDocumentType": {},
@@ -595,6 +715,29 @@
             "items": {
               "$ref": "#/components/schemas/SimplesAnnexConsolidation"
             }
+          },
+          "municipality": {
+            "$ref": "#/components/schemas/MunicipalityContext"
+          },
+          "company": {
+            "$ref": "#/components/schemas/DecPoaCompany"
+          },
+          "competence": {
+            "$ref": "#/components/schemas/CompetenceContext"
+          },
+          "financial": {
+            "$ref": "#/components/schemas/DecPoaFinancial"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/DecPoaReceipt"
+          },
+          "guide": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DecPoaGuide"
+              }
+            ],
+            "nullable": true
           }
         },
         "additionalProperties": true
@@ -639,6 +782,7 @@
               "RELATORIO_SIMPLES",
               "DECLARACAO_FATURAMENTO",
               "COMBINADO_DECLARACAO_RECIBO_PGDAS",
+              "DEC_POA_DECLARACAO_MENSAL",
               "NAO_IDENTIFICADO"
             ]
           },
@@ -663,6 +807,21 @@
           },
           "engine": {
             "$ref": "#/components/schemas/EngineMetadata"
+          },
+          "compound": {
+            "type": "boolean",
+            "description": "Indica que o documento originou múltiplas partes físicas.",
+            "example": true
+          },
+          "validation": {
+            "$ref": "#/components/schemas/ContextValidation"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SplitDocument"
+            },
+            "description": "Partes físicas separadas. Em DEC POA: declaração, guia opcional e recibo."
           }
         }
       },
@@ -992,6 +1151,261 @@
             "example": [
               "As métricas são mantidas em memória e reiniciadas quando o serviço é reiniciado."
             ]
+          }
+        }
+      },
+      "ContextMismatch": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "cnpj"
+          },
+          "expected": {
+            "type": "string",
+            "nullable": true,
+            "example": "12345678000190"
+          },
+          "actual": {
+            "type": "string",
+            "nullable": true,
+            "example": "98765432000110"
+          },
+          "code": {
+            "type": "string",
+            "example": "CNPJ_MISMATCH"
+          }
+        }
+      },
+      "ContextValidation": {
+        "type": "object",
+        "description": "Presente quando ao menos um campo expected* é enviado.",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "example": true
+          },
+          "mismatches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextMismatch"
+            }
+          }
+        }
+      },
+      "SplitFile": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mimeType": {
+            "type": "string",
+            "example": "application/pdf"
+          },
+          "extension": {
+            "type": "string",
+            "example": "pdf"
+          },
+          "size": {
+            "type": "integer",
+            "example": 5300
+          },
+          "base64": {
+            "type": "string",
+            "description": "Conteúdo do PDF em Base64.",
+            "example": "JVBERi0xLjcKLi4u"
+          }
+        }
+      },
+      "SplitDocument": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "DECLARACAO",
+              "GUIA",
+              "RECIBO"
+            ],
+            "example": "GUIA"
+          },
+          "suggestedSuffix": {
+            "type": "string",
+            "example": "guia"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true,
+            "example": "EMPRESA_EXEMPLO_LTDA__12345678000190__07-2026_guia.pdf"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [
+              3
+            ]
+          },
+          "file": {
+            "$ref": "#/components/schemas/SplitFile"
+          }
+        }
+      },
+      "MunicipalityContext": {
+        "type": "object",
+        "properties": {
+          "ibgeCode": {
+            "type": "string",
+            "example": "4314902"
+          },
+          "name": {
+            "type": "string",
+            "example": "Porto Alegre"
+          },
+          "uf": {
+            "type": "string",
+            "example": "RS"
+          }
+        }
+      },
+      "DecPoaCompany": {
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "example": "12345678000190"
+          },
+          "razaoSocial": {
+            "type": "string",
+            "example": "EMPRESA EXEMPLO PORTO ALEGRE LTDA."
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "example": "123456-7-8"
+          }
+        }
+      },
+      "CompetenceContext": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "example": 2026
+          },
+          "month": {
+            "type": "integer",
+            "example": 7
+          },
+          "reference": {
+            "type": "string",
+            "example": "2026-07"
+          },
+          "display": {
+            "type": "string",
+            "example": "07/2026"
+          }
+        }
+      },
+      "DecPoaFinancial": {
+        "type": "object",
+        "properties": {
+          "servicesRevenue": {
+            "type": "number",
+            "example": 20000
+          },
+          "deductions": {
+            "type": "number",
+            "example": 0
+          },
+          "taxBase": {
+            "type": "number",
+            "example": 20000
+          },
+          "issOwn": {
+            "type": "number",
+            "example": 1000
+          },
+          "issWithheldSubstitution": {
+            "type": "number",
+            "example": 0
+          },
+          "issWithheldFromThirdParties": {
+            "type": "number",
+            "example": 0
+          },
+          "issSolidaryResponsibility": {
+            "type": "number",
+            "example": 0
+          },
+          "issCpom": {
+            "type": "number",
+            "example": 0
+          },
+          "totalTaxDue": {
+            "type": "number",
+            "example": 1000
+          },
+          "totalToCollect": {
+            "type": "number",
+            "example": 1000
+          }
+        }
+      },
+      "DecPoaReceipt": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ENTREGUE"
+          },
+          "submittedAt": {
+            "type": "string",
+            "example": "2026-08-04T19:19:45-03:00"
+          },
+          "authentication": {
+            "type": "string",
+            "example": "AA BB CC DD EE FF 00 11 22 33 44 55 66 77 88 99"
+          }
+        }
+      },
+      "DecPoaGuide": {
+        "type": "object",
+        "properties": {
+          "present": {
+            "type": "boolean",
+            "example": true
+          },
+          "collectionCode": {
+            "type": "string",
+            "example": "328300123456789"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-09-30"
+          },
+          "generatedAt": {
+            "type": "string",
+            "example": "2026-09-02T11:10:00-03:00"
+          },
+          "barcode": {
+            "type": "string",
+            "example": "816700000119 315934332026 609300430327 830012345678"
+          },
+          "taxAmount": {
+            "type": "number",
+            "example": 1000
+          },
+          "amountToPay": {
+            "type": "number",
+            "example": 1110
+          },
+          "revenue": {
+            "type": "number",
+            "example": 20000
           }
         }
       }

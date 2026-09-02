@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Documentação oficial da PES2B Document API">
   <title>PES2B Document API — Developer Portal</title>
-  <link rel="stylesheet" href="/styles.css?v=3.2.0">
+  <link rel="stylesheet" href="/styles.css?v=3.3.0">
 </head>
 <body>
 <header class="topbar">
@@ -21,6 +21,7 @@
     <a href="#getting-started">Primeiros passos</a>
     <a href="#extract">Extração</a>
     <a href="#simples">Simples Nacional</a>
+    <a href="#municipal">Declarações municipais</a>
     <a href="#new-document">Novo parser</a>
     <a href="#downloads">Downloads</a>
     <a class="button button-secondary topbar-button" href="/swagger/" target="_blank" rel="noopener noreferrer">Abrir Swagger</a>
@@ -42,6 +43,7 @@
     <a href="#request">Requisição</a>
     <a href="#response">Resposta</a>
     <a href="#simples">Simples Nacional</a>
+    <a href="#municipal">Declarações municipais / DEC POA</a>
     <a href="#documents">Documentos reconhecidos</a>
     <a href="#examples-by-type">Exemplos por documento</a>
     <a href="#new-document">Incluir novo documento</a>
@@ -149,7 +151,7 @@
     "unknownDocuments": 0,
     "rejectedUploads": 0,
     "averageProcessingMs": 0,
-    "parsers": { "total": 6, "active": 6, "inactive": 0 },
+    "parsers": { "total": 7, "active": 7, "inactive": 0 },
     "byDocumentType": {},
     "byConfidenceLevel": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 }
   },
@@ -164,8 +166,8 @@
     <section id="extract">
       <span class="eyebrow">ENDPOINT PRINCIPAL</span><h2>Processar PDF</h2>
       <div class="endpoint"><span class="method method-post">POST</span><code>/api/v1/pdf/extract</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
-      <p>Recebe um arquivo PDF no campo multipart <code>file</code>, identifica o tipo documental e devolve os dados encontrados em JSON.</p>
-      <div class="callout callout-info">Envie o arquivo como <code>multipart/form-data</code>. O nome do campo deve ser exatamente <code>file</code>.</div>
+      <p>Recebe um arquivo PDF no campo multipart <code>file</code>, identifica o tipo documental e devolve os dados encontrados em JSON. Para documentos compatíveis, a requisição pode informar um contexto esperado para validar CNPJ, competência e município.</p>
+      <div class="callout callout-info">Envie o arquivo como <code>multipart/form-data</code>. O nome do campo deve ser exatamente <code>file</code>. Os campos <code>expected*</code> são opcionais e não alteram chamadas existentes que enviam somente o PDF.</div>
     </section>
 
     <section id="batch">
@@ -180,7 +182,23 @@
   'https://document.pes2b.com/api/v1/pdf/extract' \
   -H 'X-API-Key: SUA_CHAVE' \
   -F 'file=@documento.pdf;type=application/pdf'</code></pre></div>
-      <div class="table-wrapper"><table><thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead><tbody><tr><td><code>file</code></td><td>PDF</td><td>Sim</td><td>Documento a ser identificado e processado.</td></tr></tbody></table></div>
+      <div class="table-wrapper"><table><thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead><tbody>
+        <tr><td><code>file</code></td><td>PDF</td><td>Sim</td><td>Documento a ser identificado e processado.</td></tr>
+        <tr><td><code>expectedCnpj</code></td><td>Texto</td><td>Não</td><td>CNPJ esperado. Quando informado, é comparado com o CNPJ extraído.</td></tr>
+        <tr><td><code>expectedCompetence</code></td><td>Texto</td><td>Não</td><td>Competência esperada em <code>AAAA-MM</code> ou <code>MM/AAAA</code>.</td></tr>
+        <tr><td><code>expectedMunicipalityIbge</code></td><td>Texto</td><td>Não</td><td>Código IBGE esperado do município.</td></tr>
+        <tr><td><code>expectedUf</code></td><td>Texto</td><td>Não</td><td>UF esperada com duas letras.</td></tr>
+      </tbody></table></div>
+      <h3>Exemplo com validação de contexto</h3>
+      <div class="code-card"><button class="copy-button" data-copy="curl -X POST 'https://document.pes2b.com/api/v1/pdf/extract' -H 'X-API-Key: SUA_CHAVE' -F 'file=@dec-poa.pdf;type=application/pdf' -F 'expectedCnpj=12.345.678/0001-90' -F 'expectedCompetence=2026-07' -F 'expectedMunicipalityIbge=4314902' -F 'expectedUf=RS'">Copiar</button><pre><code>curl -X POST \
+  'https://document.pes2b.com/api/v1/pdf/extract' \
+  -H 'X-API-Key: SUA_CHAVE' \
+  -F 'file=@dec-poa.pdf;type=application/pdf' \
+  -F 'expectedCnpj=12.345.678/0001-90' \
+  -F 'expectedCompetence=2026-07' \
+  -F 'expectedMunicipalityIbge=4314902' \
+  -F 'expectedUf=RS'</code></pre></div>
+      <div class="callout callout-info"><strong>Validação parcial:</strong> somente os campos <code>expected*</code> enviados são comparados. Quando nenhum deles é informado, a resposta mantém o contrato anterior e não inclui <code>validation</code>.</div>
     </section>
 
     <section id="response">
@@ -245,6 +263,149 @@
 }</code></pre></div>
     </section>
 
+    <section id="municipal">
+      <span class="eyebrow">DECLARAÇÕES MUNICIPAIS</span><h2>DEC Porto Alegre — Declaração Mensal de ISSQN</h2>
+      <p>O documento <code>DEC_POA_DECLARACAO_MENSAL</code> pertence à família <code>DECLARACAO_MUNICIPAL</code> e utiliza o parser <code>dec-poa</code>. Além dos dados estruturados, a API separa fisicamente o PDF original em declaração, guia — quando existir — e recibo.</p>
+
+      <div class="feature-grid">
+        <article class="feature-card"><strong>Identificação</strong><p>CNPJ, razão social, inscrição municipal, competência e município.</p></article>
+        <article class="feature-card"><strong>Valores fiscais</strong><p>Receita, base, ISS próprio, retenções, imposto devido e total a recolher.</p></article>
+        <article class="feature-card"><strong>Recibo</strong><p>Status de entrega, data/hora e autenticação da declaração.</p></article>
+        <article class="feature-card"><strong>Guia opcional</strong><p>Código de arrecadação, vencimento, código de barras, imposto e valor a pagar.</p></article>
+        <article class="feature-card"><strong>Validação de contexto</strong><p>Compara CNPJ, competência, código IBGE e UF quando o chamador informa os campos esperados.</p></article>
+        <article class="feature-card"><strong>PDFs separados</strong><p>Retorna cada parte em Base64 com nome padronizado, pronta para arquivamento ou envio.</p></article>
+      </div>
+
+      <h3>Estrutura dos dados</h3>
+      <div class="table-wrapper"><table><thead><tr><th>Objeto</th><th>Campos principais</th></tr></thead><tbody>
+        <tr><td><code>data.company</code></td><td><code>cnpj</code>, <code>razaoSocial</code>, <code>inscricaoMunicipal</code>.</td></tr>
+        <tr><td><code>data.competence</code></td><td><code>year</code>, <code>month</code>, <code>reference</code>, <code>display</code>.</td></tr>
+        <tr><td><code>data.municipality</code></td><td><code>ibgeCode</code>, <code>name</code>, <code>uf</code>.</td></tr>
+        <tr><td><code>data.financial</code></td><td>Receita, deduções, base, ISS próprio, retenções e totais.</td></tr>
+        <tr><td><code>data.receipt</code></td><td><code>status</code>, <code>submittedAt</code>, <code>authentication</code>.</td></tr>
+        <tr><td><code>data.guide</code></td><td>Dados da guia quando existente. Em declarações sem guia, pode ser <code>null</code>.</td></tr>
+      </tbody></table></div>
+
+      <h3>Validação opcional do contexto esperado</h3>
+      <p>Quando a requisição contém campos <code>expected*</code>, a resposta inclui <code>validation</code>. Uma divergência não altera o HTTP por si só: o chamador deve verificar <code>validation.valid</code> e decidir se interrompe a automação.</p>
+      <div class="code-card"><pre><code>{
+  "validation": {
+    "valid": true,
+    "mismatches": []
+  }
+}</code></pre></div>
+      <div class="code-card"><pre><code>{
+  "validation": {
+    "valid": false,
+    "mismatches": [
+      {
+        "field": "cnpj",
+        "expected": "12345678000190",
+        "actual": "98765432000110",
+        "code": "CNPJ_MISMATCH"
+      }
+    ]
+  }
+}</code></pre></div>
+
+      <h3>Separação automática do PDF</h3>
+      <p>O array <code>documents</code> contém as partes físicas geradas a partir do PDF original. A declaração e o recibo são esperados; a guia é opcional.</p>
+      <div class="table-wrapper"><table><thead><tr><th>Role</th><th>Quando retorna</th><th>Conteúdo</th></tr></thead><tbody>
+        <tr><td><code>DECLARACAO</code></td><td>Sempre</td><td>Uma ou mais páginas da declaração mensal.</td></tr>
+        <tr><td><code>GUIA</code></td><td>Quando o PDF contém guia</td><td>Guia para pagamento de ISSQN.</td></tr>
+        <tr><td><code>RECIBO</code></td><td>Sempre</td><td>Recibo de entrega da declaração mensal.</td></tr>
+      </tbody></table></div>
+      <p>Os nomes seguem o padrão <code>RAZAO_SOCIAL__CNPJ__MM-AAAA_sufixo.pdf</code>, com sufixos <code>declaracao</code>, <code>guia</code> e <code>recibo</code>.</p>
+
+      <div class="code-card"><button class="copy-button" data-copy-target="json-dec-poa">Copiar</button><pre id="json-dec-poa"><code>{
+  "success": true,
+  "documentType": "DEC_POA_DECLARACAO_MENSAL",
+  "compound": true,
+  "engine": {
+    "family": "DECLARACAO_MUNICIPAL",
+    "parser": "dec-poa",
+    "confidence": 1,
+    "confidenceLevel": "HIGH",
+    "parserExecuted": true
+  },
+  "data": {
+    "municipality": {
+      "ibgeCode": "4314902",
+      "name": "Porto Alegre",
+      "uf": "RS"
+    },
+    "company": {
+      "cnpj": "12345678000190",
+      "razaoSocial": "EMPRESA EXEMPLO PORTO ALEGRE LTDA.",
+      "inscricaoMunicipal": "123456-7-8"
+    },
+    "competence": {
+      "year": 2026,
+      "month": 7,
+      "reference": "2026-07",
+      "display": "07/2026"
+    },
+    "financial": {
+      "servicesRevenue": 20000.00,
+      "issOwn": 1000.00,
+      "issWithheldFromThirdParties": 0.00,
+      "totalTaxDue": 1000.00,
+      "totalToCollect": 1000.00
+    },
+    "receipt": {
+      "status": "ENTREGUE",
+      "submittedAt": "2026-08-04T19:19:45-03:00",
+      "authentication": "AA BB CC DD EE FF 00 11 22 33 44 55 66 77 88 99"
+    },
+    "guide": {
+      "present": true,
+      "collectionCode": "328300123456789",
+      "dueDate": "2026-09-30",
+      "generatedAt": "2026-09-02T11:10:00-03:00",
+      "barcode": "816700000119 315934332026 609300430327 830012345678",
+      "taxAmount": 1000.00,
+      "amountToPay": 1110.00,
+      "revenue": 20000.00
+    }
+  },
+  "validation": {
+    "valid": true,
+    "mismatches": []
+  },
+  "documents": [
+    {
+      "role": "DECLARACAO",
+      "suggestedSuffix": "declaracao",
+      "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_declaracao.pdf",
+      "pages": [1, 2],
+      "file": {
+        "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_declaracao.pdf",
+        "mimeType": "application/pdf",
+        "extension": "pdf",
+        "size": 4200,
+        "base64": "JVBERi0xLjcKLi4u"
+      }
+    },
+    {
+      "role": "GUIA",
+      "suggestedSuffix": "guia",
+      "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_guia.pdf",
+      "pages": [3],
+      "file": { "mimeType": "application/pdf", "extension": "pdf", "size": 13000, "base64": "JVBERi0xLjcKLi4u" }
+    },
+    {
+      "role": "RECIBO",
+      "suggestedSuffix": "recibo",
+      "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_recibo.pdf",
+      "pages": [4],
+      "file": { "mimeType": "application/pdf", "extension": "pdf", "size": 5300, "base64": "JVBERi0xLjcKLi4u" }
+    }
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000101"
+}</code></pre></div>
+      <div class="callout callout-warning"><strong>Declaração sem guia:</strong> o array <code>documents</code> retorna apenas <code>DECLARACAO</code> e <code>RECIBO</code>; não é criado um item <code>GUIA</code> artificial.</div>
+    </section>
+
     <section id="documents">
       <span class="eyebrow">IDENTIFICAÇÃO</span><h2>Documentos reconhecidos</h2>
       <p>A API identifica automaticamente o tipo do PDF e seleciona o parser correspondente. Os campos variam conforme o documento e a qualidade do conteúdo extraído.</p>
@@ -256,6 +417,7 @@
         <tr><td>Relatório do Simples</td><td><code>RELATORIO_SIMPLES</code></td><td>Resumo, RBT12, apurações, consolidação por anexo e carga tributária.</td></tr>
         <tr><td>Declaração de faturamento</td><td><code>DECLARACAO_FATURAMENTO</code></td><td>Período, faturamento mensal, total, emissão, responsável e validações.</td></tr>
         <tr><td>Declaração + recibo no mesmo PDF</td><td><code>COMBINADO_DECLARACAO_RECIBO_PGDAS</code></td><td>Separação automática em dois documentos estruturados.</td></tr>
+        <tr><td>DEC Porto Alegre — Declaração Mensal de ISSQN</td><td><code>DEC_POA_DECLARACAO_MENSAL</code></td><td>Empresa, competência, município, valores fiscais, recibo, guia opcional, validação de contexto e PDFs separados.</td></tr>
         <tr><td>Documento não reconhecido</td><td><code>NAO_IDENTIFICADO</code></td><td>Metadados técnicos e indicação para conferência manual.</td></tr>
       </tbody></table></div>
     </section>
@@ -506,6 +668,26 @@
   "requestId": "00000000-0000-4000-8000-000000000007"
 }</code></pre></div>
         </details>
+        <details class="json-example">
+          <summary><span>DEC Porto Alegre — Declaração Mensal de ISSQN</span><code>DEC_POA_DECLARACAO_MENSAL</code></summary>
+          <div class="code-card"><pre><code>{
+  "documentType": "DEC_POA_DECLARACAO_MENSAL",
+  "data": {
+    "company": { "cnpj": "12345678000190", "razaoSocial": "EMPRESA EXEMPLO LTDA." },
+    "competence": { "reference": "2026-07", "display": "07/2026" },
+    "municipality": { "ibgeCode": "4314902", "name": "Porto Alegre", "uf": "RS" },
+    "financial": { "totalTaxDue": 1000.00, "totalToCollect": 1000.00 },
+    "receipt": { "status": "ENTREGUE", "submittedAt": "2026-08-04T19:19:45-03:00" },
+    "guide": { "present": true, "dueDate": "2026-09-30", "amountToPay": 1110.00 }
+  },
+  "validation": { "valid": true, "mismatches": [] },
+  "documents": [
+    { "role": "DECLARACAO", "pages": [1, 2], "fileName": "..._declaracao.pdf" },
+    { "role": "GUIA", "pages": [3], "fileName": "..._guia.pdf" },
+    { "role": "RECIBO", "pages": [4], "fileName": "..._recibo.pdf" }
+  ]
+}</code></pre></div>
+        </details>
       </div>
     </section>
 
@@ -535,6 +717,8 @@
         <tr><td><code>src/document/parsers/&lt;grupo&gt;/&lt;documento&gt;/parser.js</code></td><td>Extrai os campos e monta o objeto <code>data</code>.</td></tr>
         <tr><td><code>src/document/parsers/registry.js</code></td><td>Liga o identificador retornado pelo detector ao parser correspondente.</td></tr>
         <tr><td><code>src/document/helpers/</code></td><td>Funções reutilizáveis para CNPJ, competência, datas, valores e normalização.</td></tr>
+        <tr><td><code>src/document/validators/</code></td><td>Validação opcional do contexto esperado quando o tipo documental exigir conferência de empresa, competência ou município.</td></tr>
+        <tr><td><code>src/document/splitters/</code></td><td>Separação física de PDFs compostos ou documentos que contenham múltiplas partes.</td></tr>
         <tr><td><code>test/&lt;documento&gt;.test.js</code></td><td>Garante que futuras mudanças não quebrem o documento já suportado.</td></tr>
         <tr><td><code>docs/openapi.json</code> e <code>docs-site/openapi.json</code></td><td>Documentam schemas, exemplos e respostas no Swagger.</td></tr>
         <tr><td><code>docs-site/index.html</code> e Markdown</td><td>Explicam o novo documento para quem integra com a API.</td></tr>
@@ -627,8 +811,28 @@ exports.parse = (text) =&gt; ({
         <div><span>2</span><p>Método <strong>POST</strong> e URL <code>https://document.pes2b.com/api/v1/pdf/extract</code>.</p></div>
         <div><span>3</span><p>Adicione o cabeçalho <code>X-API-Key</code> usando uma credencial segura.</p></div>
         <div><span>4</span><p>Ative <strong>Send Body</strong>, selecione <strong>Form-Data</strong> e envie o binary no campo <code>file</code>.</p></div>
-        <div><span>5</span><p>Utilize <code>documentType</code>, <code>data.identificacao.competencia</code> e <code>data</code> nos próximos nodes.</p></div>
+        <div><span>5</span><p>Quando precisar validar o contexto, envie também <code>expectedCnpj</code>, <code>expectedCompetence</code>, <code>expectedMunicipalityIbge</code> e <code>expectedUf</code>.</p></div>
+        <div><span>6</span><p>Para documentos separados, percorra <code>documents</code>, converta <code>file.base64</code> em binário e utilize <code>role</code> para decidir o destino.</p></div>
       </div>
+      <h3>DEC POA como subfluxo reutilizável</h3>
+      <p>Na homologação do grupo P&S2B, o workflow <code>PES2B | Declarações Municipais | Interpretar PDF</code> recebe o PDF em <code>binary.pdf</code>, chama a API com contexto esperado e devolve um item por documento, com o arquivo em <code>binary.file</code>.</p>
+      <div class="code-card"><pre><code>Entrada do subfluxo
+json.system = "DEC_POA"
+json.expected.cnpj = "12345678000190"
+json.expected.competence = "2026-07"
+json.expected.municipality.ibgeCode = "4314902"
+json.expected.municipality.uf = "RS"
+binary.pdf = PDF original
+
+Saída com guia
+item 1: role = DECLARACAO | binary.file
+item 2: role = GUIA       | binary.file
+item 3: role = RECIBO     | binary.file
+
+Saída sem guia
+item 1: role = DECLARACAO | binary.file
+item 2: role = RECIBO     | binary.file</code></pre></div>
+      <div class="callout callout-info"><strong>Responsabilidade:</strong> a API identifica, valida, interpreta e separa. O fluxo principal decide arquivamento, SharePoint, envio ao cliente, controle operacional e demais regras de negócio.</div>
     </section>
 
     <section id="architecture">
@@ -638,9 +842,11 @@ exports.parse = (text) =&gt; ({
         <article class="feature-card"><strong>Detecção por família</strong><p>Regras ponderadas identificam o documento, registram regras encontradas e calculam confiança real.</p></article>
         <article class="feature-card"><strong>Registry central</strong><p>Cada parser declara família, versão, status, schema e confiança mínima.</p></article>
         <article class="feature-card"><strong>Parser modular</strong><p>Cada documento possui <code>index.js</code>, <code>parser.js</code>, <code>schema.js</code> e <code>rules.js</code>.</p></article>
-        <article class="feature-card"><strong>Qualidade automatizada</strong><p>Fixtures anonimizadas e testes unitários, de contrato e end-to-end protegem os formatos homologados.</p></article>
+        <article class="feature-card"><strong>Qualidade automatizada</strong><p>Fixtures anonimizadas e testes unitários, de contrato e end-to-end protegem os formatos homologados. A homologação DEC POA foi concluída com 101 testes automatizados aprovados.</p></article>
         <article class="feature-card"><strong>Logs estruturados</strong><p>Eventos JSON registram requestId, documento, confiança, parser, duração e motivo de falha.</p></article>
         <article class="feature-card"><strong>Métricas operacionais</strong><p>O endpoint de diagnóstico consolida volume, taxa de sucesso, tempo médio e níveis de confiança.</p></article>
+        <article class="feature-card"><strong>Validadores de contexto</strong><p>Comparam dados esperados e extraídos sem acoplar regras de negócio ao parser.</p></article>
+        <article class="feature-card"><strong>Splitters documentais</strong><p>Separam fisicamente PDFs compostos e devolvem partes em Base64 com nomes padronizados.</p></article>
       </div>
       <div class="callout callout-info"><strong>Compatibilidade:</strong> o campo público <code>documentType</code> foi preservado. As informações novas foram acrescentadas ao objeto <code>engine</code>, mantendo os workflows existentes do n8n.</div>
     </section>
@@ -700,6 +906,6 @@ exports.parse = (text) =&gt; ({
     </section>
   </main>
 </div>
-<script src="/app.js?v=3.2.0"></script>
+<script src="/app.js?v=3.3.0"></script>
 </body>
 </html>

@@ -24,6 +24,7 @@ Envie a API Key no cabeçalho `X-API-Key`.
 - `GET /openapi.json`
 - `POST /api/v1/pdf/extract`
 - `POST /api/v1/pdf/extract-batch`
+- `GET /api/v1/diagnostics`
 
 ## Processar um PDF
 
@@ -33,6 +34,44 @@ curl -X POST \
   -H 'X-API-Key: SUA_CHAVE' \
   -F 'file=@documento.pdf;type=application/pdf'
 ```
+
+### Validação opcional de contexto
+
+O endpoint individual aceita campos multipart opcionais:
+
+- `expectedCnpj`
+- `expectedCompetence` (`AAAA-MM` ou `MM/AAAA`)
+- `expectedMunicipalityIbge`
+- `expectedUf`
+
+Quando ao menos um desses campos é informado, a resposta inclui `validation`. Somente os campos enviados são comparados. Sem contexto esperado, a chamada mantém o contrato anterior.
+
+```bash
+curl -X POST \
+  'https://document.pes2b.com/api/v1/pdf/extract' \
+  -H 'X-API-Key: SUA_CHAVE' \
+  -F 'file=@dec-poa.pdf;type=application/pdf' \
+  -F 'expectedCnpj=12.345.678/0001-90' \
+  -F 'expectedCompetence=2026-07' \
+  -F 'expectedMunicipalityIbge=4314902' \
+  -F 'expectedUf=RS'
+```
+
+A divergência é informada em `validation.valid = false`; o consumidor decide se deve interromper o processo.
+
+## Documentos reconhecidos
+
+| Tipo | `documentType` | Dados principais |
+|---|---|---|
+| Declaração PGDAS-D | `DECLARACAO_PGDAS` | Competência, receitas, débito, número da declaração, recibo e tipo original/retificadora. |
+| Recibo PGDAS-D | `RECIBO_PGDAS` | Número do recibo, transmissão, CNPJ, competência, receita e débitos. |
+| Guia DAS | `DAS` | Empresa, CNPJ, competência, número do documento, valor e vencimento. |
+| Extrato PGDAS-D | `EXTRATO_PGDAS` | Identificação do documento; parser detalhado ainda em evolução. |
+| Relatório do Simples | `RELATORIO_SIMPLES` | Resumo, RBT12, apurações, consolidação por anexo e carga tributária. |
+| Declaração de faturamento | `DECLARACAO_FATURAMENTO` | Período, faturamento mensal, total, emissão, responsável e validações. |
+| Declaração + recibo PGDAS no mesmo PDF | `COMBINADO_DECLARACAO_RECIBO_PGDAS` | Separação automática em dois documentos estruturados. |
+| DEC Porto Alegre — Declaração Mensal de ISSQN | `DEC_POA_DECLARACAO_MENSAL` | Empresa, competência, município, valores fiscais, recibo, guia opcional, validação de contexto e PDFs separados. |
+| Documento não reconhecido | `NAO_IDENTIFICADO` | Metadados técnicos e indicação para conferência manual. |
 
 ## Processar em lote
 
@@ -90,7 +129,7 @@ Exemplo:
     "unknownDocuments": 0,
     "rejectedUploads": 0,
     "averageProcessingMs": 0,
-    "parsers": { "total": 6, "active": 6, "inactive": 0 },
+    "parsers": { "total": 7, "active": 7, "inactive": 0 },
     "byDocumentType": {},
     "byConfidenceLevel": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 }
   },
@@ -138,11 +177,148 @@ A engine `1.10.0` utiliza:
 - detectores organizados por família documental;
 - registry central de parsers com versão, status e schema;
 - módulos de parser com `index.js`, `parser.js`, `schema.js` e `rules.js`;
+- validadores de contexto esperado;
+- splitters documentais para PDFs compostos;
 - fixtures anonimizadas;
 - testes unitários, de contrato e end-to-end;
 - logs estruturados em JSON;
 - rastreamento por `requestId`;
-- métricas operacionais em memória.
+- métricas operacionais em memória;
+- homologação DEC POA concluída com 101 testes automatizados aprovados.
+
+## Declarações municipais — DEC Porto Alegre
+
+O tipo `DEC_POA_DECLARACAO_MENSAL` pertence à família `DECLARACAO_MUNICIPAL` e utiliza o parser `dec-poa`.
+
+A API extrai:
+
+- `data.company`: CNPJ, razão social e inscrição municipal;
+- `data.competence`: ano, mês, referência `AAAA-MM` e exibição `MM/AAAA`;
+- `data.municipality`: código IBGE, nome e UF;
+- `data.financial`: receita, deduções, base, ISS próprio, retenções, imposto devido e total a recolher;
+- `data.receipt`: situação da entrega, data/hora e autenticação;
+- `data.guide`: dados da guia quando existente.
+
+### Separação física automática
+
+O PDF original é classificado página a página e devolvido também no array `documents`:
+
+- `DECLARACAO`: obrigatório; pode conter uma ou mais páginas;
+- `GUIA`: opcional;
+- `RECIBO`: obrigatório.
+
+Cada item contém:
+
+```json
+{
+  "role": "GUIA",
+  "suggestedSuffix": "guia",
+  "fileName": "EMPRESA_EXEMPLO_LTDA__12345678000190__07-2026_guia.pdf",
+  "pages": [3],
+  "file": {
+    "fileName": "EMPRESA_EXEMPLO_LTDA__12345678000190__07-2026_guia.pdf",
+    "mimeType": "application/pdf",
+    "extension": "pdf",
+    "size": 13000,
+    "base64": "JVBERi0xLjcKLi4u"
+  }
+}
+```
+
+Padrão do nome:
+
+`RAZAO_SOCIAL__CNPJ__MM-AAAA_sufixo.pdf`
+
+Sufixos atuais: `declaracao`, `guia` e `recibo`.
+
+Quando não existe guia, o array `documents` contém somente `DECLARACAO` e `RECIBO`.
+
+### Exemplo de resposta DEC POA
+
+```json
+{
+  "success": true,
+  "documentType": "DEC_POA_DECLARACAO_MENSAL",
+  "compound": true,
+  "engine": {
+    "family": "DECLARACAO_MUNICIPAL",
+    "parser": "dec-poa",
+    "confidence": 1,
+    "confidenceLevel": "HIGH",
+    "parserExecuted": true
+  },
+  "data": {
+    "municipality": {
+      "ibgeCode": "4314902",
+      "name": "Porto Alegre",
+      "uf": "RS"
+    },
+    "company": {
+      "cnpj": "12345678000190",
+      "razaoSocial": "EMPRESA EXEMPLO PORTO ALEGRE LTDA.",
+      "inscricaoMunicipal": "123456-7-8"
+    },
+    "competence": {
+      "year": 2026,
+      "month": 7,
+      "reference": "2026-07",
+      "display": "07/2026"
+    },
+    "financial": {
+      "servicesRevenue": 20000,
+      "issOwn": 1000,
+      "issWithheldFromThirdParties": 0,
+      "totalTaxDue": 1000,
+      "totalToCollect": 1000
+    },
+    "receipt": {
+      "status": "ENTREGUE",
+      "submittedAt": "2026-08-04T19:19:45-03:00",
+      "authentication": "AA BB CC DD EE FF 00 11 22 33 44 55 66 77 88 99"
+    },
+    "guide": {
+      "present": true,
+      "collectionCode": "328300123456789",
+      "dueDate": "2026-09-30",
+      "generatedAt": "2026-09-02T11:10:00-03:00",
+      "barcode": "816700000119 315934332026 609300430327 830012345678",
+      "taxAmount": 1000,
+      "amountToPay": 1110,
+      "revenue": 20000
+    }
+  },
+  "validation": {
+    "valid": true,
+    "mismatches": []
+  },
+  "documents": [
+    { "role": "DECLARACAO", "pages": [1, 2], "fileName": "..._declaracao.pdf" },
+    { "role": "GUIA", "pages": [3], "fileName": "..._guia.pdf" },
+    { "role": "RECIBO", "pages": [4], "fileName": "..._recibo.pdf" }
+  ]
+}
+```
+
+### Integração n8n homologada
+
+O subfluxo `PES2B | Declarações Municipais | Interpretar PDF` foi homologado com o contrato:
+
+```text
+Entrada:
+json.system = DEC_POA
+json.expected.cnpj
+json.expected.competence
+json.expected.municipality.ibgeCode
+json.expected.municipality.uf
+binary.pdf
+
+Saída:
+um item por documento
+json.role = DECLARACAO | GUIA | RECIBO
+binary.file = PDF separado
+```
+
+O fluxo principal continua responsável por SharePoint, arquivamento, envio ao cliente e demais regras de negócio.
 
 # Como incluir um novo documento no parser
 

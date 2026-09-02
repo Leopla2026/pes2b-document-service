@@ -7,20 +7,851 @@
   },
   "servers": [
     {
-      "url": "https://regiflowautomacao-irpf-pdf-reader.ftlz6v.easypanel.host",
+      "url": "https://document.pes2b.com",
       "description": "Produção"
     }
   ],
+  "tags": [
+    {
+      "name": "Status",
+      "description": "Disponibilidade e informações do serviço"
+    },
+    {
+      "name": "Documentos",
+      "description": "Extração individual e em lote"
+    },
+    {
+      "name": "Diagnóstico",
+      "description": "Métricas operacionais e diagnóstico protegido do serviço"
+    }
+  ],
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "Verifica a disponibilidade do serviço",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "Serviço disponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/info": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "Retorna versão e informações da API",
+        "operationId": "serviceInfo",
+        "responses": {
+          "200": {
+            "description": "Informações públicas do serviço",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pdf/extract": {
+      "post": {
+        "tags": [
+          "Documentos"
+        ],
+        "summary": "Processa um documento PDF",
+        "operationId": "extractPdf",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Arquivo PDF a ser processado"
+                  },
+                  "expectedCnpj": {
+                    "type": "string",
+                    "description": "CNPJ esperado. Opcional; quando informado, é comparado ao CNPJ extraído.",
+                    "example": "12.345.678/0001-90"
+                  },
+                  "expectedCompetence": {
+                    "type": "string",
+                    "description": "Competência esperada em AAAA-MM ou MM/AAAA.",
+                    "example": "2026-07"
+                  },
+                  "expectedMunicipalityIbge": {
+                    "type": "string",
+                    "description": "Código IBGE esperado do município.",
+                    "example": "4314902"
+                  },
+                  "expectedUf": {
+                    "type": "string",
+                    "description": "UF esperada com duas letras.",
+                    "example": "RS"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Documento processado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentExtractionResponse"
+                },
+                "examples": {
+                  "relatorioSimples": {
+                    "summary": "Relatório do Simples Nacional",
+                    "value": {
+                      "success": true,
+                      "documentType": "RELATORIO_SIMPLES",
+                      "data": {
+                        "identificacao": {
+                          "empresa": "EMPRESA EXEMPLO LTDA.",
+                          "cnpj": "12.345.678/0001-90",
+                          "competencia": "06/2026"
+                        },
+                        "resumo": {
+                          "receitaBrutaMesNumero": 45000.0,
+                          "rbt12Numero": 540000.0,
+                          "valorSimplesRecolherNumero": 2187.5,
+                          "cargaTributariaTotalNumero": 4.8611
+                        },
+                        "apuracoes": [],
+                        "consolidacaoPorAnexo": []
+                      },
+                      "warnings": [],
+                      "errors": [],
+                      "requestId": "00000000-0000-4000-8000-000000000001"
+                    }
+                  },
+                  "decPoa": {
+                    "summary": "DEC Porto Alegre com contexto e PDFs separados",
+                    "value": {
+                      "success": true,
+                      "documentType": "DEC_POA_DECLARACAO_MENSAL",
+                      "compound": true,
+                      "engine": {
+                        "family": "DECLARACAO_MUNICIPAL",
+                        "parser": "dec-poa",
+                        "confidence": 1,
+                        "confidenceLevel": "HIGH",
+                        "parserExecuted": true
+                      },
+                      "data": {
+                        "municipality": {
+                          "ibgeCode": "4314902",
+                          "name": "Porto Alegre",
+                          "uf": "RS"
+                        },
+                        "company": {
+                          "cnpj": "12345678000190",
+                          "razaoSocial": "EMPRESA EXEMPLO PORTO ALEGRE LTDA.",
+                          "inscricaoMunicipal": "123456-7-8"
+                        },
+                        "competence": {
+                          "year": 2026,
+                          "month": 7,
+                          "reference": "2026-07",
+                          "display": "07/2026"
+                        },
+                        "financial": {
+                          "servicesRevenue": 20000,
+                          "totalTaxDue": 1000,
+                          "totalToCollect": 1000
+                        },
+                        "receipt": {
+                          "status": "ENTREGUE",
+                          "submittedAt": "2026-08-04T19:19:45-03:00",
+                          "authentication": "AA BB CC DD EE FF 00 11 22 33 44 55 66 77 88 99"
+                        },
+                        "guide": {
+                          "present": true,
+                          "dueDate": "2026-09-30",
+                          "amountToPay": 1110
+                        }
+                      },
+                      "validation": {
+                        "valid": true,
+                        "mismatches": []
+                      },
+                      "documents": [
+                        {
+                          "role": "DECLARACAO",
+                          "suggestedSuffix": "declaracao",
+                          "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_declaracao.pdf",
+                          "pages": [
+                            1,
+                            2
+                          ],
+                          "file": {
+                            "mimeType": "application/pdf",
+                            "extension": "pdf",
+                            "size": 4200,
+                            "base64": "JVBERi0xLjcKLi4u"
+                          }
+                        },
+                        {
+                          "role": "GUIA",
+                          "suggestedSuffix": "guia",
+                          "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_guia.pdf",
+                          "pages": [
+                            3
+                          ],
+                          "file": {
+                            "mimeType": "application/pdf",
+                            "extension": "pdf",
+                            "size": 13000,
+                            "base64": "JVBERi0xLjcKLi4u"
+                          }
+                        },
+                        {
+                          "role": "RECIBO",
+                          "suggestedSuffix": "recibo",
+                          "fileName": "EMPRESA_EXEMPLO_PORTO_ALEGRE_LTDA__12345678000190__07-2026_recibo.pdf",
+                          "pages": [
+                            4
+                          ],
+                          "file": {
+                            "mimeType": "application/pdf",
+                            "extension": "pdf",
+                            "size": 5300,
+                            "base64": "JVBERi0xLjcKLi4u"
+                          }
+                        }
+                      ],
+                      "warnings": [],
+                      "errors": [],
+                      "requestId": "00000000-0000-4000-8000-000000000101"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Arquivo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API Key ausente ou inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Arquivo acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "PDF não processável",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pdf/extract-batch": {
+      "post": {
+        "tags": [
+          "Documentos"
+        ],
+        "summary": "Processa até 10 documentos PDF",
+        "operationId": "extractPdfBatch",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "files"
+                ],
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lote processado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchExtractionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requisição inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API Key ausente ou inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostics": {
+      "get": {
+        "tags": [
+          "Diagnóstico"
+        ],
+        "summary": "Retorna métricas operacionais em memória",
+        "description": "Endpoint protegido por X-API-Key. Exibe volume processado, sucesso, falhas, confiança, parsers ativos e tempo médio. As métricas reiniciam quando o processo ou contêiner é reiniciado.",
+        "operationId": "getDiagnostics",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Diagnóstico operacional retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticsResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Diagnóstico operacional do serviço.",
+                  "requestId": "a1cb5279-4b56-442d-876c-bf4b1ae23aca",
+                  "data": {
+                    "service": "pes2b-document-service",
+                    "environment": "production",
+                    "engineVersion": "1.10.0",
+                    "startedAt": "2026-07-18T12:26:10.849Z",
+                    "uptimeSeconds": 104,
+                    "processedDocuments": 0,
+                    "successfulDocuments": 0,
+                    "failedDocuments": 0,
+                    "successRate": 1,
+                    "blockedByConfidence": 0,
+                    "unknownDocuments": 0,
+                    "rejectedUploads": 0,
+                    "averageProcessingMs": 0,
+                    "parsers": {
+                      "total": 7,
+                      "active": 7,
+                      "inactive": 0
+                    },
+                    "byDocumentType": {},
+                    "byConfidenceLevel": {
+                      "HIGH": 0,
+                      "MEDIUM": 0,
+                      "LOW": 0
+                    }
+                  },
+                  "errors": [],
+                  "warnings": [
+                    "As métricas são mantidas em memória e reiniciadas quando o serviço é reiniciado."
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API Key ausente ou inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "components": {
     "securitySchemes": {
       "ApiKeyAuth": {
         "type": "apiKey",
         "in": "header",
-        "name": "X-API-Key"
+        "name": "X-API-Key",
+        "description": "Chave de acesso fornecida pela P&S2B"
       }
     },
     "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "UP"
+          },
+          "service": {
+            "type": "string",
+            "example": "pes2b-document-service"
+          },
+          "version": {
+            "type": "string",
+            "example": "2.0.0"
+          }
+        }
+      },
+      "InfoResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "P&S2B Document Service API"
+          },
+          "version": {
+            "type": "string",
+            "example": "2.0.0"
+          },
+          "environment": {
+            "type": "string",
+            "example": "production"
+          }
+        }
+      },
+      "Identification": {
+        "type": "object",
+        "properties": {
+          "empresa": {
+            "type": "string",
+            "example": "EMPRESA EXEMPLO LTDA."
+          },
+          "cnpj": {
+            "type": "string",
+            "example": "12.345.678/0001-90"
+          },
+          "competencia": {
+            "type": "string",
+            "example": "06/2026"
+          }
+        }
+      },
+      "DeclarationData": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "example": "DECLARACAO_PGDAS"
+          },
+          "tipoDeclaracao": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL",
+              "RETIFICADORA",
+              "NAO_IDENTIFICADO"
+            ]
+          },
+          "ehRetificadora": {
+            "type": "boolean"
+          },
+          "numeroDeclaracao": {
+            "type": "string"
+          },
+          "numeroRecibo": {
+            "type": "string"
+          }
+        }
+      },
+      "DasData": {
+        "type": "object",
+        "properties": {
+          "numeroDocumento": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double",
+            "example": 2187.5
+          },
+          "vencimento": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-07-20"
+          },
+          "codigoBarras": {
+            "type": "string"
+          }
+        }
+      },
+      "RevenueStatementData": {
+        "type": "object",
+        "properties": {
+          "periodoInicial": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodoFinal": {
+            "type": "string",
+            "format": "date"
+          },
+          "faturamentoTotal": {
+            "type": "number",
+            "format": "double",
+            "example": 45000.0
+          },
+          "assinada": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SimplesSummary": {
+        "type": "object",
+        "properties": {
+          "receitaBrutaMesNumero": {
+            "type": "number",
+            "format": "double",
+            "example": 45000.0
+          },
+          "rbt12Numero": {
+            "type": "number",
+            "format": "double",
+            "example": 540000.0
+          },
+          "faixaEnquadramento": {
+            "type": "string"
+          },
+          "valorSimplesRecolherNumero": {
+            "type": "number",
+            "format": "double",
+            "example": 2187.5
+          },
+          "cargaTributariaTotalNumero": {
+            "type": "number",
+            "format": "double",
+            "example": 4.8611
+          }
+        }
+      },
+      "SimplesAssessment": {
+        "type": "object",
+        "properties": {
+          "ordem": {
+            "type": "integer"
+          },
+          "anexo": {
+            "type": "string",
+            "example": "III"
+          },
+          "descricaoAnexo": {
+            "type": "string"
+          },
+          "secao": {
+            "type": "string"
+          },
+          "tabela": {
+            "type": "string"
+          },
+          "tratamentoTributario": {
+            "type": "string"
+          },
+          "receitaTributadaNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "aliquotaEfetivaNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorSimplesNumero": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "SimplesAnnexConsolidation": {
+        "type": "object",
+        "properties": {
+          "anexo": {
+            "type": "string"
+          },
+          "descricaoAnexo": {
+            "type": "string"
+          },
+          "receitaTributadaNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorSimplesNumero": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidadeApuracoes": {
+            "type": "integer"
+          },
+          "aliquotaMediaNumero": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ExtractedDocumentData": {
+        "type": "object",
+        "description": "Estrutura variável conforme o tipo documental reconhecido.",
+        "properties": {
+          "identificacao": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "documento": {
+            "$ref": "#/components/schemas/DeclarationData"
+          },
+          "das": {
+            "$ref": "#/components/schemas/DasData"
+          },
+          "declaracaoFaturamento": {
+            "$ref": "#/components/schemas/RevenueStatementData"
+          },
+          "resumo": {
+            "$ref": "#/components/schemas/SimplesSummary"
+          },
+          "apuracoes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimplesAssessment"
+            }
+          },
+          "consolidacaoPorAnexo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimplesAnnexConsolidation"
+            }
+          },
+          "municipality": {
+            "$ref": "#/components/schemas/MunicipalityContext"
+          },
+          "company": {
+            "$ref": "#/components/schemas/DecPoaCompany"
+          },
+          "competence": {
+            "$ref": "#/components/schemas/CompetenceContext"
+          },
+          "financial": {
+            "$ref": "#/components/schemas/DecPoaFinancial"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/DecPoaReceipt"
+          },
+          "guide": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DecPoaGuide"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": true
+      },
       "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "INVALID_FILE"
+          },
+          "message": {
+            "type": "string",
+            "example": "O arquivo enviado não é um PDF válido."
+          },
+          "field": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DocumentExtractionResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "documentType",
+          "data",
+          "requestId"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "documentType": {
+            "type": "string",
+            "enum": [
+              "DECLARACAO_PGDAS",
+              "RECIBO_PGDAS",
+              "DAS",
+              "EXTRATO_PGDAS",
+              "RELATORIO_SIMPLES",
+              "DECLARACAO_FATURAMENTO",
+              "COMBINADO_DECLARACAO_RECIBO_PGDAS",
+              "DEC_POA_DECLARACAO_MENSAL",
+              "NAO_IDENTIFICADO"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExtractedDocumentData"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "engine": {
+            "$ref": "#/components/schemas/EngineMetadata"
+          },
+          "compound": {
+            "type": "boolean",
+            "description": "Indica que o documento originou múltiplas partes físicas.",
+            "example": true
+          },
+          "validation": {
+            "$ref": "#/components/schemas/ContextValidation"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SplitDocument"
+            },
+            "description": "Partes físicas separadas. Em DEC POA: declaração, guia opcional e recibo."
+          }
+        }
+      },
+      "BatchExtractionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer",
+            "example": 2
+          },
+          "processed": {
+            "type": "integer",
+            "example": 2
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentExtractionResponse"
+            }
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ErrorResponse": {
         "type": "object",
         "properties": {
           "success": {
@@ -31,7 +862,8 @@
             "type": "string"
           },
           "requestId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "data": {
             "nullable": true
@@ -39,19 +871,7 @@
           "errors": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "field": {
-                  "type": "string",
-                  "nullable": true
-                }
-              }
+              "$ref": "#/components/schemas/ApiError"
             }
           },
           "warnings": {
@@ -333,197 +1153,262 @@
             ]
           }
         }
+      },
+      "ContextMismatch": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "cnpj"
+          },
+          "expected": {
+            "type": "string",
+            "nullable": true,
+            "example": "12345678000190"
+          },
+          "actual": {
+            "type": "string",
+            "nullable": true,
+            "example": "98765432000110"
+          },
+          "code": {
+            "type": "string",
+            "example": "CNPJ_MISMATCH"
+          }
+        }
+      },
+      "ContextValidation": {
+        "type": "object",
+        "description": "Presente quando ao menos um campo expected* é enviado.",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "example": true
+          },
+          "mismatches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextMismatch"
+            }
+          }
+        }
+      },
+      "SplitFile": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mimeType": {
+            "type": "string",
+            "example": "application/pdf"
+          },
+          "extension": {
+            "type": "string",
+            "example": "pdf"
+          },
+          "size": {
+            "type": "integer",
+            "example": 5300
+          },
+          "base64": {
+            "type": "string",
+            "description": "Conteúdo do PDF em Base64.",
+            "example": "JVBERi0xLjcKLi4u"
+          }
+        }
+      },
+      "SplitDocument": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "DECLARACAO",
+              "GUIA",
+              "RECIBO"
+            ],
+            "example": "GUIA"
+          },
+          "suggestedSuffix": {
+            "type": "string",
+            "example": "guia"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true,
+            "example": "EMPRESA_EXEMPLO_LTDA__12345678000190__07-2026_guia.pdf"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [
+              3
+            ]
+          },
+          "file": {
+            "$ref": "#/components/schemas/SplitFile"
+          }
+        }
+      },
+      "MunicipalityContext": {
+        "type": "object",
+        "properties": {
+          "ibgeCode": {
+            "type": "string",
+            "example": "4314902"
+          },
+          "name": {
+            "type": "string",
+            "example": "Porto Alegre"
+          },
+          "uf": {
+            "type": "string",
+            "example": "RS"
+          }
+        }
+      },
+      "DecPoaCompany": {
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "example": "12345678000190"
+          },
+          "razaoSocial": {
+            "type": "string",
+            "example": "EMPRESA EXEMPLO PORTO ALEGRE LTDA."
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "example": "123456-7-8"
+          }
+        }
+      },
+      "CompetenceContext": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "example": 2026
+          },
+          "month": {
+            "type": "integer",
+            "example": 7
+          },
+          "reference": {
+            "type": "string",
+            "example": "2026-07"
+          },
+          "display": {
+            "type": "string",
+            "example": "07/2026"
+          }
+        }
+      },
+      "DecPoaFinancial": {
+        "type": "object",
+        "properties": {
+          "servicesRevenue": {
+            "type": "number",
+            "example": 20000
+          },
+          "deductions": {
+            "type": "number",
+            "example": 0
+          },
+          "taxBase": {
+            "type": "number",
+            "example": 20000
+          },
+          "issOwn": {
+            "type": "number",
+            "example": 1000
+          },
+          "issWithheldSubstitution": {
+            "type": "number",
+            "example": 0
+          },
+          "issWithheldFromThirdParties": {
+            "type": "number",
+            "example": 0
+          },
+          "issSolidaryResponsibility": {
+            "type": "number",
+            "example": 0
+          },
+          "issCpom": {
+            "type": "number",
+            "example": 0
+          },
+          "totalTaxDue": {
+            "type": "number",
+            "example": 1000
+          },
+          "totalToCollect": {
+            "type": "number",
+            "example": 1000
+          }
+        }
+      },
+      "DecPoaReceipt": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ENTREGUE"
+          },
+          "submittedAt": {
+            "type": "string",
+            "example": "2026-08-04T19:19:45-03:00"
+          },
+          "authentication": {
+            "type": "string",
+            "example": "AA BB CC DD EE FF 00 11 22 33 44 55 66 77 88 99"
+          }
+        }
+      },
+      "DecPoaGuide": {
+        "type": "object",
+        "properties": {
+          "present": {
+            "type": "boolean",
+            "example": true
+          },
+          "collectionCode": {
+            "type": "string",
+            "example": "328300123456789"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-09-30"
+          },
+          "generatedAt": {
+            "type": "string",
+            "example": "2026-09-02T11:10:00-03:00"
+          },
+          "barcode": {
+            "type": "string",
+            "example": "816700000119 315934332026 609300430327 830012345678"
+          },
+          "taxAmount": {
+            "type": "number",
+            "example": 1000
+          },
+          "amountToPay": {
+            "type": "number",
+            "example": 1110
+          },
+          "revenue": {
+            "type": "number",
+            "example": 20000
+          }
+        }
       }
     }
-  },
-  "paths": {
-    "/api/v1/health": {
-      "get": {
-        "summary": "Verifica a disponibilidade do serviço",
-        "responses": {
-          "200": {
-            "description": "Serviço disponível"
-          }
-        }
-      }
-    },
-    "/api/v1/info": {
-      "get": {
-        "summary": "Retorna versão e informações da API",
-        "responses": {
-          "200": {
-            "description": "Informações do serviço"
-          }
-        }
-      }
-    },
-    "/api/v1/pdf/extract": {
-      "post": {
-        "summary": "Processa um documento PDF",
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "file"
-                ],
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Documento processado"
-          },
-          "400": {
-            "description": "Arquivo ausente ou inválido"
-          },
-          "401": {
-            "description": "API Key ausente ou inválida"
-          },
-          "500": {
-            "description": "Erro interno"
-          }
-        }
-      }
-    },
-    "/api/v1/pdf/extract-batch": {
-      "post": {
-        "summary": "Processa até 10 documentos PDF",
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "files"
-                ],
-                "properties": {
-                  "files": {
-                    "type": "array",
-                    "maxItems": 10,
-                    "items": {
-                      "type": "string",
-                      "format": "binary"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Lote processado"
-          },
-          "400": {
-            "description": "Arquivos ausentes ou inválidos"
-          },
-          "401": {
-            "description": "API Key ausente ou inválida"
-          },
-          "500": {
-            "description": "Erro interno"
-          }
-        }
-      }
-    },
-    "/api/v1/diagnostics": {
-      "get": {
-        "tags": [
-          "Diagnóstico"
-        ],
-        "summary": "Retorna métricas operacionais em memória",
-        "description": "Endpoint protegido por X-API-Key. Exibe volume processado, sucesso, falhas, confiança, parsers ativos e tempo médio. As métricas reiniciam quando o processo ou contêiner é reiniciado.",
-        "operationId": "getDiagnostics",
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Diagnóstico operacional retornado com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiagnosticsResponse"
-                },
-                "example": {
-                  "success": true,
-                  "message": "Diagnóstico operacional do serviço.",
-                  "requestId": "a1cb5279-4b56-442d-876c-bf4b1ae23aca",
-                  "data": {
-                    "service": "pes2b-document-service",
-                    "environment": "production",
-                    "engineVersion": "1.10.0",
-                    "startedAt": "2026-07-18T12:26:10.849Z",
-                    "uptimeSeconds": 104,
-                    "processedDocuments": 0,
-                    "successfulDocuments": 0,
-                    "failedDocuments": 0,
-                    "successRate": 1,
-                    "blockedByConfidence": 0,
-                    "unknownDocuments": 0,
-                    "rejectedUploads": 0,
-                    "averageProcessingMs": 0,
-                    "parsers": {
-                      "total": 6,
-                      "active": 6,
-                      "inactive": 0
-                    },
-                    "byDocumentType": {},
-                    "byConfidenceLevel": {
-                      "HIGH": 0,
-                      "MEDIUM": 0,
-                      "LOW": 0
-                    }
-                  },
-                  "errors": [],
-                  "warnings": [
-                    "As métricas são mantidas em memória e reiniciadas quando o serviço é reiniciado."
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API Key ausente ou inválida",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "tags": [
-    {
-      "name": "Diagnóstico",
-      "description": "Métricas operacionais e diagnóstico protegido do serviço"
-    }
-  ]
+  }
 }
