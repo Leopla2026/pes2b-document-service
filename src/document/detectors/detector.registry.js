@@ -1,7 +1,9 @@
 const simplesDetector = require('./familias/simples.detector');
+const municipalDetector = require('./familias/municipal.detector');
 
 const detectors = Object.freeze([
-  simplesDetector
+  simplesDetector,
+  municipalDetector
 ]);
 
 function confidenceLevel(confidence) {

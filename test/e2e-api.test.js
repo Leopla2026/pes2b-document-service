@@ -147,3 +147,69 @@ test('E2E: ausência de arquivo mantém erro HTTP compatível com o n8n', async 
     assert.ok(body.requestId);
   });
 });
+
+test('E2E: DEC POA percorre HTTP e é reconhecido sem parser municipal', async () => {
+  await withServer(async baseUrl => {
+    const response = await postPdf(
+      baseUrl,
+      'dec-poa.pdf'
+    );
+
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.success, true);
+
+    assert.equal(
+      body.documentType,
+      'DEC_POA_DECLARACAO_MENSAL'
+    );
+
+    assert.equal(
+      body.engine.family,
+      'DECLARACAO_MUNICIPAL'
+    );
+
+    assert.equal(
+      body.engine.detector,
+      'municipal.detector'
+    );
+
+    assert.equal(
+      body.engine.confidenceLevel,
+      'HIGH'
+    );
+
+    assert.equal(
+      body.engine.parser,
+      'none'
+    );
+
+    assert.equal(
+      body.engine.parserExecuted,
+      false
+    );
+
+    assert.equal(
+      body.engine.parserBlocked,
+      false
+    );
+
+    assert.deepEqual(
+      body.data,
+      {}
+    );
+
+    assert.deepEqual(
+      body.errors,
+      []
+    );
+
+    assert.ok(body.requestId);
+
+    assert.equal(
+      response.headers.get('x-request-id'),
+      body.requestId
+    );
+  });
+});
