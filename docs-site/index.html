@@ -20,6 +20,7 @@
     <a href="#overview">Visão geral</a>
     <a href="#getting-started">Primeiros passos</a>
     <a href="#extract">Extração</a>
+    <a href="#efd-auxiliary">Auxiliares EFD</a>
     <a href="#simples">Simples Nacional</a>
     <a href="#municipal">Declarações municipais</a>
     <a href="#new-document">Novo parser</a>
@@ -39,6 +40,7 @@
     <a href="#health">Health checks</a>
     <a href="#diagnostics">Diagnóstico operacional</a>
     <a href="#extract">Processar PDF</a>
+    <a href="#efd-auxiliary">Auxiliares EFD-Contribuições</a>
     <a href="#batch">Processamento em lote</a>
     <a href="#request">Requisição</a>
     <a href="#response">Resposta</a>
@@ -174,6 +176,21 @@
       <span class="eyebrow">PROCESSAMENTO EM LOTE</span><h2>Processar vários PDFs</h2>
       <div class="endpoint"><span class="method method-post">POST</span><code>/api/v1/pdf/extract-batch</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
       <p>Processa até 10 arquivos por requisição. Envie os PDFs no campo multipart <code>files</code>.</p>
+    </section>
+
+    <section id="efd-auxiliary">
+      <span class="eyebrow">EFD-CONTRIBUIÇÕES</span><h2>Interpretar arquivos auxiliares TXT e REC</h2>
+      <div class="endpoint"><span class="method method-post">POST</span><code>/api/v1/efd-contribuicoes/auxiliary/parse</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
+      <p>Recebe um arquivo por requisição no campo multipart <code>file</code>. Aceita somente <code>.txt</code> e <code>.REC</code>.</p>
+      <ul>
+        <li><strong>TXT:</strong> lê o registro <code>0000</code>, retorna CNPJ, razão social, período, competência e o MD5 calculado sobre os bytes originais.</li>
+        <li><strong>REC:</strong> interpreta o formato <code>RCP01</code>, retornando CNPJ, data/hora, MD5 do TXT referenciado e dois identificadores técnicos sem atribuição de significado não comprovado.</li>
+      </ul>
+      <div class="code-card"><button class="copy-button" data-copy="curl -X POST 'https://document.pes2b.com/api/v1/efd-contribuicoes/auxiliary/parse' -H 'X-API-Key: SUA_CHAVE' -F 'file=@sped.txt'">Copiar</button><pre><code>curl -X POST \
+  'https://document.pes2b.com/api/v1/efd-contribuicoes/auxiliary/parse' \
+  -H 'X-API-Key: SUA_CHAVE' \
+  -F 'file=@sped.txt'</code></pre></div>
+      <div class="callout callout-info">A API não correlaciona os arquivos. A comparação entre <code>md5</code> do TXT e <code>md5TxtReferenciado</code> do REC deve ser feita pelo consumidor.</div>
     </section>
 
     <section id="request">

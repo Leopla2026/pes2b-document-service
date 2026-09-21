@@ -7,6 +7,7 @@ const infoRoutes = require('./routes/info.routes');
 const openApiRoutes = require('./routes/openapi.routes');
 const pdfRoutes = require('./routes/pdf.routes');
 const diagnosticsRoutes = require('./routes/diagnostics.routes');
+const efdContribuicoesRoutes = require('./routes/efd-contribuicoes.routes');
 const requestIdMiddleware = require('./middleware/request-id.middleware');
 const requestObservabilityMiddleware = require('./middleware/request-observability.middleware');
 const apiKeyMiddleware = require('./middleware/api-key.middleware');
@@ -27,6 +28,7 @@ app.use('/openapi.json', openApiRoutes);
 
 app.use('/api/v1/diagnostics', apiKeyMiddleware, diagnosticsRoutes);
 app.use('/api/v1/pdf', apiKeyMiddleware, pdfRoutes);
+app.use('/api/v1/efd-contribuicoes', apiKeyMiddleware, efdContribuicoesRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

@@ -24,6 +24,7 @@ Envie a API Key no cabeçalho `X-API-Key`.
 - `GET /openapi.json`
 - `POST /api/v1/pdf/extract`
 - `POST /api/v1/pdf/extract-batch`
+- `POST /api/v1/efd-contribuicoes/auxiliary/parse`
 - `GET /api/v1/diagnostics`
 
 ## Processar um PDF
@@ -58,6 +59,23 @@ curl -X POST \
 ```
 
 A divergência é informada em `validation.valid = false`; o consumidor decide se deve interromper o processo.
+
+## Arquivos auxiliares da EFD-Contribuições
+
+`POST /api/v1/efd-contribuicoes/auxiliary/parse`
+
+Recebe um arquivo por requisição no campo multipart `file`, aceitando somente `.txt` ou `.REC`.
+
+- TXT: extrai o registro `0000` e calcula o MD5 sobre os bytes originais.
+- REC: interpreta o formato `RCP01` e retorna CNPJ, data/hora, MD5 referenciado e dois identificadores técnicos sem significado presumido.
+- A correlação entre os arquivos fica a cargo do consumidor.
+
+```bash
+curl -X POST \
+  'https://document.pes2b.com/api/v1/efd-contribuicoes/auxiliary/parse' \
+  -H 'X-API-Key: SUA_CHAVE' \
+  -F 'file=@sped.txt'
+```
 
 ## Documentos reconhecidos
 

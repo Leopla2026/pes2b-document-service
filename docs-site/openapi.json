@@ -311,6 +311,98 @@
         }
       }
     },
+    "/api/v1/efd-contribuicoes/auxiliary/parse": {
+      "post": {
+        "tags": [
+          "Documentos"
+        ],
+        "summary": "Interpreta arquivo auxiliar TXT ou REC da EFD-Contribuições",
+        "operationId": "parseEfdContribuicoesAuxiliary",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Um arquivo .txt ou .REC da EFD-Contribuições"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Arquivo auxiliar interpretado",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "txt": {
+                    "summary": "TXT da escrituração",
+                    "value": {
+                      "success": true,
+                      "tipoArquivo": "EFD_CONTRIBUICOES_TXT",
+                      "cnpj": "40799826000187",
+                      "empresa": "EMPRESA EXEMPLO LTDA",
+                      "dataInicial": "2026-07-01",
+                      "dataFinal": "2026-07-31",
+                      "competencia": "07/2026",
+                      "md5": "0745F7FCBECBA8BCBBA7D02C216BCA55"
+                    }
+                  },
+                  "rec": {
+                    "summary": "REC no formato RCP01",
+                    "value": {
+                      "success": true,
+                      "tipoArquivo": "EFD_CONTRIBUICOES_REC",
+                      "formato": "RCP01",
+                      "cnpj": "40799826000187",
+                      "dataHora": "2026-08-24T21:28:14",
+                      "md5TxtReferenciado": "0745F7FCBECBA8BCBBA7D02C216BCA55",
+                      "identificadorTecnico1": "...",
+                      "identificadorTecnico2": "..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Arquivo ausente ou extensão não suportada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Conteúdo TXT ou REC inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "/api/v1/pdf/extract-batch": {
       "post": {
         "tags": [
