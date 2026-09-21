@@ -430,8 +430,8 @@
                     "rejectedUploads": 0,
                     "averageProcessingMs": 0,
                     "parsers": {
-                      "total": 7,
-                      "active": 7,
+                      "total": 10,
+                      "active": 10,
                       "inactive": 0
                     },
                     "byDocumentType": {},

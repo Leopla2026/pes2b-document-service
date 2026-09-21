@@ -151,7 +151,7 @@
     "unknownDocuments": 0,
     "rejectedUploads": 0,
     "averageProcessingMs": 0,
-    "parsers": { "total": 7, "active": 7, "inactive": 0 },
+    "parsers": { "total": 10, "active": 10, "inactive": 0 },
     "byDocumentType": {},
     "byConfidenceLevel": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 }
   },
@@ -919,7 +919,7 @@ item 2: role = RECIBO     | binary.file</code></pre></div>
         <article class="feature-card"><strong>Detecção por família</strong><p>Regras ponderadas identificam o documento, registram regras encontradas e calculam confiança real.</p></article>
         <article class="feature-card"><strong>Registry central</strong><p>Cada parser declara família, versão, status, schema e confiança mínima.</p></article>
         <article class="feature-card"><strong>Parser modular</strong><p>Cada documento possui <code>index.js</code>, <code>parser.js</code>, <code>schema.js</code> e <code>rules.js</code>.</p></article>
-        <article class="feature-card"><strong>Qualidade automatizada</strong><p>Fixtures anonimizadas e testes unitários, de contrato e end-to-end protegem os formatos homologados. O contrato DEC POA 1.0.0 foi homologado em produção após 115 testes automatizados aprovados.</p></article>
+        <article class="feature-card"><strong>Qualidade automatizada</strong><p>Fixtures anonimizadas e testes unitários, de contrato e end-to-end protegem os formatos homologados. A suíte atual foi aprovada com 128 testes automatizados, incluindo a regressão dos documentos já suportados.</p></article>
         <article class="feature-card"><strong>Logs estruturados</strong><p>Eventos JSON registram requestId, documento, confiança, parser, duração e motivo de falha.</p></article>
         <article class="feature-card"><strong>Métricas operacionais</strong><p>O endpoint de diagnóstico consolida volume, taxa de sucesso, tempo médio e níveis de confiança.</p></article>
         <article class="feature-card"><strong>Validadores de contexto</strong><p>Comparam dados esperados e extraídos sem acoplar regras de negócio ao parser.</p></article>

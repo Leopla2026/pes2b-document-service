@@ -168,7 +168,7 @@ Exemplo:
     "unknownDocuments": 0,
     "rejectedUploads": 0,
     "averageProcessingMs": 0,
-    "parsers": { "total": 7, "active": 7, "inactive": 0 },
+    "parsers": { "total": 10, "active": 10, "inactive": 0 },
     "byDocumentType": {},
     "byConfidenceLevel": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 }
   },
@@ -223,7 +223,7 @@ A engine `1.11.0` utiliza:
 - logs estruturados em JSON;
 - rastreamento por `requestId`;
 - métricas operacionais em memória;
-- contrato DEC POA 1.0.0 homologado em produção após 115 testes automatizados aprovados.
+- suíte atual aprovada com 128 testes automatizados, incluindo a regressão dos documentos já suportados.
 
 ## Declarações municipais — DEC Porto Alegre
 
