@@ -114,13 +114,13 @@ test('endpoint de diagnóstico reflete documento processado', async () => {
 
     assert.equal(response.status, 200);
     assert.equal(body.success, true);
-    assert.equal(body.data.engineVersion, '1.10.0');
+    assert.equal(body.data.engineVersion, '1.11.0');
     assert.equal(body.data.processedDocuments, 1);
     assert.equal(body.data.successfulDocuments, 1);
     assert.equal(body.data.failedDocuments, 0);
     assert.equal(body.data.byDocumentType.DAS, 1);
     assert.ok(body.data.averageProcessingMs >= 0);
-    assert.equal(body.data.parsers.active, 7);
+    assert.equal(body.data.parsers.active, 10);
     assert.ok(body.requestId);
     assert.equal(body.warnings.length, 1);
   });

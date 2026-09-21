@@ -8,7 +8,7 @@
 ## Versões atuais
 
 - **API pública:** `2.0.0`
-- **Engine documental:** `1.10.0`
+- **Engine documental:** `1.11.0`
 - **Rota principal:** `/api/v1`
 
 A versão da API representa o contrato público. A versão da engine identifica a evolução interna de detecção, parsers, confiança e métricas.
@@ -70,10 +70,49 @@ A divergência é informada em `validation.valid = false`; o consumidor decide s
 | Relatório do Simples | `RELATORIO_SIMPLES` | Resumo, RBT12, apurações, consolidação por anexo e carga tributária. |
 | Declaração de faturamento | `DECLARACAO_FATURAMENTO` | Período, faturamento mensal, total, emissão, responsável e validações. |
 | Declaração + recibo PGDAS no mesmo PDF | `COMBINADO_DECLARACAO_RECIBO_PGDAS` | Separação automática em dois documentos estruturados. |
+| Documento de Arrecadação de Receitas Federais | `DARF` | Uma ou mais linhas de tributo, códigos, regime PIS/COFINS, período mensal ou trimestral e valores. |
+| Recibo EFD-Contribuições | `RECIBO_EFD_CONTRIBUICOES` | Escrituração, PIS/COFINS cumulativos e não cumulativos, CPRB e transmissão. |
+| Relatório completo DCTFWeb | `DCTFWEB` | Declaração, MIT, responsáveis, todos os débitos e totais consolidados. |
 | DEC Porto Alegre — Declaração Mensal de ISSQN | `DEC_POA_DECLARACAO_MENSAL` | Empresa, competência, município, valores fiscais, recibo, guia opcional, validação de contexto e PDFs separados. |
 | Documento não reconhecido | `NAO_IDENTIFICADO` | Metadados técnicos e indicação para conferência manual. |
 
 ## Processar em lote
+
+### Documentos fiscais federais
+
+Os três tipos federais são aditivos e utilizam o mesmo envelope do endpoint atual.
+
+- `DARF` percorre todas as linhas da composição e mantém os tributos em `data.tributos`. O parser não usa o vencimento como competência tributária. Para IRPJ/CSLL trimestrais, preserva `trimestre` e `anoTrimestre`.
+- Em possíveis quotas trimestrais, `data.parcelamento.numeroQuota` permanece `null` quando o próprio documento não informa o número. A correlação entre guias deve ser feita pelo consumidor.
+- PIS e COFINS usam `regime = CUMULATIVO`, `NAO_CUMULATIVO` ou `NAO_IDENTIFICADO`; códigos conhecidos auxiliam a leitura, mas o contrato aceita outros códigos.
+- `RECIBO_EFD_CONTRIBUICOES` preserva simultaneamente blocos cumulativos e não cumulativos, inclusive quando um deles está zerado.
+- `DCTFWEB` retorna todos os itens em `data.debitos` e consolida quantidades e valores em `data.resumo`.
+- Campos sem evidência suficiente retornam `null`; nenhum número de quota, regime ou dado ausente é inventado.
+
+Exemplo resumido de quota trimestral:
+
+```json
+{
+  "documentType": "DARF",
+  "data": {
+    "tributos": [{
+      "tributo": "CSLL",
+      "codigoReceita": "2372",
+      "periodicidade": "TRIMESTRAL",
+      "trimestre": 2,
+      "anoTrimestre": 2026,
+      "principal": 14836.90,
+      "juros": 148.36,
+      "total": 14985.26
+    }],
+    "parcelamento": {
+      "possivelQuotaTrimestral": true,
+      "numeroQuota": null,
+      "totalQuotas": null
+    }
+  }
+}
+```
 
 Envie até 10 PDFs no campo multipart `files`.
 
@@ -119,7 +158,7 @@ Exemplo:
   "data": {
     "service": "pes2b-document-service",
     "environment": "production",
-    "engineVersion": "1.10.0",
+    "engineVersion": "1.11.0",
     "uptimeSeconds": 104,
     "processedDocuments": 0,
     "successfulDocuments": 0,
@@ -149,7 +188,7 @@ A resposta de processamento pode incluir o objeto `engine`, com dados técnicos 
 ```json
 {
   "engine": {
-    "version": "1.10.0",
+    "version": "1.11.0",
     "family": "SIMPLES_NACIONAL",
     "detector": "simples.detector",
     "parser": "declaracao",
@@ -172,7 +211,7 @@ Os níveis são: `HIGH` para confiança igual ou superior a `0.90`, `MEDIUM` a p
 
 ## Arquitetura e qualidade
 
-A engine `1.10.0` utiliza:
+A engine `1.11.0` utiliza:
 
 - detectores organizados por família documental;
 - registry central de parsers com versão, status e schema;
@@ -207,7 +246,7 @@ O DEC POA adiciona, sem remover ou renomear campos existentes:
 - `parseId`: UUID único por interpretação;
 - `contract`: `version=1.0.0`, `adapter=dec-poa`, `layoutVersion=2026.1`;
 - `document`: SHA-256 do PDF original, número de páginas e tamanho em bytes;
-- `processing`: `startedAt`, `finishedAt`, `durationMs`, `engine=pes2b-document-engine` e `engineVersion=1.9.0`;
+- `processing`: `startedAt`, `finishedAt`, `durationMs`, `engine=pes2b-document-engine` e `engineVersion=1.11.0`;
 - `isExpectedDocument`: `true` quando o contexto esperado foi enviado e validado, `false` quando diverge e `null` quando não foi enviado;
 - `classification`: atualmente `DECLARACAO_MENSAL`; enum preparado para `DECLARACAO_RETIFICADORA`, `DECLARACAO_SEM_MOVIMENTO`, `DECLARACAO_COM_MOVIMENTO`, `GUIA_AVULSA`, `RECIBO` e `OUTRO`;
 - `confidence`: `company`, `competence`, `financial`, `receipt` e `guide`. `1` significa que os campos mínimos objetivos estão presentes; `null` significa evidência insuficiente. Não é uma probabilidade estatística.
@@ -258,7 +297,7 @@ Quando não existe guia, o array `documents` contém somente `DECLARACAO` e `REC
   "parseId": "e495bf27-fc09-47fc-b7c3-101801946144",
   "contract": { "version": "1.0.0", "adapter": "dec-poa", "layoutVersion": "2026.1" },
   "document": { "sha256": "82cea2978caabcf03a391037f3600331e6f8dbf3a30eff1590d00707cb85c473", "pages": 4, "size": 21807 },
-  "processing": { "durationMs": 682, "engine": "pes2b-document-engine", "engineVersion": "1.9.0" },
+  "processing": { "durationMs": 682, "engine": "pes2b-document-engine", "engineVersion": "1.11.0" },
   "isExpectedDocument": true,
   "confidence": { "company": 1, "competence": 1, "financial": 1, "receipt": 1, "guide": 1 },
   "compound": true,

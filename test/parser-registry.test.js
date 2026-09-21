@@ -24,7 +24,7 @@ test('registry preserva acesso direto compatível com a versão anterior', () =>
 test('registry lista metadados sem expor implementação por padrão', () => {
   const parsers = registry.list();
 
-  assert.equal(parsers.length, 7);
+  assert.equal(parsers.length, 10);
   assert.ok(
   parsers.some(
     item => item.family === 'SIMPLES_NACIONAL'
@@ -36,6 +36,11 @@ assert.ok(
     item => item.family === 'DECLARACAO_MUNICIPAL'
   )
 );
+assert.ok(
+  parsers.some(
+    item => item.family === 'FISCAL_FEDERAL'
+  )
+);
   assert.ok(parsers.every(item => item.status === 'active'));
   assert.ok(parsers.every(item => !Object.hasOwn(item, 'parser')));
 });
@@ -44,7 +49,7 @@ test('registry valida todas as definições cadastradas', () => {
   const result = registry.validate();
 
   assert.equal(result.valid, true);
-  assert.equal(result.count, 7);
+  assert.equal(result.count, 10);
   assert.deepEqual(result.errors, []);
 });
 

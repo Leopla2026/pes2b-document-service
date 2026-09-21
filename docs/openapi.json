@@ -61,6 +61,368 @@
             }
           }
         }
+      },
+      "ExtractedDocumentData": {
+        "type": "object",
+        "description": "Estrutura variável conforme o tipo documental reconhecido.",
+        "properties": {
+          "tributos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FederalTaxItem"
+            }
+          },
+          "debitos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DctfwebDebit"
+            }
+          },
+          "parcelamento": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "DocumentExtractionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "documentType": {
+            "type": "string",
+            "enum": [
+              "DECLARACAO_PGDAS",
+              "RECIBO_PGDAS",
+              "DAS",
+              "EXTRATO_PGDAS",
+              "RELATORIO_SIMPLES",
+              "DECLARACAO_FATURAMENTO",
+              "COMBINADO_DECLARACAO_RECIBO_PGDAS",
+              "DEC_POA_DECLARACAO_MENSAL",
+              "DARF",
+              "RECIBO_EFD_CONTRIBUICOES",
+              "DCTFWEB",
+              "NAO_IDENTIFICADO"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExtractedDocumentData"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "FederalTaxItem": {
+        "type": "object",
+        "properties": {
+          "tributo": {
+            "type": "string",
+            "enum": [
+              "PIS",
+              "COFINS",
+              "IRPJ",
+              "CSLL",
+              "OUTRO"
+            ]
+          },
+          "codigoReceita": {
+            "type": "string",
+            "example": "8109"
+          },
+          "codigoVariacao": {
+            "type": "string",
+            "nullable": true,
+            "example": "02"
+          },
+          "denominacao": {
+            "type": "string"
+          },
+          "descricaoDetalhada": {
+            "type": "string"
+          },
+          "regime": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "CUMULATIVO",
+              "NAO_CUMULATIVO",
+              "NAO_IDENTIFICADO"
+            ]
+          },
+          "periodicidade": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "MENSAL",
+              "TRIMESTRAL"
+            ]
+          },
+          "periodoApuracao": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimestre": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 4
+          },
+          "anoTrimestre": {
+            "type": "integer",
+            "nullable": true
+          },
+          "principal": {
+            "type": "number",
+            "nullable": true
+          },
+          "multa": {
+            "type": "number",
+            "nullable": true
+          },
+          "juros": {
+            "type": "number",
+            "nullable": true
+          },
+          "total": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "DarfData": {
+        "type": "object",
+        "description": "Dados de DARF. Um único documento pode conter vários tributos.",
+        "properties": {
+          "identificacao": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "documento": {
+            "type": "object",
+            "properties": {
+              "numeroDocumento": {
+                "type": "string"
+              },
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "DARF"
+                ]
+              },
+              "origem": {
+                "type": "string",
+                "nullable": true
+              },
+              "numeroReciboDeclaracao": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "datas": {
+            "type": "object",
+            "properties": {
+              "periodoApuracaoOriginal": {
+                "type": "string",
+                "nullable": true
+              },
+              "periodoApuracaoISO": {
+                "type": "string",
+                "nullable": true
+              },
+              "vencimento": {
+                "type": "string"
+              },
+              "vencimentoISO": {
+                "type": "string",
+                "format": "date",
+                "nullable": true
+              },
+              "dataEmissao": {
+                "type": "string",
+                "nullable": true
+              },
+              "dataEmissaoISO": {
+                "type": "string",
+                "format": "date",
+                "nullable": true
+              }
+            }
+          },
+          "valores": {
+            "type": "object",
+            "properties": {
+              "principal": {
+                "type": "number",
+                "nullable": true
+              },
+              "multa": {
+                "type": "number",
+                "nullable": true
+              },
+              "juros": {
+                "type": "number",
+                "nullable": true
+              },
+              "total": {
+                "type": "number",
+                "nullable": true
+              }
+            }
+          },
+          "tributos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FederalTaxItem"
+            }
+          },
+          "parcelamento": {
+            "type": "object",
+            "description": "Em tributos trimestrais o número da quota permanece null quando o PDF não o informa.",
+            "properties": {
+              "possivelQuotaTrimestral": {
+                "type": "boolean"
+              },
+              "numeroQuota": {
+                "type": "integer",
+                "nullable": true
+              },
+              "totalQuotas": {
+                "type": "integer",
+                "nullable": true
+              },
+              "criterioIdentificacao": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "resumo": {
+            "type": "object",
+            "properties": {
+              "quantidadeTributos": {
+                "type": "integer"
+              },
+              "darfUnificado": {
+                "type": "boolean"
+              },
+              "tributosIdentificados": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "EfdContribuicoesData": {
+        "type": "object",
+        "description": "Recibo EFD-Contribuições com blocos cumulativo, não cumulativo, CPRB e transmissão.",
+        "properties": {
+          "identificacao": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "escrituracao": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "pis": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "cofins": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "cprb": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "transmissao": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "DctfwebDebit": {
+        "type": "object",
+        "properties": {
+          "codigoReceita": {
+            "type": "string",
+            "example": "8109-02"
+          },
+          "tributo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "periodoApuracao": {
+            "type": "string",
+            "example": "07/2026"
+          },
+          "debitoApurado": {
+            "type": "number"
+          },
+          "saldoPagar": {
+            "type": "number"
+          }
+        }
+      },
+      "DctfwebData": {
+        "type": "object",
+        "description": "Relatório completo da DCTFWeb, incluindo todos os débitos encontrados.",
+        "properties": {
+          "identificacao": {
+            "$ref": "#/components/schemas/Identification"
+          },
+          "declaracao": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "dadosIniciais": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "mit": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "representante": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "responsavelPreenchimento": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "debitos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DctfwebDebit"
+            }
+          },
+          "resumo": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
       }
     }
   },
@@ -114,7 +476,14 @@
         },
         "responses": {
           "200": {
-            "description": "Documento processado"
+            "description": "Documento processado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentExtractionResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Arquivo ausente ou inválido"

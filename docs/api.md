@@ -63,6 +63,16 @@ A versão 2.0 retorna todas as apurações encontradas:
 
 `apuracoes` preserva cada segregação tributária. `consolidacaoPorAnexo` agrupa as apurações para relatórios e e-mails.
 
+## Documentos fiscais federais
+
+A engine 1.11.0 acrescenta, sem alterar os tipos anteriores:
+
+- `DARF`: retorna todas as linhas em `data.tributos`, com códigos, regime, valores e período mensal ou trimestral;
+- `RECIBO_EFD_CONTRIBUICOES`: retorna identificação, blocos PIS/COFINS cumulativos e não cumulativos, CPRB e transmissão;
+- `DCTFWEB`: retorna declaração, MIT, responsáveis, todos os débitos e resumo consolidado.
+
+Em DARFs trimestrais, o vencimento não é usado como competência. Quando o PDF não informa o número da quota, `data.parcelamento.numeroQuota` permanece `null`.
+
 ## Request ID
 
 Toda resposta contém o cabeçalho `X-Request-Id`. Também é possível enviar um identificador próprio no mesmo cabeçalho.

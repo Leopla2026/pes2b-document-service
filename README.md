@@ -6,6 +6,7 @@ API para extração e estruturação de documentos usados nas automações da P&
 
 - identificação e leitura de PDFs do Simples Nacional;
 - declaração, recibo, DAS, extrato, relatório e declaração de faturamento;
+- DARF, Recibo EFD-Contribuições e relatório completo DCTFWeb;
 - declaração original e retificadora;
 - separação de declaração e recibo combinados;
 - múltiplas apurações e consolidação por anexo;

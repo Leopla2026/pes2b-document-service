@@ -98,7 +98,7 @@ assert.equal(
 
     assert.equal(
       resultado.processing.engineVersion,
-      '1.9.0'
+      '1.11.0'
     );
 
     assert.equal(

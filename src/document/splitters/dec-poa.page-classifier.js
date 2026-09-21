@@ -1,4 +1,4 @@
-const pdf = require('pdf-parse');
+const pdfExtractor = require('../extractors/pdf.extractor');
 const textNormalizer = require('../utils/text.normalizer');
 
 function normalizar(texto) {
@@ -43,30 +43,13 @@ function classificarTextoPagina(texto) {
 }
 
 async function extrairPaginas(buffer) {
-  const pages = [];
+  const pageTexts = await pdfExtractor.extractPages(buffer);
 
-  const options = {
-    pagerender: async function(pageData) {
-      const textContent =
-        await pageData.getTextContent();
-
-      const texto = textContent.items
-        .map(item => item.str)
-        .join(' ');
-
-      pages.push({
-        pageNumber: pages.length + 1,
-        text: textNormalizer.normalize(texto),
-        type: classificarTextoPagina(texto)
-      });
-
-      return texto;
-    }
-  };
-
-  await pdf(buffer, options);
-
-  return pages;
+  return pageTexts.map((text, index) => ({
+    pageNumber: index + 1,
+    text,
+    type: classificarTextoPagina(text)
+  }));
 }
 
 module.exports = {

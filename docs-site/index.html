@@ -61,7 +61,7 @@
 
   <main class="content">
     <section id="overview" class="hero">
-      <span class="badge">API 2.0.0 • ENGINE 1.10.0 • ESTÁVEL</span>
+      <span class="badge">API 2.0.0 • ENGINE 1.11.0 • ESTÁVEL</span>
       <h1>Documentos fiscais transformados em dados estruturados</h1>
       <p>API para identificação e extração de informações de PDFs fiscais e contábeis, preparada para automações com n8n, Microsoft 365 e sistemas internos do grupo P&S2B.</p>
       <div class="hero-actions">
@@ -79,7 +79,7 @@
         <article class="status-card"><span>Status</span><strong data-api-status>Consultando...</strong></article>
         <article class="status-card"><span>Versão</span><strong data-api-version>2.0.0</strong></article>
         <article class="status-card"><span>Tempo de resposta</span><strong data-api-response-time>Consultando...</strong></article>
-        <article class="status-card"><span>Engine documental</span><strong>1.10.0</strong></article>
+        <article class="status-card"><span>Engine documental</span><strong>1.11.0</strong></article>
       </div>
       <p class="status-updated">Última verificação: <strong data-api-checked-at>aguardando...</strong></p>
     </section>
@@ -141,7 +141,7 @@
   "data": {
     "service": "pes2b-document-service",
     "environment": "production",
-    "engineVersion": "1.10.0",
+    "engineVersion": "1.11.0",
     "uptimeSeconds": 104,
     "processedDocuments": 0,
     "successfulDocuments": 0,
@@ -207,7 +207,7 @@
   "success": true,
   "documentType": "DECLARACAO_PGDAS",
   "engine": {
-    "version": "1.10.0",
+    "version": "1.11.0",
     "family": "SIMPLES_NACIONAL",
     "detector": "simples.detector",
     "parser": "declaracao",
@@ -335,7 +335,7 @@
   "parseId": "e495bf27-fc09-47fc-b7c3-101801946144",
   "contract": { "version": "1.0.0", "adapter": "dec-poa", "layoutVersion": "2026.1" },
   "document": { "sha256": "82cea2978caabcf03a391037f3600331e6f8dbf3a30eff1590d00707cb85c473", "pages": 4, "size": 21807 },
-  "processing": { "startedAt": "2026-09-02T18:49:30.000Z", "finishedAt": "2026-09-02T18:49:30.682Z", "durationMs": 682, "engine": "pes2b-document-engine", "engineVersion": "1.9.0" },
+  "processing": { "startedAt": "2026-09-02T18:49:30.000Z", "finishedAt": "2026-09-02T18:49:30.682Z", "durationMs": 682, "engine": "pes2b-document-engine", "engineVersion": "1.11.0" },
   "isExpectedDocument": true,
   "confidence": { "company": 1, "competence": 1, "financial": 1, "receipt": 1, "guide": 1 },
   "compound": true,
@@ -437,6 +437,9 @@
         <tr><td>Relatório do Simples</td><td><code>RELATORIO_SIMPLES</code></td><td>Resumo, RBT12, apurações, consolidação por anexo e carga tributária.</td></tr>
         <tr><td>Declaração de faturamento</td><td><code>DECLARACAO_FATURAMENTO</code></td><td>Período, faturamento mensal, total, emissão, responsável e validações.</td></tr>
         <tr><td>Declaração + recibo no mesmo PDF</td><td><code>COMBINADO_DECLARACAO_RECIBO_PGDAS</code></td><td>Separação automática em dois documentos estruturados.</td></tr>
+        <tr><td>Documento de Arrecadação de Receitas Federais</td><td><code>DARF</code></td><td>Tributos, códigos e variações, regime PIS/COFINS, período mensal ou trimestral, valores, vencimento e indício seguro de quota.</td></tr>
+        <tr><td>Recibo EFD-Contribuições</td><td><code>RECIBO_EFD_CONTRIBUICOES</code></td><td>Identificação da escrituração, PIS/COFINS cumulativos e não cumulativos, CPRB e transmissão.</td></tr>
+        <tr><td>Relatório completo DCTFWeb</td><td><code>DCTFWEB</code></td><td>Declaração, MIT, responsáveis, coleção de débitos e totais consolidados.</td></tr>
         <tr><td>DEC Porto Alegre — Declaração Mensal de ISSQN</td><td><code>DEC_POA_DECLARACAO_MENSAL</code></td><td>Empresa, competência, município, valores fiscais, recibo, guia opcional, validação de contexto e PDFs separados.</td></tr>
         <tr><td>Documento não reconhecido</td><td><code>NAO_IDENTIFICADO</code></td><td>Metadados técnicos e indicação para conferência manual.</td></tr>
       </tbody></table></div>
@@ -689,6 +692,60 @@
 }</code></pre></div>
         </details>
         <details class="json-example">
+          <summary><span>DARF</span><code>DARF</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-darf">Copiar</button><pre id="json-darf"><code>{
+  "success": true,
+  "documentType": "DARF",
+  "data": {
+    "identificacao": { "empresa": "EMPRESA EXEMPLO LTDA.", "cnpj": "12.345.678/0001-90", "competencia": "06/2026" },
+    "documento": { "numeroDocumento": "07.16.26233.8951119-4", "tipo": "DARF", "origem": "SENDA" },
+    "datas": { "vencimento": "31/08/2026", "vencimentoISO": "2026-08-31" },
+    "valores": { "principal": 14836.90, "multa": 0, "juros": 148.36, "total": 14985.26 },
+    "tributos": [{
+      "tributo": "CSLL", "codigoReceita": "2372", "codigoVariacao": "01",
+      "periodicidade": "TRIMESTRAL", "periodoApuracao": "2º Trimestre/2026",
+      "trimestre": 2, "anoTrimestre": 2026, "principal": 14836.90, "juros": 148.36, "total": 14985.26
+    }],
+    "parcelamento": { "possivelQuotaTrimestral": true, "numeroQuota": null, "totalQuotas": null },
+    "resumo": { "quantidadeTributos": 1, "darfUnificado": false, "tributosIdentificados": ["CSLL"] }
+  }
+}</code></pre></div>
+          <div class="callout callout-warning"><strong>Quotas trimestrais:</strong> o vencimento não é usado como competência. Quando o próprio PDF não informa o número da quota, <code>numeroQuota</code> permanece <code>null</code>.</div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Recibo EFD-Contribuições</span><code>RECIBO_EFD_CONTRIBUICOES</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-efd">Copiar</button><pre id="json-efd"><code>{
+  "success": true,
+  "documentType": "RECIBO_EFD_CONTRIBUICOES",
+  "data": {
+    "identificacao": { "empresa": "EMPRESA EXEMPLO LTDA.", "cnpj": "12.345.678/0001-90", "competencia": "07/2026" },
+    "escrituracao": { "tipo": "ORIGINAL", "versaoEfd": "6.1.2", "periodoInicio": "01/07/2026", "periodoFim": "31/07/2026" },
+    "pis": { "naoCumulativo": { "valorRecolher": 0 }, "cumulativo": { "contribuicaoApurada": 8119.80, "valorRecolher": 8119.80 } },
+    "cofins": { "naoCumulativo": { "valorRecolher": 0 }, "cumulativo": { "contribuicaoApurada": 37476.00, "valorRecolher": 37476.00 } },
+    "transmissao": { "data": "24/08/2026", "dataISO": "2026-08-24", "hora": "16:08:58", "numeroRecibo": "RECIBO_ANONIMIZADO" }
+  }
+}</code></pre></div>
+        </details>
+
+        <details class="json-example">
+          <summary><span>Relatório completo DCTFWeb</span><code>DCTFWEB</code></summary>
+          <div class="code-card"><button class="copy-button" data-copy-target="json-dctfweb">Copiar</button><pre id="json-dctfweb"><code>{
+  "success": true,
+  "documentType": "DCTFWEB",
+  "data": {
+    "identificacao": { "empresa": "EMPRESA EXEMPLO LTDA.", "cnpj": "12.345.678/0001-90", "competencia": "07/2026" },
+    "declaracao": { "periodoApuracao": "07/2026", "numeroRecibo": "50000000000000", "origemApuracao": "MIT" },
+    "debitos": [
+      { "codigoReceita": "8109-02", "tributo": "PIS", "periodoApuracao": "07/2026", "debitoApurado": 19.79, "saldoPagar": 19.79 },
+      { "codigoReceita": "2172-01", "tributo": "COFINS", "periodoApuracao": "07/2026", "debitoApurado": 91.35, "saldoPagar": 91.35 }
+    ],
+    "resumo": { "quantidadeDebitos": 2, "valorTotalDebitos": 111.14, "valorTotalSaldoPagar": 111.14, "tributosIdentificados": ["PIS", "COFINS"] }
+  }
+}</code></pre></div>
+        </details>
+
+        <details class="json-example">
           <summary><span>DEC Porto Alegre — Declaração Mensal de ISSQN</span><code>DEC_POA_DECLARACAO_MENSAL</code></summary>
           <div class="code-card"><pre><code>{
   "documentType": "DEC_POA_DECLARACAO_MENSAL",
@@ -856,7 +913,7 @@ item 2: role = RECIBO     | binary.file</code></pre></div>
     </section>
 
     <section id="architecture">
-      <span class="eyebrow">ENGINE 1.10.0</span><h2>Arquitetura, testes e observabilidade</h2>
+      <span class="eyebrow">ENGINE 1.11.0</span><h2>Arquitetura, testes e observabilidade</h2>
       <p>A engine foi organizada para crescer por famílias documentais sem concentrar toda a lógica em um único detector ou parser.</p>
       <div class="feature-grid">
         <article class="feature-card"><strong>Detecção por família</strong><p>Regras ponderadas identificam o documento, registram regras encontradas e calculam confiança real.</p></article>
@@ -917,7 +974,7 @@ item 2: role = RECIBO     | binary.file</code></pre></div>
 
     <section id="versioning">
       <span class="eyebrow">EVOLUÇÃO</span><h2>Versionamento</h2>
-      <p>A API pública está na versão <code>2.0.0</code> e utiliza rotas <code>/api/v1</code>. A engine documental está na versão <code>1.10.0</code>. Alterações incompatíveis no contrato público serão publicadas em uma nova versão de rota; melhorias internas compatíveis evoluem a versão da engine.</p>
+      <p>A API pública está na versão <code>2.0.0</code> e utiliza rotas <code>/api/v1</code>. A engine documental está na versão <code>1.11.0</code>. Alterações incompatíveis no contrato público serão publicadas em uma nova versão de rota; melhorias internas compatíveis evoluem a versão da engine.</p>
     </section>
 
     <section id="security">

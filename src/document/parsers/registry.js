@@ -54,6 +54,24 @@ const definitions = Object.freeze({
     'declaracao-faturamento'
   ),
 
+  DARF: loadParser(
+    'darf',
+    'darf',
+    'federal'
+  ),
+
+  RECIBO_EFD_CONTRIBUICOES: loadParser(
+    'efd-contribuicoes',
+    'efd-contribuicoes',
+    'federal'
+  ),
+
+  DCTFWEB: loadParser(
+    'dctfweb',
+    'dctfweb',
+    'federal'
+  ),
+
   DEC_POA_DECLARACAO_MENSAL: loadParser(
     'dec-poa',
     'dec-poa',
