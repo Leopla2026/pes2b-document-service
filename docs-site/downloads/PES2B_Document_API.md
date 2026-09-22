@@ -66,7 +66,8 @@ A divergência é informada em `validation.valid = false`; o consumidor decide s
 
 Recebe um arquivo por requisição no campo multipart `file`, aceitando somente `.txt` ou `.REC`.
 
-- TXT: extrai o registro `0000` e calcula o MD5 sobre os bytes originais.
+- TXT: extrai identificação, regime e faturamento, com composição por CST, reconciliação, alertas e origens compactas; calcula o MD5 sobre os bytes originais.
+- A apuração usa `0111`/`0900` como referências e consolidações F/M para abranger receitas dos blocos A, C, D e F sem dupla contagem. Receita financeira só é separada com evidência conjunta de `F100` e `0500`/descrição; informações não comprováveis retornam `null`.
 - REC: interpreta o formato `RCP01` e retorna CNPJ, data/hora, MD5 referenciado e dois identificadores técnicos sem significado presumido.
 - A correlação entre os arquivos fica a cargo do consumidor.
 
