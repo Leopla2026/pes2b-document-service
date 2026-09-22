@@ -183,7 +183,8 @@
       <div class="endpoint"><span class="method method-post">POST</span><code>/api/v1/efd-contribuicoes/auxiliary/parse</code><span class="endpoint-badge endpoint-badge-protected">API Key</span></div>
       <p>Recebe um arquivo por requisição no campo multipart <code>file</code>. Aceita somente <code>.txt</code> e <code>.REC</code>.</p>
       <ul>
-        <li><strong>TXT:</strong> lê o registro <code>0000</code>, retorna CNPJ, razão social, período, competência e o MD5 calculado sobre os bytes originais.</li>
+        <li><strong>TXT:</strong> lê identificação, regime e receitas; retorna também <code>faturamento</code>, composição por CST, reconciliação, alertas e origens compactas. Usa <code>0111</code>/<code>0900</code> como referências e consolidações F/M sem dupla contagem.</li>
+        <li><strong>Receita financeira:</strong> só é separada quando <code>F100</code> e <code>0500</code>/descrição fornecem evidência suficiente; caso contrário, o campo retorna <code>null</code>.</li>
         <li><strong>REC:</strong> interpreta o formato <code>RCP01</code>, retornando CNPJ, data/hora, MD5 do TXT referenciado e dois identificadores técnicos sem atribuição de significado não comprovado.</li>
       </ul>
       <div class="code-card"><button class="copy-button" data-copy="curl -X POST 'https://document.pes2b.com/api/v1/efd-contribuicoes/auxiliary/parse' -H 'X-API-Key: SUA_CHAVE' -F 'file=@sped.txt'">Copiar</button><pre><code>curl -X POST \

@@ -359,7 +359,31 @@
                       "dataInicial": "2026-07-01",
                       "dataFinal": "2026-07-31",
                       "competencia": "07/2026",
-                      "md5": "0745F7FCBECBA8BCBBA7D02C216BCA55"
+                      "md5": "0745F7FCBECBA8BCBBA7D02C216BCA55",
+                      "faturamento": {
+                        "encontrado": true,
+                        "fontePrincipal": "F500",
+                        "total": 3045,
+                        "cumulativo": 3045,
+                        "naoCumulativo": 0,
+                        "receitaTributadaAliquotaBasica": 3045,
+                        "receitaFinanceiraExcluidaFaturamento": null,
+                        "faturamentoDeclarado0111": null,
+                        "faturamentoCalculadoDetalhamento": 3045,
+                        "diferenca": null,
+                        "confere": null,
+                        "registrosUtilizados": ["0110", "F500"],
+                        "alertas": [],
+                        "origens": [
+                          {
+                            "registro": "F500",
+                            "cst": "01",
+                            "valor": 3045,
+                            "classificacao": "receitaTributadaAliquotaBasica",
+                            "incluidoFaturamento": true
+                          }
+                        ]
+                      }
                     }
                   },
                   "rec": {
