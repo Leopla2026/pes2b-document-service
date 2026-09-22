@@ -25,6 +25,8 @@ test('TXT EFD-Contribuições extrai registro 0000 e calcula MD5 dos bytes origi
   assert.equal(result.dataFinal, '2026-07-31');
   assert.equal(result.competencia, '07/2026');
   assert.match(result.md5, /^[A-F0-9]{32}$/);
+  assert.equal(result.faturamento.encontrado, false);
+  assert.equal(result.faturamento.total, null);
 });
 
 test('REC RCP01 extrai somente campos objetivos', () => {
@@ -76,6 +78,21 @@ test('arquivos reais TXT e REC possuem o mesmo MD5', {
   assert.equal(txt.cnpj, '40799826000187');
   assert.equal(txt.competencia, '07/2026');
   assert.equal(txt.md5, '0745F7FCBECBA8BCBBA7D02C216BCA55');
+  assert.equal(txt.faturamento.regime.codigoIncidenciaTributaria, '2');
+  assert.equal(txt.faturamento.regime.tipoContribuicaoApurada, '1');
+  assert.equal(txt.faturamento.fontePrincipal, 'F500');
+  assert.equal(txt.faturamento.total, 3045);
+  assert.equal(txt.faturamento.cumulativo, 3045);
+  assert.equal(txt.faturamento.naoCumulativo, 0);
+  assert.equal(txt.faturamento.receitaTributadaAliquotaBasica, 3045);
+  assert.equal(txt.faturamento.receitaFinanceiraExcluidaFaturamento, null);
+  assert.equal(txt.faturamento.faturamentoDeclarado0111, null);
+  assert.equal(txt.faturamento.faturamentoCalculadoDetalhamento, 3045);
+  assert.equal(txt.faturamento.diferenca, null);
+  assert.equal(txt.faturamento.confere, null);
+  assert.deepEqual(txt.faturamento.registrosUtilizados, ['0110', 'F500']);
+  assert.equal(txt.faturamento.origens.length, 1);
+  assert.equal(txt.faturamento.origens[0].valor, 3045);
   assert.equal(rec.formato, 'RCP01');
   assert.equal(rec.dataHora, '2026-08-24T21:28:14');
   assert.equal(rec.md5TxtReferenciado, txt.md5);
