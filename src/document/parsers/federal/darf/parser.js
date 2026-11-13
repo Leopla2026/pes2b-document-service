@@ -6,6 +6,7 @@ const {
   cnpj,
   taxFrom
 } = require('../helpers');
+const retention = require('./retencoes');
 
 const MONEY = /\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}/g;
 
@@ -78,7 +79,7 @@ function parseRows(text) {
   const composition = first(text, /Composição do Documento de Arrecadação\s*([\s\S]*?)\s*Totais/i);
   if (!composition) return [];
 
-  const starts = [...composition.matchAll(/(?:^|\s)(\d{4})(?=[A-ZÀ-Ü])/g)];
+  const starts = [...composition.matchAll(/(?:^|\s)(\d{4})\s*(?=[A-ZÀ-Ü])/g)];
   if (starts.length === 0 && /^\d{4}/.test(composition)) starts.push({ index: 0, 1: composition.slice(0, 4) });
 
   return starts.map((start, index) => {
@@ -86,10 +87,11 @@ function parseRows(text) {
     const rowEnd = starts[index + 1]?.index ?? composition.length;
     const row = composition.slice(rowStart, rowEnd).trim();
     const code = row.slice(0, 4);
-    const paIndex = row.search(/\bPA\s*:?/i);
+    // O campo PA exige dois-pontos para não confundir PAGT ou PATRONAL com o período.
+    const paIndex = row.search(/\bPA\s*:/i);
     const beforePeriod = paIndex >= 0 ? row.slice(4, paIndex) : row.slice(4);
     const periodText = paIndex >= 0
-      ? first(row.slice(paIndex), /PA\s*:?\s*([^\s]+(?:\s*Trimestre\/\d{4}|\/\d{4}))/i)
+      ? first(row.slice(paIndex), /\bPA\s*:\s*([^\s]+(?:\s*Trimestre\/\d{4}|\/\d{4}))/i)
       : null;
     const firstAmount = beforePeriod.search(MONEY);
     const label = (firstAmount >= 0 ? beforePeriod.slice(0, firstAmount) : beforePeriod).trim();
@@ -99,6 +101,7 @@ function parseRows(text) {
       : '';
     const variationMatch = variationAndDescription.match(/^(\d{2})\s+([\s\S]*)$/);
     const detail = variationMatch?.[2]?.trim() || label;
+    const retencao = retention.classify(code, `${label} ${detail}`);
     const quarter = quarterlyInfo(`${label} ${detail}`, periodText);
     const periodicity = quarter.trimestre ? 'TRIMESTRAL' : (periodText ? 'MENSAL' : null);
     const period = quarter.trimestre
@@ -106,7 +109,12 @@ function parseRows(text) {
       : normalizeCompetence(periodText);
 
     return {
-      tributo: taxFrom(`${label} ${detail}`),
+      tributo: retencao.tributo || taxFrom(`${label} ${detail}`),
+      retencao: Boolean(retencao.tributo),
+      codigoRetencaoMapeado: retencao.codigoMapeado,
+      descricaoRetencaoDivergente: retencao.descricaoDivergente,
+      indicioRetencao: retencao.indicioRetencao,
+      cnpjPrestador: first(row, /CNPJ\s+Prestador\s*:\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/i),
       codigoReceita: code,
       codigoVariacao: variationMatch?.[1] || null,
       denominacao: label || null,
@@ -131,6 +139,7 @@ exports.parse = function parseDarf(text) {
     juros: acc.juros + (item.juros || 0),
     total: acc.total + (item.total || 0)
   }), { principal: 0, multa: 0, juros: 0, total: 0 });
+  for (const key of Object.keys(totals)) totals[key] = Math.round(totals[key] * 100) / 100;
   const quarterly = tributos.some(item => item.periodicidade === 'TRIMESTRAL');
   const source = /Darf emitido pelo Sicalc Web/i.test(text) ? 'SICALC_WEB' : (/SENDA/i.test(text) ? 'SENDA' : null);
   const barcode = first(text, /AUTENTICAÇÃO MECÂNICA\s*Documento de Arrecadação de Receitas Federais\s*((?:\d{11}\s*){4})/i);
@@ -157,6 +166,7 @@ exports.parse = function parseDarf(text) {
     },
     valores: tributos.length ? totals : { principal: null, multa: null, juros: null, total: header.total },
     tributos,
+    retencoes: retention.summarize(tributos, header.total, header.competence),
     pagamento: {
       codigoBarras: barcode ? barcode.replace(/\s/g, '') : null,
       possuiPix: /Pague com o PIX/i.test(text) ? true : null

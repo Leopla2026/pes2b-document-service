@@ -66,6 +66,12 @@ const definitions = Object.freeze({
     'federal'
   ),
 
+  RELATORIO_EFD_REINF: loadParser(
+    'reinf-envios',
+    'reinf-envios',
+    'federal'
+  ),
+
   DCTFWEB: loadParser(
     'dctfweb',
     'dctfweb',

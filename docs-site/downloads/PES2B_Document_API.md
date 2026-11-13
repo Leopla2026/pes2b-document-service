@@ -92,6 +92,7 @@ curl -X POST \
 | Documento de Arrecadação de Receitas Federais | `DARF` | Uma ou mais linhas de tributo, códigos, regime PIS/COFINS, período mensal ou trimestral e valores. |
 | Recibo EFD-Contribuições | `RECIBO_EFD_CONTRIBUICOES` | Escrituração, PIS/COFINS cumulativos e não cumulativos, CPRB e transmissão. |
 | Relatório completo DCTFWeb | `DCTFWEB` | Declaração, MIT, responsáveis, todos os débitos e totais consolidados. |
+| Relatório Domínio de envio da EFD-Reinf | `RELATORIO_EFD_REINF` | Arquivamento; identificação, período, eventos, recibos, situações e retificações. Não confirma conclusão da declaração. |
 | DEC Porto Alegre — Declaração Mensal de ISSQN | `DEC_POA_DECLARACAO_MENSAL` | Empresa, competência, município, valores fiscais, recibo, guia opcional, validação de contexto e PDFs separados. |
 | Documento não reconhecido | `NAO_IDENTIFICADO` | Metadados técnicos e indicação para conferência manual. |
 
@@ -99,7 +100,10 @@ curl -X POST \
 
 ### Documentos fiscais federais
 
-Os três tipos federais são aditivos e utilizam o mesmo envelope do endpoint atual.
+Os tipos federais são aditivos e utilizam o mesmo envelope do endpoint atual.
+
+- DARFs de retenções retornam `data.retencoes`, com INSS, IRRF e CRF separados, sem dividir o PDF unificado em guias diferentes. Códigos não mapeados, guias mistas e divergências de competência ou valor exigem análise. O CNPJ do prestador não substitui o contribuinte.
+- `RELATORIO_EFD_REINF` é somente para arquivo (`data.documento.enviarAoCliente = false`). Os recibos e situações são conservados por evento; `situacaoDeclaracao = NAO_INFERIDA`, inclusive quando todos os eventos apresentados têm sucesso. Processando, invalidado, linhas não lidas e divergências exigem conferência.
 
 - `DARF` percorre todas as linhas da composição e mantém os tributos em `data.tributos`. O parser não usa o vencimento como competência tributária. Para IRPJ/CSLL trimestrais, preserva `trimestre` e `anoTrimestre`.
 - Em possíveis quotas trimestrais, `data.parcelamento.numeroQuota` permanece `null` quando o próprio documento não informa o número. A correlação entre guias deve ser feita pelo consumidor.

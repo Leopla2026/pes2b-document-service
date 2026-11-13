@@ -70,6 +70,13 @@ A engine 1.11.0 acrescenta, sem alterar os tipos anteriores:
 - `DARF`: retorna todas as linhas em `data.tributos`, com códigos, regime, valores e período mensal ou trimestral;
 - `RECIBO_EFD_CONTRIBUICOES`: retorna identificação, blocos PIS/COFINS cumulativos e não cumulativos, CPRB e transmissão;
 - `DCTFWEB`: retorna declaração, MIT, responsáveis, todos os débitos e resumo consolidado.
+- `RELATORIO_EFD_REINF`: lê o relatório Domínio de consulta do envio dos arquivos da EFD-Reinf. Retorna CNPJ do contribuinte, competência ou intervalo, emissão e `data.eventos` com código Domínio, ambiente, recibo, situação e tipo de envio (inclusive retificação). O documento é destinado somente ao arquivamento: `data.documento.enviarAoCliente` é `false`.
+
+O parser DARF 1.1.0 preserva `documentType: DARF` e os campos anteriores. Cada linha em `data.tributos` identifica também `IRRF`, `INSS` ou `CRF` quando aplicável. Os códigos inicialmente mapeados são 1708/8045 (IRRF), 1162 (INSS) e 5952 (CRF), conforme os layouts atendidos. Códigos não mapeados e descrições ambíguas exigem conferência; o serviço não calcula a obrigação tributária.
+
+`data.retencoes` consolida principal, multa, juros e total por tributo. Uma guia unificada continua sendo um só documento. `valorTotalGuia` representa o cabeçalho e `total` representa somente as linhas de retenção; guias mistas, divergências de valores ou competências e códigos não mapeados são sinalizados por `requerAnalise` e `motivos`. O CNPJ do prestador dentro da composição não substitui o CNPJ do contribuinte.
+
+No relatório Reinf, `data.resumo.situacaoDeclaracao` permanece `NAO_INFERIDA`, mesmo que todos os eventos apresentados tenham sucesso. Situações como processando ou invalidado, linhas não interpretadas, ambiente não oficial ou divergência de empresa/período são preservadas para conferência. Relatórios de várias competências não recebem automaticamente uma única `identificacao.competencia`.
 
 Em DARFs trimestrais, o vencimento não é usado como competência. Quando o PDF não informa o número da quota, `data.parcelamento.numeroQuota` permanece `null`.
 

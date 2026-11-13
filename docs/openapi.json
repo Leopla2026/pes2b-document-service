@@ -81,6 +81,15 @@
           "parcelamento": {
             "type": "object",
             "additionalProperties": true
+          },
+          "retencoes": {
+            "$ref": "#/components/schemas/RetencoesDarf"
+          },
+          "eventos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReinfEnvioEvento"
+            }
           }
         },
         "additionalProperties": true
@@ -105,7 +114,8 @@
               "DARF",
               "RECIBO_EFD_CONTRIBUICOES",
               "DCTFWEB",
-              "NAO_IDENTIFICADO"
+              "NAO_IDENTIFICADO",
+              "RELATORIO_EFD_REINF"
             ]
           },
           "data": {
@@ -138,7 +148,10 @@
               "COFINS",
               "IRPJ",
               "CSLL",
-              "OUTRO"
+              "OUTRO",
+              "INSS",
+              "IRRF",
+              "CRF"
             ]
           },
           "codigoReceita": {
@@ -423,6 +436,223 @@
             "additionalProperties": true
           }
         }
+      },
+      "RetencoesDarf": {
+        "type": "object",
+        "description": "Retenções lidas da composição. Valores monetários são numéricos, separados de tributos próprios; não representam cálculo da obrigação tributária.",
+        "properties": {
+          "possuiRetencoes": {
+            "type": "boolean"
+          },
+          "guiaSomenteRetencoes": {
+            "type": "boolean"
+          },
+          "tributos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "INSS",
+                "IRRF",
+                "CRF"
+              ]
+            }
+          },
+          "porTributo": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "principal": {
+                  "type": "number"
+                },
+                "multa": {
+                  "type": "number"
+                },
+                "juros": {
+                  "type": "number"
+                },
+                "total": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "principal": {
+            "type": "number"
+          },
+          "multa": {
+            "type": "number"
+          },
+          "juros": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          },
+          "valorTotalGuia": {
+            "type": "number",
+            "nullable": true
+          },
+          "requerAnalise": {
+            "type": "boolean"
+          },
+          "motivos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ReinfEnvioEvento": {
+        "type": "object",
+        "properties": {
+          "codigoDominio": {
+            "type": "string",
+            "nullable": false
+          },
+          "empresa": {
+            "type": "string",
+            "nullable": false
+          },
+          "competencia": {
+            "type": "string",
+            "nullable": false
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": false
+          },
+          "ambiente": {
+            "type": "string",
+            "nullable": false
+          },
+          "dataEnvio": {
+            "type": "string",
+            "nullable": false
+          },
+          "horaEnvio": {
+            "type": "string",
+            "nullable": false
+          },
+          "numeroRecibo": {
+            "type": "string",
+            "nullable": true
+          },
+          "situacao": {
+            "type": "string",
+            "nullable": false
+          },
+          "tipoEnvio": {
+            "type": "string",
+            "nullable": true
+          },
+          "evento": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricaoEvento": {
+            "type": "string",
+            "nullable": true
+          },
+          "leituraCompleta": {
+            "type": "boolean"
+          },
+          "textoOriginal": {
+            "type": "string"
+          }
+        }
+      },
+      "ReinfEnviosData": {
+        "type": "object",
+        "description": "Relatório Domínio somente para arquivamento. Situações dos eventos não comprovam conclusão da declaração.",
+        "properties": {
+          "identificacao": {
+            "type": "object",
+            "properties": {
+              "empresa": {
+                "type": "string",
+                "nullable": true
+              },
+              "cnpj": {
+                "type": "string",
+                "nullable": true
+              },
+              "competencia": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "documento": {
+            "type": "object",
+            "properties": {
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "RELATORIO_EFD_REINF"
+                ]
+              },
+              "origem": {
+                "type": "string",
+                "enum": [
+                  "DOMINIO"
+                ]
+              },
+              "finalidade": {
+                "type": "string",
+                "enum": [
+                  "ARQUIVAMENTO"
+                ]
+              },
+              "enviarAoCliente": {
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              }
+            }
+          },
+          "periodo": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "emissao": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "eventos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReinfEnvioEvento"
+            }
+          },
+          "resumo": {
+            "type": "object",
+            "properties": {
+              "situacaoDeclaracao": {
+                "type": "string",
+                "enum": [
+                  "NAO_INFERIDA"
+                ]
+              },
+              "requerAnalise": {
+                "type": "boolean"
+              },
+              "possuiPendencias": {
+                "type": "boolean"
+              },
+              "motivos": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
       }
     }
   },
@@ -558,7 +788,10 @@
                         "faturamentoCalculadoDetalhamento": 3045,
                         "diferenca": null,
                         "confere": null,
-                        "registrosUtilizados": ["0110", "F500"],
+                        "registrosUtilizados": [
+                          "0110",
+                          "F500"
+                        ],
                         "alertas": [],
                         "origens": [
                           {
@@ -612,7 +845,6 @@
         }
       }
     },
-
     "/api/v1/pdf/extract-batch": {
       "post": {
         "summary": "Processa até 10 documentos PDF",

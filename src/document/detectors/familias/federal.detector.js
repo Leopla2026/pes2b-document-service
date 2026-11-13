@@ -38,6 +38,19 @@ function evaluate(normalized, definition) {
 
 const definitions = Object.freeze([
   Object.freeze({
+    documentType: 'RELATORIO_EFD_REINF',
+    minimumConfidence: 0.8,
+    required: Object.freeze([
+      'RELATORIO DE CONSULTA DO ENVIO DOS ARQUIVOS DA EFD-REINF',
+      'CNPJ:',
+      'COMPETENCIA:'
+    ]),
+    signals: Object.freeze([
+      'RELATORIO DE CONSULTA DO ENVIO DOS ARQUIVOS DA EFD-REINF',
+      'CNPJ:', 'COMPETENCIA:', 'NUMERO DO RECIBO', 'EVENTO'
+    ])
+  }),
+  Object.freeze({
     documentType: 'RECIBO_EFD_CONTRIBUICOES',
     minimumConfidence: 0.75,
     required: Object.freeze([
