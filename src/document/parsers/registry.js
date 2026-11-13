@@ -27,6 +27,7 @@ function loadParser(folderName, parserName, familyFolder = 'simples') {
 }
 
 const definitions = Object.freeze({
+  RELATORIO_RETENCOES_RECOLHER:loadParser('retencoes-recolher','retencoes-recolher','federal'),
   DAS: loadParser('das', 'das'),
 
   RECIBO_PGDAS: loadParser(

@@ -137,3 +137,8 @@ X-API-Key: sua-chave
 ```
 
 Ele retorna contadores de documentos processados, taxa de sucesso, bloqueios por confiança, documentos desconhecidos, tempo médio e distribuição por tipo documental. As métricas são locais ao processo e reiniciam a cada novo deploy ou reinício do contêiner.
+
+
+### Relatório opcional de retenções a recolher
+
+`RELATORIO_RETENCOES_RECOLHER` reconhece o relatório Domínio Retenções a Recolher pelo conteúdo, valida CNPJ e período de um mês completo e retorna `data.documento.enviarAoCliente = true`, `opcional = true` e `informativo = true`. É apoio para identificar as notas; não gera guia nem soma valores aos DARFs. Identidade ou período ambíguos retornam identificação nula e requerem análise. O relatório de consulta de envio `RELATORIO_EFD_REINF` permanece somente interno.

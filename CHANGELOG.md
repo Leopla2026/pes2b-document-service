@@ -102,3 +102,8 @@
 - `resumo.faixaEnquadramento` permanece compatível e passa a representar sempre o Mercado Interno.
 - Adiciona `faixaEnquadramentoMercadoInterno` e `faixaEnquadramentoMercadoExterno` ao resumo.
 - Atualiza o parser `RELATORIO_SIMPLES` para a versão `1.0.1`.
+
+
+## 2026-11-13 — Relatório opcional de retenções a recolher
+- Novo parser `RELATORIO_RETENCOES_RECOLHER` com validação de CNPJ e mês completo, sem interpretar o total informativo como obrigação.
+- Catálogo e documentação distinguem este anexo opcional do relatório EFD-Reinf exclusivamente interno.

@@ -24,7 +24,7 @@ test('registry preserva acesso direto compatível com a versão anterior', () =>
 test('registry lista metadados sem expor implementação por padrão', () => {
   const parsers = registry.list();
 
-  assert.equal(parsers.length, 11);
+  assert.equal(parsers.length, 12);
   assert.ok(
   parsers.some(
     item => item.family === 'SIMPLES_NACIONAL'
@@ -49,7 +49,7 @@ test('registry valida todas as definições cadastradas', () => {
   const result = registry.validate();
 
   assert.equal(result.valid, true);
-  assert.equal(result.count, 11);
+  assert.equal(result.count, 12);
   assert.deepEqual(result.errors, []);
 });
 

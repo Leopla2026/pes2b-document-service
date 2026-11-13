@@ -930,7 +930,8 @@
               "RECIBO_EFD_CONTRIBUICOES",
               "DCTFWEB",
               "NAO_IDENTIFICADO",
-              "RELATORIO_EFD_REINF"
+              "RELATORIO_EFD_REINF",
+              "RELATORIO_RETENCOES_RECOLHER"
             ]
           },
           "data": {
@@ -2235,6 +2236,44 @@
               }
             },
             "additionalProperties": true
+          }
+        }
+      },
+      "RelatorioRetencoesRecolherData": {
+        "type": "object",
+        "description": "Relatório Domínio informativo opcional para identificar as notas, contribuinte e competência mensal. Não é guia nem soma valores aos DARFs. Distinto do EFD-Reinf interno.",
+        "properties": {
+          "identificacao": {
+            "type": "object",
+            "properties": {
+              "cnpj": {
+                "type": "string"
+              },
+              "competencia": {
+                "type": "string",
+                "example": "10/2026"
+              }
+            }
+          },
+          "documento": {
+            "type": "object",
+            "properties": {
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "RELATORIO_RETENCOES_RECOLHER"
+                ]
+              },
+              "enviarAoCliente": {
+                "type": "boolean"
+              },
+              "opcional": {
+                "type": "boolean"
+              },
+              "informativo": {
+                "type": "boolean"
+              }
+            }
           }
         }
       }

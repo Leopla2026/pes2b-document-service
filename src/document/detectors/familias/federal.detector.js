@@ -37,6 +37,7 @@ function evaluate(normalized, definition) {
 }
 
 const definitions = Object.freeze([
+ Object.freeze({documentType:'RELATORIO_RETENCOES_RECOLHER',minimumConfidence:0.9,required:Object.freeze(['RETENCOES A RECOLHER','CNPJ:','PERIODO:','FORNECEDOR','TOTAL GERAL','SISTEMA LICENCIADO PARA']),signals:Object.freeze(['RETENCOES A RECOLHER','CNPJ:','PERIODO:','FORNECEDOR','TOTAL GERAL','SISTEMA LICENCIADO PARA'])}),
   Object.freeze({
     documentType: 'RELATORIO_EFD_REINF',
     minimumConfidence: 0.8,

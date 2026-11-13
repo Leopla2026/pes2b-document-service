@@ -121,3 +121,8 @@ O leitor não rejeita uma guia apenas por o código estar fora desta lista. No l
 Retenções identificadas pela descrição com código não mapeado retornam `codigoRetencaoMapeado=false` e `data.retencoes.requerAnalise=true`, com motivo `CODIGO_RETENCAO_REQUER_VALIDACAO`. Indícios de retenção sem classificação geram `RETENCAO_NAO_CLASSIFICADA`. Guias com retenções também podem exigir análise por descrição divergente, tributos mistos ou divergências de valor e competência.
 
 A cobertura depende de PDF legível e layout compatível com a composição do DARF. O serviço interpreta os dados impressos; não calcula nem confirma a obrigação tributária.
+
+
+### Relatório opcional de retenções a recolher
+
+`RELATORIO_RETENCOES_RECOLHER` reconhece o relatório Domínio Retenções a Recolher pelo conteúdo, valida CNPJ e período de um mês completo e retorna `data.documento.enviarAoCliente = true`, `opcional = true` e `informativo = true`. É apoio para identificar as notas; não gera guia nem soma valores aos DARFs. Identidade ou período ambíguos retornam identificação nula e requerem análise. O relatório de consulta de envio `RELATORIO_EFD_REINF` permanece somente interno.

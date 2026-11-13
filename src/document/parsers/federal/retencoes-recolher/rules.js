@@ -1,0 +1,1 @@
+module.exports=Object.freeze({documentType:'RELATORIO_RETENCOES_RECOLHER',family:'FISCAL_FEDERAL',minimumConfidence:0.9,parserVersion:'1.0.0',description:'Relatório Domínio Retenções a Recolher: identificação mensal para envio opcional ao cliente, sem apurar obrigação.'});
