@@ -83,3 +83,41 @@ Em DARFs trimestrais, o vencimento não é usado como competência. Quando o PDF
 ## Request ID
 
 Toda resposta contém o cabeçalho `X-Request-Id`. Também é possível enviar um identificador próprio no mesmo cabeçalho.
+
+## Códigos aceitos de DARF
+
+Referência do parser DARF 1.1.0. Esta é a cobertura implementada do leitor, não uma tabela oficial da Receita Federal nem orientação para escolher códigos de recolhimento.
+
+### Retenções com código mapeado diretamente
+
+| Código-base | Classificação retornada |
+| --- | --- |
+| 1708 | IRRF |
+| 8045 | IRRF |
+| 5952 | CRF — contribuições sociais retidas |
+| 1162 | INSS — retenção previdenciária |
+
+### Tributos próprios cobertos pelos testes atuais
+
+| Código-base | Cenário coberto |
+| --- | --- |
+| 8109 | PIS cumulativo |
+| 2172 | COFINS cumulativa |
+| 6912 | PIS não cumulativo |
+| 5856 | COFINS não cumulativa |
+| 2089 | IRPJ — lucro presumido, apuração trimestral |
+| 2372 | CSLL — lucro presumido ou arbitrado; inclui quota com juros |
+| 3373 | IRPJ — lucro real, apuração trimestral |
+| 6012 | CSLL — lucro real, apuração trimestral |
+
+A classificação de tributos próprios depende também da descrição do PDF. Os quatro códigos de PIS/COFINS acima participam da identificação do regime. IRPJ/CSLL e a periodicidade trimestral são reconhecidos pela descrição e pelo período de apuração.
+
+O código-base retorna em `data.tributos[].codigoReceita`; a variação de dois dígitos retorna separadamente em `codigoVariacao`, quando encontrada. O serviço não possui uma lista de variações autorizadas nem valida todas as combinações de código e variação.
+
+### Códigos fora da lista
+
+O leitor não rejeita uma guia apenas por o código estar fora desta lista. No layout compatível, preserva as linhas da composição e tenta classificar pela descrição; sem classificação, retorna `OUTRO`. Extrair uma linha não significa liberá-la para envio automático.
+
+Retenções identificadas pela descrição com código não mapeado retornam `codigoRetencaoMapeado=false` e `data.retencoes.requerAnalise=true`, com motivo `CODIGO_RETENCAO_REQUER_VALIDACAO`. Indícios de retenção sem classificação geram `RETENCAO_NAO_CLASSIFICADA`. Guias com retenções também podem exigir análise por descrição divergente, tributos mistos ou divergências de valor e competência.
+
+A cobertura depende de PDF legível e layout compatível com a composição do DARF. O serviço interpreta os dados impressos; não calcula nem confirma a obrigação tributária.

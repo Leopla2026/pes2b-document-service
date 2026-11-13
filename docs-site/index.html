@@ -47,6 +47,7 @@
     <a href="#simples">Simples Nacional</a>
     <a href="#municipal">Declarações municipais / DEC POA</a>
     <a href="#documents">Documentos reconhecidos</a>
+    <a href="#darf-codes">Códigos aceitos de DARF</a>
     <a href="#examples-by-type">Exemplos por documento</a>
     <a href="#new-document">Incluir novo documento</a>
     <a href="#n8n">Integração n8n</a>
@@ -462,6 +463,35 @@
         <tr><td>DEC Porto Alegre — Declaração Mensal de ISSQN</td><td><code>DEC_POA_DECLARACAO_MENSAL</code></td><td>Empresa, competência, município, valores fiscais, recibo, guia opcional, validação de contexto e PDFs separados.</td></tr>
         <tr><td>Documento não reconhecido</td><td><code>NAO_IDENTIFICADO</code></td><td>Metadados técnicos e indicação para conferência manual.</td></tr>
       </tbody></table></div>
+    </section>
+
+    <section id="darf-codes">
+      <span class="eyebrow">COBERTURA ATUAL DO LEITOR</span><h2>Códigos aceitos de DARF</h2>
+      <p>Referência do parser DARF 1.1.0. A lista descreve a cobertura implementada no serviço; não é uma tabela oficial de códigos da Receita Federal nem uma orientação para escolher o código de recolhimento.</p>
+      <h3>Retenções com código mapeado diretamente</h3>
+      <div class="table-wrapper"><table><thead><tr><th>Código-base</th><th>Classificação retornada</th><th>Tratamento</th></tr></thead><tbody>
+        <tr><td><code>1708</code></td><td>IRRF</td><td>Incluído no resumo de retenções de IRRF.</td></tr>
+        <tr><td><code>8045</code></td><td>IRRF</td><td>Incluído no resumo de retenções de IRRF.</td></tr>
+        <tr><td><code>5952</code></td><td>CRF</td><td>Contribuições sociais retidas, consolidadas como CRF.</td></tr>
+        <tr><td><code>1162</code></td><td>INSS</td><td>Retenção previdenciária, consolidada como INSS.</td></tr>
+      </tbody></table></div>
+      <h3>Tributos próprios cobertos pelos testes atuais</h3>
+      <p>Nestes casos, a classificação do tributo depende também da descrição extraída do PDF. Os quatro códigos de PIS/COFINS abaixo participam da identificação do regime; IRPJ/CSLL e a periodicidade trimestral são reconhecidos pela descrição e pelo período de apuração.</p>
+      <div class="table-wrapper"><table><thead><tr><th>Código-base</th><th>Tributo / cenário coberto</th></tr></thead><tbody>
+        <tr><td><code>8109</code></td><td>PIS cumulativo.</td></tr>
+        <tr><td><code>2172</code></td><td>COFINS cumulativa.</td></tr>
+        <tr><td><code>6912</code></td><td>PIS não cumulativo.</td></tr>
+        <tr><td><code>5856</code></td><td>COFINS não cumulativa.</td></tr>
+        <tr><td><code>2089</code></td><td>IRPJ — lucro presumido, apuração trimestral.</td></tr>
+        <tr><td><code>2372</code></td><td>CSLL — lucro presumido ou arbitrado; inclui cenário de quota com juros.</td></tr>
+        <tr><td><code>3373</code></td><td>IRPJ — lucro real, apuração trimestral.</td></tr>
+        <tr><td><code>6012</code></td><td>CSLL — lucro real, apuração trimestral.</td></tr>
+      </tbody></table></div>
+      <div class="callout"><strong>Código e variação:</strong> o código-base de quatro dígitos retorna em <code>data.tributos[].codigoReceita</code>. A variação de dois dígitos retorna separadamente em <code>codigoVariacao</code>, quando encontrada. O serviço não possui uma lista de variações autorizadas nem valida todas as combinações de código e variação.</div>
+      <h3>Códigos fora da lista e conferência</h3>
+      <p>O leitor não rejeita uma guia apenas por o código estar fora desta lista. No layout compatível, preserva as linhas da composição e tenta classificar o tributo pela descrição; quando não consegue, retorna <code>OUTRO</code>. Ler uma linha não garante que ela esteja classificada ou liberada para envio automático.</p>
+      <p>Retenções identificadas pela descrição com código ainda não mapeado retornam <code>codigoRetencaoMapeado=false</code> e exigem conferência: <code>data.retencoes.requerAnalise=true</code>, com motivo <code>CODIGO_RETENCAO_REQUER_VALIDACAO</code>. Indícios de retenção sem classificação geram <code>RETENCAO_NAO_CLASSIFICADA</code>. Guias com retenções também podem exigir análise por descrição divergente, tributos mistos ou divergências de valor e competência.</p>
+      <p>A cobertura depende de PDF legível e layout compatível com a composição do DARF. O serviço interpreta os dados impressos; não calcula nem confirma a obrigação tributária.</p>
     </section>
 
     <section id="examples-by-type">
