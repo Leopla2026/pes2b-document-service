@@ -687,3 +687,8 @@ A cobertura depende de PDF legível e layout compatível com a composição do D
 ### Relatório opcional de retenções a recolher
 
 `RELATORIO_RETENCOES_RECOLHER` reconhece o relatório Domínio Retenções a Recolher pelo conteúdo, valida CNPJ e período de um mês completo e retorna `data.documento.enviarAoCliente = true`, `opcional = true` e `informativo = true`. É apoio para identificar as notas; não gera guia nem soma valores aos DARFs. Identidade ou período ambíguos retornam identificação nula e requerem análise. O relatório de consulta de envio `RELATORIO_EFD_REINF` permanece somente interno.
+
+
+### Relatórios de matriz e filiais e retenções a compensar
+
+`RELATORIO_RETENCOES_COMPENSAR` reconhece o relatório Domínio Retenções a Compensar, valida CNPJ e período mensal e o identifica como informativo e opcional para o cliente. O leitor preserva o CNPJ original de cada PDF. No projeto de envio de retenções, os relatórios a recolher e a compensar de filiais são vinculados ao controle da matriz cadastrada da mesma raiz de CNPJ; não exigem cadastro individual das filiais. A identidade de versão é tipo de relatório + CNPJ de origem, para manter matriz e filiais juntas sem se substituírem. O modo de envio continua seguindo o cadastro mestre.

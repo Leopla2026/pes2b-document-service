@@ -1,0 +1,1 @@
+module.exports=Object.freeze({documentType:'RELATORIO_RETENCOES_COMPENSAR',family:'FISCAL_FEDERAL',minimumConfidence:0.9,parserVersion:'1.0.0',description:'Relatório Domínio de retenções a compensar, informativo e opcional para o cliente.'});

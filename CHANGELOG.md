@@ -107,3 +107,8 @@
 ## 2026-11-13 — Relatório opcional de retenções a recolher
 - Novo parser `RELATORIO_RETENCOES_RECOLHER` com validação de CNPJ e mês completo, sem interpretar o total informativo como obrigação.
 - Catálogo e documentação distinguem este anexo opcional do relatório EFD-Reinf exclusivamente interno.
+
+
+## 2026-11-15 — Retenções a compensar e matriz/filiais
+- Adicionado o tipo opcional RELATORIO_RETENCOES_COMPENSAR; CNPJ de origem e mês preservados, inclusive em relatórios com múltiplas páginas.
+- Documentado o vínculo dos relatórios das filiais ao controle da matriz no projeto de envios.

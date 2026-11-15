@@ -931,7 +931,8 @@
               "DCTFWEB",
               "NAO_IDENTIFICADO",
               "RELATORIO_EFD_REINF",
-              "RELATORIO_RETENCOES_RECOLHER"
+              "RELATORIO_RETENCOES_RECOLHER",
+              "RELATORIO_RETENCOES_COMPENSAR"
             ]
           },
           "data": {
@@ -2262,6 +2263,44 @@
                 "type": "string",
                 "enum": [
                   "RELATORIO_RETENCOES_RECOLHER"
+                ]
+              },
+              "enviarAoCliente": {
+                "type": "boolean"
+              },
+              "opcional": {
+                "type": "boolean"
+              },
+              "informativo": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "RelatorioRetencoesCompensarData": {
+        "type": "object",
+        "description": "Relatório Domínio Retenções a Compensar, informativo e opcional; preserva CNPJ do estabelecimento e competência. Não gera obrigação nem soma valores aos DARFs.",
+        "properties": {
+          "identificacao": {
+            "type": "object",
+            "properties": {
+              "cnpj": {
+                "type": "string"
+              },
+              "competencia": {
+                "type": "string",
+                "example": "10/2026"
+              }
+            }
+          },
+          "documento": {
+            "type": "object",
+            "properties": {
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "RELATORIO_RETENCOES_COMPENSAR"
                 ]
               },
               "enviarAoCliente": {
