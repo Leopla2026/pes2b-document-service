@@ -112,3 +112,7 @@
 ## 2026-11-15 — Retenções a compensar e matriz/filiais
 - Adicionado o tipo opcional RELATORIO_RETENCOES_COMPENSAR; CNPJ de origem e mês preservados, inclusive em relatórios com múltiplas páginas.
 - Documentado o vínculo dos relatórios das filiais ao controle da matriz no projeto de envios.
+
+
+## 2026-11-15 — CNPJs dos clientes no relatório a compensar
+- A identidade é conferida nos cabeçalhos de cada página, preservando o titular e o período; CNPJs dos clientes/fornecedores na tabela não são confundidos com o contribuinte. Cabeçalhos com titular ou período divergentes continuam bloqueados.

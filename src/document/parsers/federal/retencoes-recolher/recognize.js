@@ -10,7 +10,18 @@ function retentionReport(text,kind='RECOLHER'){
  const periodHeader=header.split(/HORA\s*:|EMISSAO\s*:|PAGINA\s*:/)[0];
  const dates=periodHeader.match(/\d{2}\/\d{2}\/\d{4}/g)||[];
  if(cnpjs.length!==1||dates.length!==2||!/[Pp][Ee][Rr][Ii][Oo][Dd][Oo]/.test(header))return fail('IDENTIDADE_OU_PERIODO_AMBIGUO');
- if(new Set((normalized.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/g)||[])).size!==1)return fail('MULTIPLOS_CONTRIBUINTES');
+ // Client/supplier CNPJs in the table are not report owners. Validate each page header only.
+ const headerStart=/CNPJ\s*:\s*(?:\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\s*)?PERIODO\s*:/g;
+ const pages=[...normalized.matchAll(headerStart)];
+ for(const page of pages){
+   const tail=normalized.slice(page.index),titleAt=tail.search(title);
+   if(titleAt<0)return fail('CABECALHO_SEM_TITULO');
+   const pageHeader=tail.slice(0,titleAt);
+   const owners=[...new Set((pageHeader.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/g)||[]).map(x=>x.replace(/\D/g,'')))];
+   if(owners.length!==1||owners[0]!==cnpjs[0])return fail('MULTIPLOS_CONTRIBUINTES');
+   const period=pageHeader.split(/HORA\s*:|EMISSAO\s*:|PAGINA\s*:/)[0].match(/\d{2}\/\d{2}\/\d{4}/g)||[];
+   if(period.length!==2||period[0]!==dates[0]||period[1]!==dates[1])return fail('PERIODOS_DIVERGENTES_ENTRE_PAGINAS');
+ }
  const cnpj=cnpjs[0];if(/^(\d)\1+$/.test(cnpj))return fail('CNPJ_INVALIDO');
  const digit=(base,weights)=>{const rem=base.split('').reduce((sum,n,i)=>sum+Number(n)*weights[i],0)%11;return rem<2?0:11-rem;};
  if(digit(cnpj.slice(0,12),[5,4,3,2,9,8,7,6,5,4,3,2])!==Number(cnpj[12])||digit(cnpj.slice(0,13),[6,5,4,3,2,9,8,7,6,5,4,3,2])!==Number(cnpj[13]))return fail('CNPJ_INVALIDO');
